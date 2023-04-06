@@ -1,4 +1,4 @@
-package br.com.erichiroshi.libraryapi1.api.service;
+package br.com.erichiroshi.libraryapi1.service;
 
 import br.com.erichiroshi.libraryapi1.model.entity.Book;
 
