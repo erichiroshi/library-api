@@ -1,4 +1,4 @@
-package br.com.erichiroshi.libraryapi1.api.service;
+package br.com.erichiroshi.libraryapi1.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -18,7 +18,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import br.com.erichiroshi.libraryapi1.model.entity.Book;
 import br.com.erichiroshi.libraryapi1.model.repository.BookRepository;
-import br.com.erichiroshi.libraryapi1.service.BookService;
 import br.com.erichiroshi.libraryapi1.service.exception.BusinessException;
 import br.com.erichiroshi.libraryapi1.service.impl.BookServiceImpl;
 
