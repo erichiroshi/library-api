@@ -1,5 +1,6 @@
 package br.com.erichiroshi.libraryapi1.api.resource;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -61,13 +62,24 @@ public class BookControllerTest {
 			.andExpect(jsonPath("title").value(bookDTO.getTitle()))
 			.andExpect(jsonPath("author").value(bookDTO.getAuthor()))
 			.andExpect(jsonPath("isbn").value(bookDTO.getIsbn()));
-
 	}
 
 	@Test
 	@DisplayName("Deve lançar erro de validação quando não houver dados suficiente para criação do livro.")
-	public void createInvalidBookTest() {
+	public void createInvalidBookTest() throws Exception {
 
+		String json = new ObjectMapper().writeValueAsString(new BookDTO());
+		
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.post(BOOK_API)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content(json);
+		
+		mvc
+		.perform(request)
+		.andExpect(status().isBadRequest())
+		.andExpect(jsonPath("errors", hasSize(3)));
 	}
 
 }
