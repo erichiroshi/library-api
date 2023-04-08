@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import br.com.erichiroshi.libraryapi1.model.entity.Book;
 import br.com.erichiroshi.libraryapi1.model.repository.BookRepository;
 import br.com.erichiroshi.libraryapi1.service.BookService;
+import br.com.erichiroshi.libraryapi1.service.exception.BusinessException;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -17,6 +18,8 @@ public class BookServiceImpl implements BookService {
 
 	@Override
 	public Book save(Book book) {
+		if (repository.existsByIsbn(book.getIsbn()))
+			throw new BusinessException("Isbn já cadastrado.");
 		return repository.save(book);
 	}
 
