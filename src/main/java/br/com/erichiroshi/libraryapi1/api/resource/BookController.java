@@ -1,7 +1,13 @@
 package br.com.erichiroshi.libraryapi1.api.resource;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,21 +32,21 @@ public class BookController {
 	@Autowired
 	private BookService service;
 	@Autowired
-	private ModelMapper mapper;
+	private ModelMapper modelMapper;
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public BookDTO create(@RequestBody @Valid BookDTO bookDTO) {
-		Book entity = mapper.map(bookDTO, Book.class);
+		Book entity = modelMapper.map(bookDTO, Book.class);
 		entity = service.save(entity);
-		return mapper.map(entity, BookDTO.class);
+		return modelMapper.map(entity, BookDTO.class);
 	}
 
 	@GetMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public BookDTO findById(@PathVariable Long id) {
 		Book book = service.getById(id).orElseThrow(() -> new LivroNaoExisteException("Livro não encontrado."));
-		return mapper.map(book, BookDTO.class);
+		return modelMapper.map(book, BookDTO.class);
 	}
 
 	@DeleteMapping("/{id}")
@@ -57,6 +63,17 @@ public class BookController {
 		book.setAuthor(bookDto.getAuthor());
 		book.setTitle(bookDto.getTitle());
 		service.update(book);
-		return mapper.map(book, BookDTO.class);
+		return modelMapper.map(book, BookDTO.class);
+	}
+	
+	@GetMapping
+	public Page<BookDTO> find(BookDTO dto, Pageable pageRequest) {
+		Book filter = modelMapper.map(dto, Book.class);
+		Page<Book> result = service.find(filter, pageRequest);
+		List<BookDTO> list = result.getContent().stream()
+				.map(entity -> modelMapper.map(entity, BookDTO.class))
+				.collect(Collectors.toList());
+
+		return new PageImpl<BookDTO>(list, pageRequest, result.getTotalElements());
 	}
 }
