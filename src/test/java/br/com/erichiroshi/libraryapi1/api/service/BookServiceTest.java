@@ -11,10 +11,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import br.com.erichiroshi.libraryapi1.api.service.impl.BookServiceImpl;
 import br.com.erichiroshi.libraryapi1.model.entity.Book;
 import br.com.erichiroshi.libraryapi1.model.repository.BookRepository;
 import br.com.erichiroshi.libraryapi1.service.BookService;
+import br.com.erichiroshi.libraryapi1.service.impl.BookServiceImpl;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")

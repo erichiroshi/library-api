@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.erichiroshi.libraryapi1.api.dto.BookDTO;
 import br.com.erichiroshi.libraryapi1.model.entity.Book;
 import br.com.erichiroshi.libraryapi1.service.BookService;
+import br.com.erichiroshi.libraryapi1.service.exception.BusinessException;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -43,7 +44,7 @@ public class BookControllerTest {
 	@Test
 	@DisplayName("Deve criar um livro com sucesso.")
 	public void createBookTest() throws Exception {
-		BookDTO bookDTO = BookDTO.builder().author("Autor").title("As aventuras").isbn("001").build();
+		BookDTO bookDTO = createNewBookDTO();
 		Book savedBook = Book.builder().id(10L).author("Autor").title("As aventuras").isbn("001").build();
 
 		BDDMockito.given(service.save(any(Book.class))).willReturn(savedBook);
@@ -81,5 +82,29 @@ public class BookControllerTest {
 		.andExpect(status().isBadRequest())
 		.andExpect(jsonPath("errors", hasSize(3)));
 	}
+	
+	@Test
+	@DisplayName("Deve lançar erro ao tentar cadastrar um livro com isbn já utilizado por outro")
+	public void createBookWithDuplicateIsbn() throws Exception {
+		BookDTO bookDTO = createNewBookDTO();
+		String json = new ObjectMapper().writeValueAsString(bookDTO);
+		String mensagemErro = "Isbn já cadastrado";
+		BDDMockito.when(service.save(any(Book.class))).thenThrow(new BusinessException(mensagemErro));
+		
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.post(BOOK_API)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content(json);
+		
+		mvc
+		.perform(request)
+		.andExpect(status().isBadRequest())
+		.andExpect(jsonPath("errors", hasSize(1)))
+		.andExpect(jsonPath("errors[0]").value(mensagemErro));
+	}
 
+	private BookDTO createNewBookDTO() {
+		return BookDTO.builder().author("Autor").title("As aventuras").isbn("001").build();
+	}
 }

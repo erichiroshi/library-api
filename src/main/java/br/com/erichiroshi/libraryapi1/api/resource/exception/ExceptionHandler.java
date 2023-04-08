@@ -7,6 +7,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import br.com.erichiroshi.libraryapi1.service.exception.BusinessException;
+
 @ControllerAdvice
 public class ExceptionHandler {
 
@@ -15,6 +17,13 @@ public class ExceptionHandler {
 	public ResponseEntity<ApiErrors> handleValidationsExceptions(MethodArgumentNotValidException ex) {
 		BindingResult bindingResult = ex.getBindingResult();
 		ApiErrors apiErrors = new ApiErrors(bindingResult);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiErrors);
+	}
+	
+	@org.springframework.web.bind.annotation.ExceptionHandler(BusinessException.class)
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+	public ResponseEntity<ApiErrors> handleBusinessExceptions(BusinessException ex) {
+		ApiErrors apiErrors = new ApiErrors(ex);
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiErrors);
 	}
 }

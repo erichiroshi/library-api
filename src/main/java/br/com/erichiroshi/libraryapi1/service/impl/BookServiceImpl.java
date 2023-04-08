@@ -1,4 +1,4 @@
-package br.com.erichiroshi.libraryapi1.api.service.impl;
+package br.com.erichiroshi.libraryapi1.service.impl;
 
 import org.springframework.stereotype.Service;
 
