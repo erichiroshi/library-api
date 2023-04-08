@@ -26,4 +26,11 @@ public class ExceptionHandler {
 		ApiErrors apiErrors = new ApiErrors(ex);
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiErrors);
 	}
+	
+	@org.springframework.web.bind.annotation.ExceptionHandler(LivroNaoExisteException.class)
+	@ResponseStatus(value = HttpStatus.NOT_FOUND)
+	public  ResponseEntity<ApiErrors> handleLivroNaoEncontradoExceptions(LivroNaoExisteException ex) {
+		ApiErrors apiErrors = new ApiErrors(ex);
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiErrors);
+	}
 }

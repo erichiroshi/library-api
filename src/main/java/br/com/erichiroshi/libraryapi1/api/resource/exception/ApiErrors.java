@@ -22,4 +22,8 @@ public class ApiErrors {
 		this.errors = Arrays.asList(ex.getMessage());
 	}
 
+	public ApiErrors(LivroNaoExisteException ex) {
+		this.errors = Arrays.asList(ex.getMessage());
+	}
+
 }
