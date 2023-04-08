@@ -3,6 +3,7 @@ package br.com.erichiroshi.libraryapi1.api.resource;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,5 +40,12 @@ public class BookController {
 	public BookDTO findById(@PathVariable Long id) {
 		Book book = service.getById(id).orElseThrow(() -> new LivroNaoExisteException("Livro não encontrado."));
 		return mapper.map(book, BookDTO.class);
+	}
+	
+	@DeleteMapping("/{id}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteById(@PathVariable Long id) {
+		Book book = service.getById(id).orElseThrow(() -> new LivroNaoExisteException("Livro não encontrado."));
+		service.delete(book);
 	}
 }
