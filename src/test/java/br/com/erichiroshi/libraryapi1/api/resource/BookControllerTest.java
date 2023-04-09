@@ -39,7 +39,7 @@ import br.com.erichiroshi.libraryapi1.service.exception.BusinessException;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
-@WebMvcTest
+@WebMvcTest(controllers = BookController.class)
 @AutoConfigureMockMvc
 public class BookControllerTest {
 

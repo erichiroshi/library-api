@@ -5,25 +5,30 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.validation.BindingResult;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.com.erichiroshi.libraryapi1.service.exception.BusinessException;
 import lombok.Getter;
 
 @Getter
-public class ApiErrors {
+public class ApiErros {
 
 	List<String> errors = new ArrayList<>();
 
-	public ApiErrors(BindingResult bindingResult) {
+	public ApiErros(BindingResult bindingResult) {
 		bindingResult.getAllErrors().forEach(error -> this.errors.add(error.getDefaultMessage()));
 	}
 
-	public ApiErrors(BusinessException ex) {
+	public ApiErros(BusinessException ex) {
 		this.errors = Arrays.asList(ex.getMessage());
 	}
 
-	public ApiErrors(LivroNaoExisteException ex) {
+	public ApiErros(LivroNaoExisteException ex) {
 		this.errors = Arrays.asList(ex.getMessage());
+	}
+
+	public ApiErros(ResponseStatusException ex) {
+		this.errors = Arrays.asList(ex.getReason());
 	}
 
 }
