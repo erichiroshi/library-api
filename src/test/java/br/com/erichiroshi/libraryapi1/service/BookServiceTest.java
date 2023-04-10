@@ -190,5 +190,19 @@ public class BookServiceTest {
 		assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
 		assertThat(result.getPageable().getPageSize()).isEqualTo(10);
 	}
+	
+	@Test
+	@DisplayName("deve obter um livro pelo isbn")
+	public void getBookByIsbnTest() {
+		String isbn = "1230";
+		when(repository.findByIsbn(isbn)).thenReturn(Optional.of(Book.builder().id(1l).isbn(isbn).build()));
 
+		Optional<Book> book = service.getBookByIsbn(isbn);
+
+		assertThat(book.isPresent()).isTrue();
+		assertThat(book.get().getId()).isEqualTo(1l);
+		assertThat(book.get().getIsbn()).isEqualTo(isbn);
+
+		verify(repository, times(1)).findByIsbn(isbn);
+	}
 }

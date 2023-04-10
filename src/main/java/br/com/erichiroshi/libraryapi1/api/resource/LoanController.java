@@ -3,6 +3,8 @@ package br.com.erichiroshi.libraryapi1.api.resource;
 import java.time.LocalDate;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import br.com.erichiroshi.libraryapi1.api.dto.LoanDTO;
+import br.com.erichiroshi.libraryapi1.api.dto.ReturnedLoanDTO;
 import br.com.erichiroshi.libraryapi1.model.entity.Book;
 import br.com.erichiroshi.libraryapi1.model.entity.Loan;
 import br.com.erichiroshi.libraryapi1.service.BookService;
@@ -41,4 +44,12 @@ public class LoanController {
         entity = service.save(entity);
         return entity.getId();
     }
+    
+	@PatchMapping("{id}")
+	public void returnBook(@PathVariable Long id, @RequestBody ReturnedLoanDTO dto) {
+		Loan loan = service.getById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		loan.setReturned(dto.getReturned());
+		service.update(loan);
+	}
+
 }
