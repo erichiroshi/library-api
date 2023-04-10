@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -89,6 +90,41 @@ public class LoanServiceTest {
                 .hasMessage("Book already loaned");
 
         verify(repository, never()).save(savingLoan);
-
     }
+    
+    @Test
+    @DisplayName(" Deve obter as informações de um empréstimo pelo ID")
+	public void getLoanDetaisTest() {
+		// cenário
+		Long id = 1l;
+
+		Loan loan = createLoan();
+		loan.setId(id);
+
+		when(repository.findById(id)).thenReturn(Optional.of(loan));
+
+		// execucao
+		Optional<Loan> result = service.getById(id);
+
+		// verificacao
+		assertThat(result.isPresent()).isTrue();
+		assertThat(result.get().getId()).isEqualTo(id);
+		assertThat(result.get().getCustomer()).isEqualTo(loan.getCustomer());
+		assertThat(result.get().getBook()).isEqualTo(loan.getBook());
+		assertThat(result.get().getLoanDate()).isEqualTo(loan.getLoanDate());
+
+		verify(repository).findById(id);
+	}
+
+	public static Loan createLoan() {
+		Book book = Book.builder().id(1l).build();
+		String customer = "Fulano";
+
+	      return Loan.builder()
+                        .book(book)
+                        .customer(customer)
+                        .loanDate(LocalDate.now())
+                        .build();
+    }
+    
 }
