@@ -8,14 +8,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.server.ResponseStatusException;
 
 import br.com.erichiroshi.libraryapi1.service.exception.BusinessException;
-import lombok.Getter;
 
-@Getter
 public class ApiErros {
-
-	List<String> errors = new ArrayList<>();
+	private List<String> errors;
 
 	public ApiErros(BindingResult bindingResult) {
+		this.errors = new ArrayList<>();
 		bindingResult.getAllErrors().forEach(error -> this.errors.add(error.getDefaultMessage()));
 	}
 
@@ -23,12 +21,15 @@ public class ApiErros {
 		this.errors = Arrays.asList(ex.getMessage());
 	}
 
-	public ApiErros(LivroNaoExisteException ex) {
-		this.errors = Arrays.asList(ex.getMessage());
-	}
-
 	public ApiErros(ResponseStatusException ex) {
 		this.errors = Arrays.asList(ex.getReason());
 	}
 
+	public ApiErros(LivroNaoExisteException ex) {
+		this.errors = Arrays.asList(ex.getMessage());
+	}
+
+	public List<String> getErrors() {
+		return errors;
+	}
 }

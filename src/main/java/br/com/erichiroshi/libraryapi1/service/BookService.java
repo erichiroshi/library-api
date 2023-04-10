@@ -9,16 +9,15 @@ import br.com.erichiroshi.libraryapi1.model.entity.Book;
 
 public interface BookService {
 
-	Book save(Book book);
+    Book save(Book any);
 
-	Optional<Book> getById(Long id);
+    Optional<Book> getById(Long id);
 
-	void delete(Book book);
+    void delete(Book book);
 
-	Book update(Book book);
+    Book update(Book book);
 
-	Page<Book> find(Book filter, Pageable pageRequest);
+    Page<Book> find( Book filter, Pageable pageRequest );
 
-	Optional<Book> getBookByIsbn(String isbn);
-
+    Optional<Book> getBookByIsbn(String isbn);
 }

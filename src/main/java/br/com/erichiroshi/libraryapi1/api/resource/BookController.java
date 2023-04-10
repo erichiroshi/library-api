@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -18,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.com.erichiroshi.libraryapi1.api.dto.BookDTO;
-import br.com.erichiroshi.libraryapi1.api.resource.exception.LivroNaoExisteException;
 import br.com.erichiroshi.libraryapi1.model.entity.Book;
 import br.com.erichiroshi.libraryapi1.service.BookService;
 import jakarta.validation.Valid;
@@ -29,51 +28,60 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/books")
 public class BookController {
 
-	@Autowired
-	private BookService service;
-	@Autowired
-	private ModelMapper modelMapper;
+    private BookService service;
+    private ModelMapper modelMapper;
 
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	public BookDTO create(@RequestBody @Valid BookDTO bookDTO) {
-		Book entity = modelMapper.map(bookDTO, Book.class);
-		entity = service.save(entity);
-		return modelMapper.map(entity, BookDTO.class);
-	}
+    public BookController(BookService service, ModelMapper mapper) {
+        this.service = service;
+        this.modelMapper = mapper;
+    }
 
-	@GetMapping("/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	public BookDTO findById(@PathVariable Long id) {
-		Book book = service.getById(id).orElseThrow(() -> new LivroNaoExisteException("Livro não encontrado."));
-		return modelMapper.map(book, BookDTO.class);
-	}
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public BookDTO create( @RequestBody @Valid BookDTO dto ){
+        Book entity = modelMapper.map( dto, Book.class );
+        entity = service.save(entity);
+        return modelMapper.map(entity, BookDTO.class);
+    }
 
-	@DeleteMapping("/{id}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteById(@PathVariable Long id) {
-		Book book = service.getById(id).orElseThrow(() -> new LivroNaoExisteException("Livro não encontrado."));
-		service.delete(book);
-	}
+    @GetMapping("{id}")
+    public BookDTO get( @PathVariable Long id ){
+        return service
+                .getById(id)
+                .map( book -> modelMapper.map(book, BookDTO.class)  )
+                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
+    }
 
-	@PutMapping("/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	public BookDTO update(@RequestBody BookDTO bookDto, @PathVariable Long id) {
-		Book book = service.getById(id).orElseThrow(() -> new LivroNaoExisteException("Livro não encontrado."));
-		book.setAuthor(bookDto.getAuthor());
-		book.setTitle(bookDto.getTitle());
-		service.update(book);
-		return modelMapper.map(book, BookDTO.class);
-	}
-	
-	@GetMapping
-	public Page<BookDTO> find(BookDTO dto, Pageable pageRequest) {
-		Book filter = modelMapper.map(dto, Book.class);
-		Page<Book> result = service.find(filter, pageRequest);
-		List<BookDTO> list = result.getContent().stream()
-				.map(entity -> modelMapper.map(entity, BookDTO.class))
-				.collect(Collectors.toList());
+    @DeleteMapping("{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id){
+        Book book = service.getById(id).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
+        service.delete(book);
+    }
 
-		return new PageImpl<BookDTO>(list, pageRequest, result.getTotalElements());
-	}
+    @PutMapping("{id}")
+    public BookDTO update( @PathVariable Long id, BookDTO dto){
+        return service.getById(id).map( book -> {
+
+            book.setAuthor(dto.getAuthor());
+            book.setTitle(dto.getTitle());
+            book = service.update(book);
+            return modelMapper.map(book, BookDTO.class);
+
+        }).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
+    }
+
+    @GetMapping
+    public Page<BookDTO> find( BookDTO dto, Pageable pageRequest ){
+        Book filter = modelMapper.map(dto, Book.class);
+        Page<Book> result = service.find(filter, pageRequest);
+        List<BookDTO> list = result.getContent()
+                .stream()
+                .map(entity -> modelMapper.map(entity, BookDTO.class))
+                .collect(Collectors.toList());
+
+        return new PageImpl<BookDTO>( list, pageRequest, result.getTotalElements() );
+    }
+
+
 }
