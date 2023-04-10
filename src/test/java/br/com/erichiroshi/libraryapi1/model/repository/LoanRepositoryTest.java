@@ -1,5 +1,6 @@
 package br.com.erichiroshi.libraryapi1.model.repository;
 
+import static br.com.erichiroshi.libraryapi1.model.repository.BookRepositoryTest.createNewBook;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -12,8 +13,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import static br.com.erichiroshi.libraryapi1.model.repository.BookRepositoryTest.createNewBook;
 
 import br.com.erichiroshi.libraryapi1.model.entity.Book;
 import br.com.erichiroshi.libraryapi1.model.entity.Loan;

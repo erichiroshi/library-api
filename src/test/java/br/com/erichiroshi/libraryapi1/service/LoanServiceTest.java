@@ -2,11 +2,15 @@ package br.com.erichiroshi.libraryapi1.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,9 +18,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import br.com.erichiroshi.libraryapi1.api.dto.LoanFilterDTO;
 import br.com.erichiroshi.libraryapi1.model.entity.Book;
 import br.com.erichiroshi.libraryapi1.model.entity.Loan;
 import br.com.erichiroshi.libraryapi1.model.repository.LoanRepository;
@@ -131,35 +139,33 @@ public class LoanServiceTest {
 		verify(repository).save(loan);
 	}
 	
-//	 @Test
-//	    @DisplayName("Deve filtrar empréstimos pelas propriedades")
-//	    public void findLoanTest(){
-//	        //cenario
-//	        LoanFilterDTO loanFilterDTO = LoanFilterDTO.builder().customer("Fulano").isbn("321").build();
-//
-//	        Loan loan = createLoan();
-//	        loan.setId(1l);
-//	        PageRequest pageRequest = PageRequest.of(0, 10);
-//	        List<Loan> lista = Arrays.asList(loan);
-//
-//	        Page<Loan> page = new PageImpl<Loan>(lista, pageRequest, lista.size());
-//	        when( repository.findByBookIsbnOrCustomer(
-//	                    Mockito.anyString(),
-//	                    Mockito.anyString(),
-//	                    Mockito.any(PageRequest.class))
-//	        )
-//	                .thenReturn(page);
-//
-//	        //execucao
-//	        Page<Loan> result = service.find( loanFilterDTO, pageRequest );
-//
-//
-//	        //verificacoes
-//	        assertThat(result.getTotalElements()).isEqualTo(1);
-//	        assertThat(result.getContent()).isEqualTo(lista);
-//	        assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
-//	        assertThat(result.getPageable().getPageSize()).isEqualTo(10);
-//	    }
+	 @Test
+	    @DisplayName("Deve filtrar empréstimos pelas propriedades")
+		public void findLoanTest() {
+			// cenario
+			LoanFilterDTO loanFilterDTO = LoanFilterDTO.builder().customer("Fulano").isbn("321").build();
+
+			Loan loan = createLoan();
+			loan.setId(1l);
+			PageRequest pageRequest = PageRequest.of(0, 10);
+			List<Loan> lista = Arrays.asList(loan);
+
+			Page<Loan> page = new PageImpl<Loan>(lista, pageRequest, lista.size());
+			when(repository.findByBookIsbnOrCustomer(
+						anyString(),
+						anyString(),
+						any(PageRequest.class)))
+					.thenReturn(page);
+
+			// execucao
+			Page<Loan> result = service.find(loanFilterDTO, pageRequest);
+
+			// verificacoes
+			assertThat(result.getTotalElements()).isEqualTo(1);
+			assertThat(result.getContent()).isEqualTo(lista);
+			assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
+			assertThat(result.getPageable().getPageSize()).isEqualTo(10);
+		}
 
 	public static Loan createLoan() {
 		Book book = Book.builder().id(1l).build();
