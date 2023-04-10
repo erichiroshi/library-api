@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import br.com.erichiroshi.libraryapi1.api.dto.LoanFilterDTO;
+import br.com.erichiroshi.libraryapi1.model.entity.Book;
 import br.com.erichiroshi.libraryapi1.model.entity.Loan;
 
 public interface LoanService {
@@ -17,4 +18,6 @@ public interface LoanService {
 	Loan update(Loan loan);
 
 	Page<Loan> find(LoanFilterDTO filterDTO, Pageable pageable);
+
+	Page<Loan> getLoansByBook(Book book, Pageable pageable);
 }
