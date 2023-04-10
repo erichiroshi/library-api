@@ -2,6 +2,10 @@ package br.com.erichiroshi.libraryapi1.service.impl;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import br.com.erichiroshi.libraryapi1.api.dto.LoanFilterDTO;
 import br.com.erichiroshi.libraryapi1.model.entity.Loan;
 import br.com.erichiroshi.libraryapi1.model.repository.LoanRepository;
 import br.com.erichiroshi.libraryapi1.service.LoanService;
@@ -31,6 +35,11 @@ public class LoanServiceImpl implements LoanService {
 	@Override
 	public Loan update(Loan loan) {
 		return repository.save(loan);
+	}
+
+	@Override
+	public Page<Loan> find(LoanFilterDTO filterDTO, Pageable pageable) {
+		return null;
 	}
 
 }
