@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import br.com.erichiroshi.libraryapi1.api.dto.LoanFilterDTO;
+import br.com.erichiroshi.libraryapi1.model.entity.Book;
 import br.com.erichiroshi.libraryapi1.model.entity.Loan;
 import br.com.erichiroshi.libraryapi1.model.repository.LoanRepository;
 import br.com.erichiroshi.libraryapi1.service.LoanService;
@@ -40,6 +41,11 @@ public class LoanServiceImpl implements LoanService {
 	@Override
 	public Page<Loan> find(LoanFilterDTO filterDTO, Pageable pageable) {
 		return repository.findByBookIsbnOrCustomer(filterDTO.getIsbn(), filterDTO.getCustomer(), pageable);
+	}
+
+	@Override
+	public Page<Loan> getLoansByBook(Book book, Pageable pageable) {
+		return repository.findByBook(book, pageable);
 	}
 
 }
