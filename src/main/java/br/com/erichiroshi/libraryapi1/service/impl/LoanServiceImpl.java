@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import br.com.erichiroshi.libraryapi1.api.dto.LoanFilterDTO;
 import br.com.erichiroshi.libraryapi1.model.entity.Book;
@@ -12,6 +13,7 @@ import br.com.erichiroshi.libraryapi1.model.repository.LoanRepository;
 import br.com.erichiroshi.libraryapi1.service.LoanService;
 import br.com.erichiroshi.libraryapi1.service.exception.BusinessException;
 
+@Service
 public class LoanServiceImpl implements LoanService {
 
 	private LoanRepository repository;
