@@ -62,9 +62,9 @@ public class LoanControllerTest {
 	    private LoanService loanService;
 
 	    @Test
-	    @DisplayName("Deve realizar um emprestimo")
-	    public void createLoanTest() throws Exception {
-			LoanDTO dto = LoanDTO.builder().isbn("123").customer("Fulano").build();
+		@DisplayName("Deve realizar um emprestimo")
+		public void createLoanTest() throws Exception {
+			LoanDTO dto = LoanDTO.builder().isbn("123").email("customer@email.com").customer("Fulano").build();
 			String json = new ObjectMapper().writeValueAsString(dto);
 
 			Book book = Book.builder().id(1l).isbn("123").build();
