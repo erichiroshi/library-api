@@ -1,6 +1,7 @@
 package br.com.erichiroshi.libraryapi1.api.dto;
 
-import jakarta.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

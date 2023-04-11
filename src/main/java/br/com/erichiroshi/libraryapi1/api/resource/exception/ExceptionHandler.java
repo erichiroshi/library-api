@@ -38,6 +38,6 @@ public class ExceptionHandler {
     @org.springframework.web.bind.annotation.ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiErros> handleResponseStatusException( ResponseStatusException ex ){
     	ApiErros apiErros = new ApiErros(ex);
-        return ResponseEntity.status(ex.getStatusCode()).body(apiErros);
+        return ResponseEntity.status(ex.getStatus().value()).body(apiErros);
     }
 }

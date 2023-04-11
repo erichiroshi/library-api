@@ -3,6 +3,8 @@ package br.com.erichiroshi.libraryapi1.api.resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,7 +29,6 @@ import br.com.erichiroshi.libraryapi1.service.BookService;
 import br.com.erichiroshi.libraryapi1.service.LoanService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
