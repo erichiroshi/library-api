@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "application.mail.lateloans.message",
+    "type": "java.lang.String",
+    "description": "A description for 'application.mail.lateloans.message'"
+  },
+  {
+    "name": "application.mail.default-remetent",
+    "type": "java.lang.String",
+    "description": "A description for 'application.mail.default-remetent'"
+  }
+]}

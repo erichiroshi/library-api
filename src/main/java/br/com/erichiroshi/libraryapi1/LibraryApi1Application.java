@@ -1,24 +1,37 @@
 package br.com.erichiroshi.libraryapi1;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
+
+import br.com.erichiroshi.libraryapi1.service.EmailService;
 
 @SpringBootApplication
 @EnableScheduling
 public class LibraryApi1Application {
+
+	@Autowired
+	private EmailService emailService;
 
 	@Bean
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
 	}
 
-	@Scheduled(cron = "0 31 20 1/1 * ?")
-	public void testeAgendamentoTarefas() {
-		System.out.println("AGENDAMENTO DE TAREFAS FUNCIONANDO COM SUCESSO!");
+	@Bean
+	public CommandLineRunner runner() {
+		return args -> {
+			List<String> emails = Arrays.asList("library-api-831326@inbox.mailtrap.io");
+			emailService.sendMails("Testando serviço de emails.", emails);
+			System.out.println("EMAILS ENVIADOS");
+		};
 	}
 
 	public static void main(String[] args) {
