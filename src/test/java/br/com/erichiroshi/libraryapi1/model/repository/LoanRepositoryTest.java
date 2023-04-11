@@ -4,6 +4,7 @@ import static br.com.erichiroshi.libraryapi1.model.repository.BookRepositoryTest
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,21 +34,20 @@ public class LoanRepositoryTest {
 	@Test
 	@DisplayName("Deve verificar se existe um emprestimo não retornado para o livro passado.")
 	public void existsByBookAndNotReturnedTest() {
-		Book book = createNewBook("123");
-		entityManager.persist(book);
-		
-		Loan loan = Loan.builder().book(book).customer("Fulano").loanDate(LocalDate.now()).build();
-		entityManager.persist(loan);
+		// cenário
+		Loan loan = createAndPersistLoan(LocalDate.now());
+		Book book = loan.getBook();
 
+		// execucao
 		boolean exists = repository.existsByBookAndNotReturned(book);
 
 		assertThat(exists).isTrue();
 	}
-	
+
 	@Test
 	@DisplayName("Deve buscar empréstimo pelo isbn do livro ou customer")
 	public void findByBookIsbnOrCustomerTest() {
-		Loan loan = createAndPersistLoan();
+		Loan loan = createAndPersistLoan(LocalDate.now());
 
 		Page<Loan> result = repository.findByBookIsbnOrCustomer("123", "Fulano", PageRequest.of(0, 10));
 
@@ -58,11 +58,29 @@ public class LoanRepositoryTest {
 		assertThat(result.getTotalElements()).isEqualTo(1);
 	}
 
-	public Loan createAndPersistLoan() {
+	@Test
+	@DisplayName("Deve obter empréstimos cuja data emprestimo for menor ou igual a tres dias atras e nao retornados")
+	public void findByLoanDateLessThanAndNotReturnedTest() {
+		Loan loan = createAndPersistLoan(LocalDate.now().minusDays(5));
+
+		List<Loan> result = repository.findByLoanDateLessThanAndNotReturned(LocalDate.now().minusDays(4));
+
+		assertThat(result).hasSize(1).contains(loan);
+	}
+	
+	@Test
+	@DisplayName("Deve retornar vazio quando não houver emprestimos atrasados.")
+	public void notFindByLoanDateLessThanAndNotReturnedTest() {
+		List<Loan> result = repository.findByLoanDateLessThanAndNotReturned(LocalDate.now().minusDays(4));
+
+		assertThat(result).isEmpty();
+	}
+
+	public Loan createAndPersistLoan(LocalDate loanDate) {
 		Book book = createNewBook("123");
 		entityManager.persist(book);
 
-		Loan loan = Loan.builder().book(book).customer("Fulano").loanDate(LocalDate.now()).build();
+		Loan loan = Loan.builder().book(book).customer("Fulano").loanDate(loanDate).build();
 		entityManager.persist(loan);
 
 		return loan;
