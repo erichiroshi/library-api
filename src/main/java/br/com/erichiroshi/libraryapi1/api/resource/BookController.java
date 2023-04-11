@@ -25,12 +25,15 @@ import br.com.erichiroshi.libraryapi1.model.entity.Book;
 import br.com.erichiroshi.libraryapi1.model.entity.Loan;
 import br.com.erichiroshi.libraryapi1.service.BookService;
 import br.com.erichiroshi.libraryapi1.service.LoanService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
+@Api("Book API")
 public class BookController {
 
 	private final BookService service;
@@ -39,6 +42,7 @@ public class BookController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation("Create a book")
 	public BookDTO create(@RequestBody @Valid BookDTO dto) {
         Book entity = modelMapper.map( dto, Book.class );
         entity = service.save(entity);
@@ -46,6 +50,7 @@ public class BookController {
     }
 
     @GetMapping("{id}")
+    @ApiOperation("Create a book")
     public BookDTO get( @PathVariable Long id ){
         return service
                 .getById(id)
@@ -55,12 +60,14 @@ public class BookController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation("Deletes a book by id")
     public void delete(@PathVariable Long id){
         Book book = service.getById(id).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
         service.delete(book);
     }
 
     @PutMapping("{id}")
+    @ApiOperation("Updates a book")
     public BookDTO update( @PathVariable Long id, BookDTO dto){
         return service.getById(id).map( book -> {
 
@@ -73,6 +80,7 @@ public class BookController {
     }
 
     @GetMapping
+    @ApiOperation("Lists books by params")
     public Page<BookDTO> find( BookDTO dto, Pageable pageRequest ){
         Book filter = modelMapper.map(dto, Book.class);
         Page<Book> result = service.find(filter, pageRequest);
