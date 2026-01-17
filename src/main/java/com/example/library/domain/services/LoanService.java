@@ -11,6 +11,7 @@ import com.example.library.domain.entities.Loan;
 import com.example.library.domain.entities.LoanItem;
 import com.example.library.domain.entities.LoanStatus;
 import com.example.library.domain.entities.User;
+import com.example.library.domain.exceptions.BusinessException;
 import com.example.library.domain.repositories.BookRepository;
 import com.example.library.domain.repositories.LoanRepository;
 import com.example.library.domain.repositories.UserRepository;
@@ -41,11 +42,12 @@ public class LoanService {
 
         for (Long bookId : bookIds) {
 
-            Book book = bookRepository.findById(bookId).get();
+			Book book = bookRepository.findById(bookId).get();
 
-            if (book.getAvailableCopies() <= 0) {
-                System.out.println("Book out of stock: " + book.getTitle());
-            }
+			if (book.getAvailableCopies() <= 0) {
+				throw new BusinessException("Book is not available: " + book.getTitle());
+			}
+
 
             book.setAvailableCopies(book.getAvailableCopies() - 1);
 

@@ -13,6 +13,8 @@ import com.example.library.api.mapper.BookMapper;
 import com.example.library.domain.entities.Author;
 import com.example.library.domain.entities.Book;
 import com.example.library.domain.entities.Category;
+import com.example.library.domain.exceptions.InvalidOperationException;
+import com.example.library.domain.exceptions.ResourceNotFoundException;
 import com.example.library.domain.repositories.AuthorRepository;
 import com.example.library.domain.repositories.BookRepository;
 import com.example.library.domain.repositories.CategoryRepository;
@@ -39,12 +41,17 @@ public class BookService {
 
 		Book book = bookMapper.toEntity(dto);
 
+		if (dto.authorIds().isEmpty()) {
+			throw new InvalidOperationException("Livro deve possuir ao menos um autor");
+		}
+		
 		Set<Author> authors = authorRepository.findAllById(dto.authorIds())
 				.stream()
 				.collect(Collectors.toSet());
 
-		Category category = categoryRepository.findById(dto.categoryId()).get();
-
+		Category category = categoryRepository.findById(dto.categoryId())
+				.orElseThrow(() -> new ResourceNotFoundException("Category not found: " + dto.categoryId()));
+		
 		book.setAuthors(authors);
 		book.setCategory(category);
 
@@ -62,7 +69,8 @@ public class BookService {
 
 	@Transactional(readOnly = true)
 	public BookResponseDTO findById(Long id) {
-		Book book = bookRepository.findById(id).get();
+		Book book = bookRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Book not found. Id: " + id));
 		return bookMapper.toDTO(book);
 	}
 
