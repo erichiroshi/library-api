@@ -1,7 +1,7 @@
 spring:
 # H2 connection
   datasource:
-    url: jdbc:h2:mem:librarydb
+    url: jdbc:h2:mem:librarydb;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
     username: sa
     password:

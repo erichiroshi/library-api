@@ -19,5 +19,5 @@ public record BookRequestDTO(
 		Integer publicationYear, 
 		Integer availableCopies,
 		Set<Long> authorIds,
-		Integer categoryId
+		Long categoryId
 ) {}
