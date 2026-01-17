@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,8 @@ import com.example.library.domain.repositories.CategoryRepository;
 
 @Service
 public class BookService {
+	
+    private static final Logger log = LoggerFactory.getLogger(BookService.class);
 
 	private final BookRepository bookRepository;
 	private final AuthorRepository authorRepository;
@@ -41,6 +45,8 @@ public class BookService {
 
 		Book book = bookMapper.toEntity(dto);
 
+		log.info("Creating book: {}", book.getTitle());
+		
 		if (dto.authorIds().isEmpty()) {
 			throw new InvalidOperationException("Livro deve possuir ao menos um autor");
 		}
@@ -56,6 +62,7 @@ public class BookService {
 		book.setCategory(category);
 
 		Book saved = bookRepository.save(book);
+		
 		return bookMapper.toDTO(saved);
 	}
 
@@ -69,8 +76,13 @@ public class BookService {
 
 	@Transactional(readOnly = true)
 	public BookResponseDTO findById(Long id) {
-		Book book = bookRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Book not found. Id: " + id));
+		log.info("Searching book with id={}", id);
+
+		Book book = bookRepository.findById(id).orElseThrow(() -> {
+			log.warn("Book not found: {}", id);
+			return new ResourceNotFoundException("Book not found. Id: " + id);
+		});
+		
 		return bookMapper.toDTO(book);
 	}
 

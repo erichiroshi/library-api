@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<!-- Conversores e propriedades do Spring Boot -->
+	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
+	<!-- Appender de console com cores -->
+	<include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+	<!-- Nível global -->
+	<root level="INFO">
+		<appender-ref ref="CONSOLE" />
+	</root>
+
+	<!-- Log da aplicação -->
+	<logger name="com.example.library" level="DEBUG" />
+
+</configuration>
