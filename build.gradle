@@ -22,7 +22,6 @@ sourceSets {
     }
 }
 
-
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor

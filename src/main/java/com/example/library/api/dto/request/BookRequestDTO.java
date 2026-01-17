@@ -18,6 +18,8 @@ public record BookRequestDTO(
 	    @NotNull
 		Integer publicationYear, 
 		Integer availableCopies,
+		
+		@NotNull
 		Set<Long> authorIds,
 		Long categoryId
 ) {}
