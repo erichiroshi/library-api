@@ -18,4 +18,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 		""")
 		List<Book> findByCategoryName(String category);
 
+    boolean existsByIsbn(String isbn);
+
 }

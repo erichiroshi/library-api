@@ -5,8 +5,10 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,7 +19,6 @@ import com.example.library.domain.exceptions.BusinessException;
 import com.example.library.domain.exceptions.ResourceNotFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -77,6 +78,16 @@ public class GlobalExceptionHandler {
 		problem.setProperty("path", request.getRequestURI());
 		return problem;
 	}
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleConstraintViolation(DataIntegrityViolationException ex, HttpServletRequest request) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problem.setTitle("Data Integrity violation");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty("timestamp", Instant.now());
+        problem.setProperty("path", request.getRequestURI());
+        return problem;
+    }
 
 	@ExceptionHandler(Exception.class)
 	public ProblemDetail handleGeneric(Exception ex, HttpServletRequest request) {

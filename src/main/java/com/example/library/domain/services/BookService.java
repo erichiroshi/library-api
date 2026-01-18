@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.example.library.domain.exceptions.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,10 @@ public class BookService {
 	public BookResponseDTO create(BookRequestDTO dto) {
 
 		Book book = bookMapper.toEntity(dto);
+
+        if(bookRepository.existsByIsbn(dto.isbn())){
+            throw new BusinessException("ISBN já existe");
+        }
 
 		log.info("Creating book: {}", book.getTitle());
 		
