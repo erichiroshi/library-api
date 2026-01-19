@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -88,17 +89,27 @@ public class GlobalExceptionHandler {
         problem.setProperty("path", request.getRequestURI());
         return problem;
     }
+    
+    @ExceptionHandler(BadCredentialsException.class)
+    public ProblemDetail handleBadCredentials(BadCredentialsException ex, HttpServletRequest request) {
+    	ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
+    	problem.setTitle("Invalid username or password");
+    	problem.setDetail(ex.getMessage());
+    	problem.setProperty("timestamp", Instant.now());
+    	problem.setProperty("path", request.getRequestURI());
+    	return problem;
+    }
 
-	@ExceptionHandler(Exception.class)
-	public ProblemDetail handleGeneric(Exception ex, HttpServletRequest request) {
-
-		log.error("Unexpected error on {}", request.getRequestURI(), ex);
-
-		ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		problem.setTitle("Internal server error");
-		problem.setDetail("Unexpected error");
-		problem.setProperty("timestamp", Instant.now());
-		problem.setProperty("path", request.getRequestURI());
-		return problem;
-	}
+//	@ExceptionHandler(Exception.class)
+//	public ProblemDetail handleGeneric(Exception ex, HttpServletRequest request) {
+//
+//		log.error("Unexpected error on {}", request.getRequestURI(), ex);
+//
+//		ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+//		problem.setTitle("Internal server error");
+//		problem.setDetail("Unexpected error");
+//		problem.setProperty("timestamp", Instant.now());
+//		problem.setProperty("path", request.getRequestURI());
+//		return problem;
+//	}
 }

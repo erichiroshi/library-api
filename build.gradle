@@ -18,15 +18,13 @@ repositories {
 	mavenCentral()
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += ['-parameters']
-    options.annotationProcessorPath = configurations.annotationProcessor
-}
-
 sourceSets {
     main {
         java {
-            srcDirs += "$buildDir/generated/sources/annotationProcessor/java/main"
+            srcDirs = [
+                'src/main/java',
+                "$buildDir/generated/sources/annotationProcessor/java/main"
+            ]
         }
     }
 }
@@ -63,15 +61,25 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-flyway'
 	implementation 'org.flywaydb:flyway-database-postgresql'
 
-	// MapStruct + Lombok
+ 	// Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // MapStruct
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
+
+    // Integração Lombok + MapStruct
 	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
 
 	// OpenAPI / Swagger	
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
+	
+	// Spring Security + JWT
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 	
 	// Tests
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
