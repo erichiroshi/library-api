@@ -4,4 +4,4 @@ spring:
 
   profiles:
     active:
-    - test
+    - dev
