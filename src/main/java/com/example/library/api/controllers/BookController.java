@@ -17,8 +17,13 @@ import com.example.library.api.dto.request.BookRequestDTO;
 import com.example.library.api.dto.response.BookResponseDTO;
 import com.example.library.domain.services.BookService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Books", description = "Gerenciamento de livros")
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
@@ -42,6 +47,14 @@ public class BookController {
 		return ResponseEntity.ok(bookService.findAll());
 	}
 
+	@Operation(
+		    summary = "Buscar livro por ID",
+		    description = "Retorna os dados de um livro existente"
+		)
+		@ApiResponses({
+		    @ApiResponse(responseCode = "200", description = "Livro encontrado"),
+		    @ApiResponse(responseCode = "404", description = "Livro não encontrado")
+		})
 	@GetMapping("/{id}")
 	public ResponseEntity<BookResponseDTO> findById(@PathVariable Long id) {
 		log.info("Requisição GET /books/{}", id);
