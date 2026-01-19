@@ -44,24 +44,28 @@ public class BookService {
 	@Transactional
 	public BookResponseDTO create(BookRequestDTO dto) {
 
-		Book book = bookMapper.toEntity(dto);
-
-        if(bookRepository.existsByIsbn(dto.isbn())){
-            throw new BusinessException("ISBN já existe");
-        }
-
-		log.info("Creating book: {}", book.getTitle());
-		
 		if (dto.authorIds().isEmpty()) {
 			throw new InvalidOperationException("Livro deve possuir ao menos um autor");
 		}
 		
+		if(bookRepository.existsByIsbn(dto.isbn())){
+			throw new BusinessException("ISBN já existe");
+		}
+		
+		Book book = bookMapper.toEntity(dto);
+
+		log.info("Creating book: {}", book.getTitle());
+
 		Set<Author> authors = authorRepository.findAllById(dto.authorIds())
 				.stream()
 				.collect(Collectors.toSet());
 
 		Category category = categoryRepository.findById(dto.categoryId())
 				.orElseThrow(() -> new ResourceNotFoundException("Category not found: " + dto.categoryId()));
+		
+		if (authors.isEmpty()) {
+	        throw new InvalidOperationException("Invalid authors");
+	    }
 		
 		book.setAuthors(authors);
 		book.setCategory(category);
