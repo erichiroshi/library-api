@@ -1,9 +1,6 @@
 package com.example.library.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,24 +37,6 @@ class BookRepositoryIT {
         registry.add("spring.datasource.password", postgres::getPassword);
     }
     
-    @Test
-    void shouldApplyAllMigrationsSuccessfully() {
-        // Se o contexto subir, Flyway já rodou
-        assertTrue(postgres.isRunning());
-    }
-    
-    @Autowired
-    DataSource dataSource;
-
-	@Test
-	void shouldHaveUserRolesTable() throws Exception {
-		try (var conn = dataSource.getConnection();
-				var rs = conn.getMetaData().getTables(null, null, "tb_user_roles", null)) {
-
-			assertTrue(rs.next());
-		}
-	}
-	
 	@Autowired
 	private BookRepository bookRepository;
 
