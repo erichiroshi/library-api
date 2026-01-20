@@ -126,3 +126,8 @@ tasks.register('integrationTest', Test) {
 tasks.named('check') {
     dependsOn tasks.integrationTest
 }
+
+tasks.withType(Copy).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
