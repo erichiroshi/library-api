@@ -9,25 +9,32 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.library.api.dto.request.BookRequestDTO;
 import com.example.library.api.dto.response.BookResponseDTO;
 import com.example.library.api.mapper.BookMapper;
+import com.example.library.domain.entities.Author;
 import com.example.library.domain.entities.Book;
+import com.example.library.domain.entities.Category;
 import com.example.library.domain.exceptions.InvalidOperationException;
 import com.example.library.domain.exceptions.ResourceNotFoundException;
 import com.example.library.domain.repositories.AuthorRepository;
 import com.example.library.domain.repositories.BookRepository;
 import com.example.library.domain.repositories.CategoryRepository;
 import com.example.library.domain.services.BookService;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
@@ -44,8 +51,15 @@ class BookServiceTest {
 	@Mock
 	CategoryRepository categoryRepository;
 
-	@InjectMocks
+	private MeterRegistry meterRegistry;
+	
 	private BookService bookService;
+	
+	@BeforeEach
+	void setUp() {
+		meterRegistry = new SimpleMeterRegistry();
+		bookService = new BookService(bookRepository, authorRepository, categoryRepository, bookMapper, meterRegistry);
+	}
 
 	@Test
 	void findById_shouldReturnBook_whenExists() {
@@ -97,6 +111,28 @@ class BookServiceTest {
 		verifyNoInteractions(authorRepository);
 		verifyNoInteractions(categoryRepository);
 		verifyNoInteractions(bookMapper);
+	}
+	
+	@Test
+	void create_shouldIncrementCounter() {
+		BookRequestDTO dto = new BookRequestDTO(null, "new title", "123456123456", 2026, null, Set.of(1L, 2L), 1L);
+		Book book = new Book(1L, "new title", "123456123456", 2026, null, new Category(1L, "Fiction"), Set.of(new Author(1L, "Author 1", null)));
+
+		when(bookMapper.toEntity(dto)).thenReturn(book);
+		when(bookRepository.save(book)).thenReturn(book);
+		when(categoryRepository.findById(1L)).thenReturn(Optional.of(new Category(1L, "Fiction")));
+		when(authorRepository.findAllById(dto.authorIds())).thenReturn(List.of(new Author(1L, "Author 1", null)));
+
+		Counter counter = meterRegistry.find("library.books.created").counter();
+		
+		double before = counter == null ? 0 : counter.count();
+		
+		bookService.create(dto);
+
+		double after = meterRegistry.find("library.books.created").counter().count();
+		
+		assertNotNull(counter);
+		assertEquals(before + 1, after, 0.0001);
 	}
 
 }
