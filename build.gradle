@@ -103,6 +103,10 @@ dependencies {
 	testImplementation platform("org.testcontainers:testcontainers-bom:1.19.7")
 	testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
+    
+    // Actuator + Prometheus
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 	
 }
 

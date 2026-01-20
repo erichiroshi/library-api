@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.example.library.domain.exceptions.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,11 +15,15 @@ import com.example.library.api.mapper.BookMapper;
 import com.example.library.domain.entities.Author;
 import com.example.library.domain.entities.Book;
 import com.example.library.domain.entities.Category;
+import com.example.library.domain.exceptions.BusinessException;
 import com.example.library.domain.exceptions.InvalidOperationException;
 import com.example.library.domain.exceptions.ResourceNotFoundException;
 import com.example.library.domain.repositories.AuthorRepository;
 import com.example.library.domain.repositories.BookRepository;
 import com.example.library.domain.repositories.CategoryRepository;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 
 @Service
 public class BookService {
@@ -31,14 +34,21 @@ public class BookService {
 	private final AuthorRepository authorRepository;
 	private final CategoryRepository categoryRepository;
 	private final BookMapper bookMapper;
+	
+    private final Counter bookCreatedCounter;
 
 	public BookService(BookRepository bookRepository, AuthorRepository authorRepository,
-			CategoryRepository categoryRepository, BookMapper bookMapper) {
+			CategoryRepository categoryRepository, BookMapper bookMapper, MeterRegistry registry) {
 
 		this.bookRepository = bookRepository;
 		this.authorRepository = authorRepository;
 		this.categoryRepository = categoryRepository;
 		this.bookMapper = bookMapper;
+        this.bookCreatedCounter =
+                Counter.builder("library.books.created")
+                       .description("Quantidade de livros criados")
+                       .register(registry);
+
 	}
 
 	@Transactional
@@ -72,6 +82,8 @@ public class BookService {
 
 		Book saved = bookRepository.save(book);
 		
+        bookCreatedCounter.increment();
+        
 		return bookMapper.toDTO(saved);
 	}
 
