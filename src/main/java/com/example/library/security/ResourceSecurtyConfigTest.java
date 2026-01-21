@@ -19,7 +19,7 @@ public class ResourceSecurtyConfigTest {
 	// liberar H2-console
     @Bean
     @Order(1)
-    SecurityFilterChain h2SecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain h2SecurityFilterChain(HttpSecurity http) {
         http
             .securityMatcher(PathRequest.toH2Console())
             .csrf(csrf -> csrf.disable())
@@ -30,13 +30,14 @@ public class ResourceSecurtyConfigTest {
 	
 	@Bean
     @Order(2)
-	SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
+	SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) {
 	    http.csrf(AbstractHttpConfigurer::disable)	     
 	    	.sessionManagement(session ->
 	            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 	        )
 	        .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 .anyRequest().authenticated()
 	        )

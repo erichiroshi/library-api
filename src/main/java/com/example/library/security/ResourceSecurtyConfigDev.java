@@ -15,7 +15,7 @@ public class ResourceSecurtyConfigDev {
 
 	
 	@Bean
-	SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
+	SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) {
 	    http.csrf(AbstractHttpConfigurer::disable)	     
 	    	.sessionManagement(session ->
 	            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
