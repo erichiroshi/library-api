@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,6 +88,7 @@ public class BookService {
 		return bookMapper.toDTO(saved);
 	}
 
+	@Cacheable(value = "books-list")
 	@Transactional(readOnly = true)
 	public List<BookResponseDTO> findAll() {
 		return bookRepository.findAll()
@@ -95,6 +97,7 @@ public class BookService {
 				.toList();
 	}
 
+    @Cacheable(value = "books-by-id", key = "#id")
 	@Transactional(readOnly = true)
 	public BookResponseDTO findById(Long id) {
 		log.info("Searching book with id={}", id);

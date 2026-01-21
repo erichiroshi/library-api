@@ -1,5 +1,6 @@
 package com.example.library.api.dto.response;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,4 +20,5 @@ public record BookResponseDTO(
 		Integer availableCopies,
 		Set<Long> authorIds,
 		Long categoryId
-) {}
+) implements Serializable 
+{}

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.example.library.api.dto.request.BookRequestDTO;
 import com.example.library.api.dto.response.BookResponseDTO;
@@ -36,6 +37,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
 

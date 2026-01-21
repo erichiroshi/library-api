@@ -9,8 +9,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,6 +27,7 @@ import com.example.library.security.JwtAuthenticationFilter;
 	        classes = JwtAuthenticationFilter.class
 	    )
 	)
+@ActiveProfiles("test")
 class CategoryControllerTest {
 
     @Autowired
@@ -32,7 +35,10 @@ class CategoryControllerTest {
 
     @MockitoBean
     private CategoryService service;
-
+    
+    @MockitoBean
+    private CacheManager cacheManager;
+    
     @Test
     void shouldReturnOk() throws Exception {
         when(service.findAll()).thenReturn(List.of());

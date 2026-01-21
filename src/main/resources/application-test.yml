@@ -28,6 +28,17 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration,classpath:db/migration/h2
 
+# Redis
+  cache:
+    type: redis
+    redis:
+      time-to-live: 10m
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+# Actuator
 management:
   endpoints:
     web:
