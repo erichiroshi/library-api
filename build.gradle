@@ -157,6 +157,36 @@ test {
     finalizedBy jacocoTestReport
 }
 
+jacocoTestCoverageVerification {
+
+    dependsOn test
+
+    violationRules {
+
+        rule {
+            element = 'BUNDLE'
+
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.39
+            }
+
+            excludes = [
+                    '**/dto/**',
+                    '**/config/**',
+                    '**/mapper/**',
+                    '**/*MapperImpl.class',
+                    '**/*Application.class',
+                    '**/exception/**',
+                    '**/enums/**'
+            ]
+        }
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
+
 tasks.named('test') {
     useJUnitPlatform()
     systemProperty "spring.profiles.active", "test"
