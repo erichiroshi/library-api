@@ -8,9 +8,9 @@
 ![Redis](https://img.shields.io/badge/Redis-Cache-red)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
 
-API REST para gerenciamento de uma biblioteca, desenvolvida com **Spring Boot** e focada em boas práticas de arquitetura backend, segurança, testes, observabilidade e infraestrutura moderna.
+API REST desenvolvida em Java com **Spring Boot**, projetada para simular um backend de produção, aplicando boas práticas de arquitetura, segurança, testes automatizados, observabilidade e CI/CD.
 
-Este projeto foi construído de forma incremental, simulando um ambiente próximo ao mundo real, cobrindo desde a modelagem de domínio até cache distribuído, CI/CD e monitoramento.
+O projeto tem como objetivo consolidar conhecimentos em desenvolvimento backend moderno, indo além de CRUDs simples, com foco em qualidade de código, manutenibilidade e confiabilidade.
 
 ---
 
@@ -23,85 +23,97 @@ A **Library API** permite gerenciar livros, autores, categorias, usuários e emp
 ## Tecnologias Utilizadas
 
 ### Backend
-- Java 25
-- Spring Boot 4
-- Spring Web (REST)
-- Spring Data JPA
-- Hibernate
-- Lombok
-- Spring Security
-- JWT (JSON Web Token)
-- Spring Cache
+- **Java 25**
+- **Spring Boot**
+  - Spring Web (API REST)
+  - Spring Data JPA (persistência)
+  - Spring Security (JWT)
+  - Spring Cache (Redis)
+- **Hibernate** (Mapeamento objeto-relacional)
+- **Lombok** (Reduzir boilerplate)
 
 ### Persistência
-- PostgreSQL
-- Flyway (versionamento de banco de dados)
-- H2 (testes)
+- **PostgreSQL** (Banco relacional)
+- **Flyway** (Versionamento de schema)
+- **H2** (Banco de testes)
 
 ### Serialização e Mapeamento
-- Jackson
-- DTOs
-- MapStruct
-- Bean Validation (Jakarta Validation)
+- **Jackson** (Serialização e desserialização JSON)
+- **DTOs** (Isolamento do modelo de domínio)
+- **MapStruct** (Mapeamento automático)
+- **Bean Validation (Jakarta Validation)** (Validação declarativa de entrada)
 
 ### Cache
-- Redis
-- Spring Data Redis
+- **Redis** (Cache distribuído)
 
 ### Observabilidade
-- Spring Boot Actuator
-- Micrometer
-- Prometheus
-- Grafana
+- **Actuator + Micrometer + Prometheus + Grafana** (Observabilidade)
 
 ### Testes
-- JUnit 5
-- Mockito
-- Spring Boot Test
-- @DataJpaTest
-- Testcontainers
-- Testes de Integração
+- **Testcontainers** (Testes de integração)
+- **JUnit 5 & Mockito** (Testes automatizados)
+- **JaCoCo** (Cobertura de código com threshold mínimo)
 
 ### Infraestrutura
-- Docker
-- Docker Compose
-- pgAdmin
+- **Docker & Docker Compose** (Ambiente local)
 
 ### Documentação e Qualidade
-- Swagger / OpenAPI
-- Logging estruturado
-- CI/CD (pipeline automatizado)
+- **Swagger / OpenAPI** (Documentação)
+- **Logging estruturado** (Verificar fluxo)
+- **GitHub Actions** (CI/CD)
 
 ---
 
-## Funcionalidades Implementadas
+## ✨ Funcionalidades e Diferenciais
 
-- Modelagem de domínio completa (Biblioteca)
-- CRUD de entidades principais
-- Validação de dados de entrada
-- Mapeamento entre entidades e DTOs
+- Autenticação e autorização com JWT
+- Cache distribuído com Redis usando Spring Cache
+- Versionamento de banco de dados com Flyway
 - Tratamento global de exceções com `@ControllerAdvice` e `ProblemDetail`
-- Autenticação e autorização via JWT
-- Cache distribuído com Redis
-- Seeds de dados para ambiente de teste
-- Testes automatizados (unitários e integração)
-- Documentação automática da API
-- Observabilidade e métricas
+- Logs estruturados para rastreabilidade
+- Métricas de aplicação expostas via Actuator
+- Monitoramento com Prometheus e dashboards no Grafana
+- Testes unitários e de integração com banco real via Testcontainers
+- Pipeline CI/CD com verificação automática de cobertura mínima de testes
 
 ---
 
-## Modelagem de Domínio
+## 🧪 Testes Automatizados
 
-Principais entidades do sistema:
+O projeto possui uma estratégia de testes dividida em:
 
-- Author
-- Book
-- Category
-- User
-- Loan
-- LoanItem
+- **Testes unitários**: validação de regras de negócio e serviços
+- **Testes de repositório**: usando `@DataJpaTest`
+- **Testes de integração**: com PostgreSQL real via Testcontainers
 
-Relacionamentos modelados com JPA seguindo boas práticas (lazy loading, chaves compostas, tabelas de associação).
+A cobertura de código é monitorada com **JaCoCo**, com threshold mínimo configurado.  
+O pipeline falha automaticamente caso a cobertura fique abaixo do valor definido.
+
+---
+
+## 🚀 Cache com Redis
+
+O cache é aplicado na camada de serviço utilizando `@Cacheable`, garantindo:
+
+- Separação entre lógica de negócio e camada HTTP
+- Reutilização do cache por diferentes fluxos
+- Melhor desempenho em consultas frequentes
+
+Durante testes automatizados, o comportamento de cache é isolado para garantir previsibilidade e confiabilidade dos testes.
+
+---
+
+## 📊 Observabilidade
+
+A aplicação expõe métricas através do Spring Actuator e Micrometer, permitindo:
+
+- Monitoramento de performance
+- Contagem de eventos de negócio
+- Integração com Prometheus
+- Visualização via Grafana
+
+Exemplo de métrica customizada:
+- Quantidade de livros criados
 
 ---
 
