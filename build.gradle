@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '4.0.1'
 	id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
 
 group = 'com.example'
@@ -109,6 +110,51 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
 	
+}
+
+jacoco {
+    toolVersion = "0.8.14"
+}
+
+jacocoTestReport {
+    dependsOn test
+    
+    reports {
+       xml.required = true
+       html.required = true
+       csv.required = false
+    }
+    
+     afterEvaluate {
+        classDirectories.setFrom(
+            files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: [
+                        // DTOs
+                        '**/dto/**',
+
+                        // Configurações
+                        '**/config/**',
+
+                        // MapStruct
+                        '**/mapper/**',
+                        '**/*MapperImpl.class',
+
+                        // Main / Bootstrap
+                        '**/*Application.class',
+
+                        // Exception / Error
+                        '**/exception/**',
+
+                        // Enums simples
+                        '**/enums/**'
+                ])
+            })
+        )
+    }
+}
+
+test {
+    finalizedBy jacocoTestReport
 }
 
 tasks.named('test') {

@@ -1,15 +1,12 @@
 # Library API
 
 ![CI](https://github.com/erichiroshi/library-api/actions/workflows/ci.yml/badge.svg)
-[![codecov](https://codecov.io/gh/erichiroshi/library-api/branch/main/graph/badge.svg)](
-https://codecov.io/gh/erichiroshi/library-api
-)
+[![codecov](https://codecov.io/github/erichiroshi/library-api/graph/badge.svg?token=Y71AMP148X)](https://codecov.io/github/erichiroshi/library-api)
 ![Java](https://img.shields.io/badge/Java-25-red)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 ![Redis](https://img.shields.io/badge/Redis-Cache-red)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
-
 
 API REST para gerenciamento de uma biblioteca, desenvolvida com **Spring Boot** e focada em boas práticas de arquitetura backend, segurança, testes, observabilidade e infraestrutura moderna.
 
