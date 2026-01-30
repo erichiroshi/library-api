@@ -185,11 +185,11 @@ docker-compose up -d
 ```
 
 Serviços disponíveis:
-- PostgreSQL
-- Redis
+- PostgreSQL - localhost:5432
+- Redis - localhost:6379
 - pgAdmin - http://localhost:5050/
 - Prometheus - http://localhost:9090/
-- Grafana - http://localhost:3000/
+- Grafana - http://localhost:3000/ (login admin/admin)
 
 Rodar pela ide
 - API: `http://localhost:8080`
@@ -288,6 +288,7 @@ Para contribuir:
 Este projeto foi desenvolvido com foco em aprendizado profundo de backend Java moderno, simulando desafios reais encontrados em ambientes profissionais.
 
 - Desenvolvido por [**Eric Hiroshi**](https://github.com/erichiroshi)
+- LinkedIn: [**Eric Hiroshi**](https://www.linkedin.com/in/eric-hiroshi/)
 - Licença: [MIT](LICENSE)
 
 ---
