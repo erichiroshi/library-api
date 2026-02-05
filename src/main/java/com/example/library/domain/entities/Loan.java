@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -34,12 +35,15 @@ public class Loan {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(nullable = false)
 	private LocalDate loanDate;
 
+	@Column(nullable = false)
 	private LocalDate dueDate;
 
 	private LocalDate returnDate;
 
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private LoanStatus status;
 

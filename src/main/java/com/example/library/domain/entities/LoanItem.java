@@ -1,5 +1,6 @@
 package com.example.library.domain.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -34,5 +35,6 @@ public class LoanItem {
 	@JoinColumn(name = "book_id")
 	private Book book;
 
+	@Column(nullable = false)
 	private Integer quantity;
 }

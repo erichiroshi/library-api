@@ -55,7 +55,7 @@ public class User implements UserDetails {
 	    name = "tb_user_roles",
 	    joinColumns = @JoinColumn(name = "user_id")
 	)
-	@Column(name = "role")
+	@Column(name = "role", nullable = false)
 	private Set<String> roles = new HashSet<>();
 
 
