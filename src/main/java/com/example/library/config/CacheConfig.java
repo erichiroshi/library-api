@@ -1,5 +1,6 @@
 package com.example.library.config;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.springframework.cache.annotation.EnableCaching;
@@ -24,10 +25,13 @@ public class CacheConfig {
 
 				.withCacheConfiguration("books-by-id",
 						RedisCacheConfiguration.defaultCacheConfig()
+								.entryTtl(Duration.ofMinutes(10))
 								.serializeValuesWith(RedisSerializationContext.SerializationPair
 										.fromSerializer(new Jackson2JsonRedisSerializer<>(BookResponseDTO.class))))
+				
 				.withCacheConfiguration("book-list",
 						RedisCacheConfiguration.defaultCacheConfig()
+								.entryTtl(Duration.ofMinutes(10))
 								.serializeValuesWith(RedisSerializationContext.SerializationPair
 										.fromSerializer(new Jackson2JsonRedisSerializer<>(List.class))))
 				.build();

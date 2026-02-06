@@ -101,6 +101,12 @@ public class BookService {
 	@Transactional(readOnly = true)
 	public BookResponseDTO findById(Long id) {
 		log.info("Searching book with id={}", id);
+		
+		try {
+		    Thread.sleep(2000); // 2 segundos
+		} catch (InterruptedException _) {
+		    Thread.currentThread().interrupt();
+		}
 
 		Book book = bookRepository.findById(id).orElseThrow(() -> {
 			log.warn("Book not found: {}", id);

@@ -20,7 +20,7 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        format_sql: true
+        '[format_sql]': true
 
 # Flyway
   flyway:
@@ -31,8 +31,6 @@ spring:
 # Redis
   cache:
     type: redis
-    redis:
-      time-to-live: 10m
   data:
     redis:
       host: localhost
