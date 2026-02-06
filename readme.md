@@ -3,11 +3,11 @@
 ![CI](https://github.com/erichiroshi/library-api/actions/workflows/ci.yml/badge.svg)
 ![CI](https://github.com/erichiroshi/library-api/actions/workflows/readme-pdf.yml/badge.svg)
 [![codecov](https://codecov.io/github/erichiroshi/library-api/graph/badge.svg?token=Y71AMP148X)](https://codecov.io/github/erichiroshi/library-api)
-![Java](https://img.shields.io/badge/Java-25-red)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
-![Redis](https://img.shields.io/badge/Redis-Cache-red)
-![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
+![Java](https://img.shields.io/badge/Java-25-red.png)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen.png)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.png)
+![Redis](https://img.shields.io/badge/Redis-Cache-red.png)
+![Docker](https://img.shields.io/badge/Docker-Enabled-blue.png)
 
 API REST desenvolvida em Java com **Spring Boot**, projetada para simular um backend de produção, aplicando boas práticas de arquitetura, segurança, testes automatizados, observabilidade e CI/CD.
 
