@@ -1,0 +1,31 @@
+name: Docs - README PDF
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+    paths:
+      - README.md
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+
+      - name: Install Tectonic
+        run: |
+          curl -fsSL https://drop-sh.fullyjustified.net | sh
+          sudo mv tectonic /usr/local/bin/tectonic
+
+      - name: Generate README PDF
+        run: pandoc README.md -o library.pdf --pdf-engine=tectonic
+
+      - name: Upload README PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: library-readme-pdf
+          path: library.pdf
