@@ -1,6 +1,7 @@
 # Library-API
 
 ![CI](https://github.com/erichiroshi/library-api/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/erichiroshi/library-api/actions/workflows/readme-pdf.yml/badge.svg)
 [![codecov](https://codecov.io/github/erichiroshi/library-api/graph/badge.svg?token=Y71AMP148X)](https://codecov.io/github/erichiroshi/library-api)
 ![Java](https://img.shields.io/badge/Java-25-red)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen)
