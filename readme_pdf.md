@@ -1,13 +1,7 @@
-# Library-API
+> Este documento é a versão técnica da documentação do projeto,
+> utilizada para geração do PDF via CI.
 
-![CI](https://github.com/erichiroshi/library-api/actions/workflows/ci.yml/badge.svg)
-![CI](https://github.com/erichiroshi/library-api/actions/workflows/readme-pdf.yml/badge.svg)
-[![codecov](https://codecov.io/github/erichiroshi/library-api/graph/badge.svg?token=Y71AMP148X)](https://codecov.io/github/erichiroshi/library-api)
-![Java](https://img.shields.io/badge/Java-25-red)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
-![Redis](https://img.shields.io/badge/Redis-Cache-red)
-![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
+# Library-API
 
 API REST desenvolvida em Java com **Spring Boot**, projetada para simular um backend de produção, aplicando boas práticas de arquitetura, segurança, testes automatizados, observabilidade e CI/CD.
 
@@ -24,14 +18,14 @@ A **Library API** permite gerenciar livros, autores, categorias, usuários e emp
 ## Tecnologias Utilizadas
 
 ### Backend
-- **Java 25**
+- **Java 21 (LTS)**
 - **Spring Boot**
   - Spring Web (API REST)
   - Spring Data JPA (persistência)
   - Spring Security (JWT)
   - Spring Cache (Redis)
 - **Hibernate** (Mapeamento objeto-relacional)
-- **Lombok** (Reduzir boilerplate)
+- **Lombok** (Redução de código boilerplate)
 
 ### Persistência
 - **PostgreSQL** (Banco relacional)
@@ -51,7 +45,7 @@ A **Library API** permite gerenciar livros, autores, categorias, usuários e emp
 - **Actuator + Micrometer + Prometheus + Grafana** (Observabilidade)
 
 ### Testes
-- **Testcontainers** (Testes de integração)
+- **Testcontainers** (Testes de integração com PostgreSQL real)
 - **JUnit 5 & Mockito** (Testes automatizados)
 - **JaCoCo** (Cobertura de código com threshold mínimo)
 
@@ -192,7 +186,7 @@ Serviços disponíveis:
 - Prometheus - http://localhost:9090/
 - Grafana - http://localhost:3000/ (login admin/admin)
 
-Rodar pela ide
+Execução pela IDE:
 - API: `http://localhost:8080`
 
 
@@ -236,8 +230,8 @@ Rodar pela ide
 
 O projeto conta com pipeline automatizado para:
 - Build
-- Execução de testes
-- Validação de qualidade
+- Execução de testes unitários e de integração
+- Validação de cobertura mínima com JaCoCo
 
 ---
 
@@ -291,13 +285,6 @@ Este projeto foi desenvolvido com foco em aprendizado profundo de backend Java m
 - Desenvolvido por [**Eric Hiroshi**](https://github.com/erichiroshi)
 - LinkedIn: [**Eric Hiroshi**](https://www.linkedin.com/in/eric-hiroshi/)
 - Licença: [MIT](LICENSE)
-
----
-
-## Documentação em PDF
-
-A versão em PDF da documentação técnica é gerada automaticamente via GitHub Actions
-e está disponível na aba **Releases** do projeto.
 
 ---
 
