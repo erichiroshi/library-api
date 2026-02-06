@@ -64,7 +64,7 @@ A **Library API** permite gerenciar livros, autores, categorias, usuários e emp
 
 ---
 
-## ✨ Funcionalidades e Diferenciais
+## Funcionalidades e Diferenciais
 
 - Autenticação e autorização com JWT
 - Cache distribuído com Redis usando Spring Cache
@@ -78,7 +78,7 @@ A **Library API** permite gerenciar livros, autores, categorias, usuários e emp
 
 ---
 
-## 🧪 Testes Automatizados
+## Testes Automatizados
 
 O projeto possui uma estratégia de testes dividida em:
 
@@ -91,7 +91,7 @@ O pipeline falha automaticamente caso a cobertura fique abaixo do valor definido
 
 ---
 
-## 🚀 Cache com Redis
+## Cache com Redis
 
 O cache é aplicado na camada de serviço utilizando `@Cacheable`, garantindo:
 
@@ -103,7 +103,7 @@ Durante testes automatizados, o comportamento de cache é isolado para garantir 
 
 ---
 
-## 📊 Observabilidade
+## Observabilidade
 
 A aplicação expõe métricas através do Spring Actuator e Micrometer, permitindo:
 
@@ -277,14 +277,14 @@ Para contribuir:
    ```
 4. Envie um Pull Request.  
 
-📜 **Boas práticas**
+**Boas práticas**
 - Adicione testes unitários.  
 - Documente suas alterações no código.  
 - Use mensagens de commit seguindo o padrão **Conventional Commits**.
 
 ---
 
-## 🔗 Referências e Créditos
+## Referências e Créditos
 Este projeto foi desenvolvido com foco em aprendizado profundo de backend Java moderno, simulando desafios reais encontrados em ambientes profissionais.
 
 - Desenvolvido por [**Eric Hiroshi**](https://github.com/erichiroshi)
