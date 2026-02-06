@@ -21,6 +21,9 @@ jobs:
           curl -fsSL https://drop-sh.fullyjustified.net | sh
           sudo mv tectonic /usr/local/bin/tectonic
 
+      - name: Install Inkscape (for SVG support)
+        run: sudo apt-get update && sudo apt-get install -y inkscape
+
       - name: Generate README PDF
         run: pandoc readme.md -o library.pdf --pdf-engine=tectonic
 
