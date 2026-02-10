@@ -16,8 +16,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.example.library.domain.exceptions.ResourceNotFoundException;
-import com.example.library.domain.services.CategoryService;
+import com.example.library.category.CategoryController;
+import com.example.library.category.CategoryService;
+import com.example.library.exceptions.exceptions.ResourceNotFoundException;
 import com.example.library.security.JwtAuthenticationFilter;
 
 @WebMvcTest(

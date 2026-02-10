@@ -1,0 +1,48 @@
+package com.example.library.category;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.library.category.dto.CategoryRequestDTO;
+import com.example.library.category.dto.CategoryResponseDTO;
+
+@Service
+public class CategoryService {
+
+	private final CategoryRepository repository;
+	private final CategoryMapper mapper;
+
+	public CategoryService(CategoryRepository repository, CategoryMapper mapper) {
+		this.repository = repository;
+		this.mapper = mapper;
+	}
+
+	@Transactional
+	public CategoryResponseDTO create(CategoryRequestDTO dto) {
+
+		if (repository.existsByNameIgnoreCase(dto.name())) {
+			System.out.println("Category with name " + dto.name() + " already exists.");
+		}
+
+		Category category = mapper.toEntity(dto);
+
+		Category saved = repository.save(category);
+		return mapper.toDTO(saved);
+	}
+
+	@Transactional(readOnly = true)
+	public CategoryResponseDTO findById(Long id) {
+		Category category = repository.findById(id).get();
+		return mapper.toDTO(category);
+	}
+
+	@Transactional(readOnly = true)
+	public List<CategoryResponseDTO> findAll() {
+		return repository.findAll()
+				.stream()
+				.map(mapper::toDTO)
+				.toList();
+	}
+}

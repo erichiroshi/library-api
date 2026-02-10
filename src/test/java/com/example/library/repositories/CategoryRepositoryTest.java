@@ -8,9 +8,9 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.example.library.category.Category;
+import com.example.library.category.CategoryRepository;
 import com.example.library.config.NoCacheTestConfig;
-import com.example.library.domain.entities.Category;
-import com.example.library.domain.repositories.CategoryRepository;
 
 @ActiveProfiles("test")
 @DataJpaTest

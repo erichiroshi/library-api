@@ -13,9 +13,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.example.library.category.Category;
+import com.example.library.category.CategoryRepository;
 import com.example.library.config.NoCacheTestITConfig;
-import com.example.library.domain.entities.Category;
-import com.example.library.domain.repositories.CategoryRepository;
 
 @Testcontainers
 @DataJpaTest

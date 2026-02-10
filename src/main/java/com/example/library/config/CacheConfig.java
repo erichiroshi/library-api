@@ -12,7 +12,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 
-import com.example.library.api.dto.response.BookResponseDTO;
+import com.example.library.book.dto.BookResponseDTO;
 
 @Configuration
 @EnableCaching
