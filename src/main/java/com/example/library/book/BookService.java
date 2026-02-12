@@ -1,24 +1,30 @@
 package com.example.library.book;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.library.author.domain.Author;
 import com.example.library.author.domain.AuthorRepository;
-import com.example.library.book.dto.BookRequestDTO;
+import com.example.library.book.dto.BookCreateDTO;
 import com.example.library.book.dto.BookResponseDTO;
+import com.example.library.book.dto.PageResponseDTO;
+import com.example.library.book.exception.BookAlreadyExistsException;
+import com.example.library.book.exception.BookNotFoundException;
+import com.example.library.book.exception.InvalidOperationException;
 import com.example.library.category.domain.Category;
 import com.example.library.category.domain.CategoryRepository;
-import com.example.library.exceptions.exceptionsDeletar.BusinessException;
-import com.example.library.exceptions.exceptionsDeletar.InvalidOperationException;
-import com.example.library.exceptions.exceptionsDeletar.ResourceNotFoundException;
+import com.example.library.category.exception.CategoryNotFoundException;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -28,20 +34,20 @@ public class BookService {
 	
     private static final Logger log = LoggerFactory.getLogger(BookService.class);
 
-	private final BookRepository bookRepository;
+	private final BookRepository repository;
 	private final AuthorRepository authorRepository;
 	private final CategoryRepository categoryRepository;
-	private final BookMapper bookMapper;
+	private final BookMapper mapper;
 	
     private final Counter bookCreatedCounter;
 
-	public BookService(BookRepository bookRepository, AuthorRepository authorRepository,
+	public BookService(BookRepository repository, AuthorRepository authorRepository,
 			CategoryRepository categoryRepository, BookMapper bookMapper, MeterRegistry registry) {
 
-		this.bookRepository = bookRepository;
+		this.repository = repository;
 		this.authorRepository = authorRepository;
 		this.categoryRepository = categoryRepository;
-		this.bookMapper = bookMapper;
+		this.mapper = bookMapper;
         this.bookCreatedCounter =
                 Counter.builder("library.books.created")
                        .description("Quantidade de livros criados")
@@ -49,52 +55,67 @@ public class BookService {
 
 	}
 
+	@CacheEvict(value = "books", allEntries = true)
 	@Transactional
-	public BookResponseDTO create(BookRequestDTO dto) {
+	public BookResponseDTO create(BookCreateDTO dto) {
 
 		if (dto.authorIds().isEmpty()) {
-			throw new InvalidOperationException("Livro deve possuir ao menos um autor");
+			throw new InvalidOperationException();
 		}
 		
-		if(bookRepository.existsByIsbn(dto.isbn())){
-			throw new BusinessException("ISBN já existe");
+		if(repository.existsByIsbn(dto.isbn())){
+			throw new BookAlreadyExistsException(dto.isbn());
 		}
 		
-		Book book = bookMapper.toEntity(dto);
+		Book book = mapper.toEntity(dto);
 
 		log.info("Creating book: {}", book.getTitle());
 
-		Set<Author> authors = authorRepository.findAllById(dto.authorIds())
-				.stream()
-				.collect(Collectors.toSet());
+		Set<Author> authors = new HashSet<>(authorRepository.findAllById(dto.authorIds()));
 
 		Category category = categoryRepository.findById(dto.categoryId())
-				.orElseThrow(() -> new ResourceNotFoundException("Category not found: " + dto.categoryId()));
+				.orElseThrow(() -> new CategoryNotFoundException(dto.categoryId()));
 		
-		if (authors.isEmpty()) {
-	        throw new InvalidOperationException("Invalid authors");
-	    }
+		if (authors.size() != dto.authorIds().size()) {
+		    throw new InvalidOperationException(dto.authorIds());
+		}
 		
-		book.setAuthors(authors);
+		book.getAuthors().addAll(authors);
 		book.setCategory(category);
 
-		Book saved = bookRepository.save(book);
+		Book saved = repository.save(book);
 		
         bookCreatedCounter.increment();
         
-		return bookMapper.toDTO(saved);
+		return mapper.toDTO(saved);
 	}
 
-	@Cacheable(value = "books-list")
+	@Cacheable(
+		    value = "books",
+		    key = "'page0:size:' + #pageable.pageSize + ':sort:' + #pageable.sort.toString()",
+		    condition = "#pageable.pageNumber == 0"
+		)
 	@Transactional(readOnly = true)
-	public List<BookResponseDTO> findAll() {
-		return bookRepository.findAll()
-				.stream()
-				.map(bookMapper::toDTO)
-				.toList();
+	public PageResponseDTO<BookResponseDTO> findAll(Pageable pageable) {
+		 Page<Book> page = repository.findAll(pageable);
+		    
+		    List<BookResponseDTO> content =
+		            page.getContent()
+		                .stream()
+		                .map(mapper::toDTO)
+		                .toList();
+
+
+		    return new PageResponseDTO<>(
+		            content,
+		            page.getNumber(),
+		            page.getSize(),
+		            page.getTotalElements(),
+		            page.getTotalPages()
+		    );
 	}
 
-    @Cacheable(value = "books-by-id", key = "#id")
+    @Cacheable(value = "bookById", key = "#id")
 	@Transactional(readOnly = true)
 	public BookResponseDTO findById(Long id) {
 		log.info("Searching book with id={}", id);
@@ -105,12 +126,25 @@ public class BookService {
 		    Thread.currentThread().interrupt();
 		}
 
-		Book book = bookRepository.findById(id).orElseThrow(() -> {
-			log.warn("Book not found: {}", id);
-			return new ResourceNotFoundException("Book not found. Id: " + id);
-		});
+		Book book = find(id);
 		
-		return bookMapper.toDTO(book);
+		return mapper.toDTO(book);
 	}
 
+    @Caching(evict = {
+    	    @CacheEvict(value = "books", allEntries = true),
+    	    @CacheEvict(value = "bookById", key = "#id")
+    	})
+	@Transactional
+	public void deleteById(Long id) {
+		find(id);
+		repository.deleteById(id);
+	}
+
+	private Book find(Long id) {
+		return repository.findById(id).orElseThrow(() -> {
+			log.warn("Book not found: {}", id);
+			return new BookNotFoundException(id);
+		});
+	}
 }

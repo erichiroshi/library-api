@@ -20,5 +20,6 @@ public record BookResponseDTO(
 		Integer availableCopies,
 		Set<Long> authorIds,
 		Long categoryId
-) implements Serializable 
+		
+) implements Serializable
 {}

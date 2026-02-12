@@ -26,12 +26,12 @@ import com.example.library.book.Book;
 import com.example.library.book.BookMapper;
 import com.example.library.book.BookRepository;
 import com.example.library.book.BookService;
-import com.example.library.book.dto.BookRequestDTO;
+import com.example.library.book.dto.BookCreateDTO;
 import com.example.library.book.dto.BookResponseDTO;
+import com.example.library.book.exception.BookNotFoundException;
+import com.example.library.book.exception.InvalidOperationException;
 import com.example.library.category.domain.Category;
 import com.example.library.category.domain.CategoryRepository;
-import com.example.library.exceptions.exceptionsDeletar.InvalidOperationException;
-import com.example.library.exceptions.exceptionsDeletar.ResourceNotFoundException;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -86,7 +86,7 @@ class BookServiceTest {
 
 		when(bookRepository.findById(1L)).thenReturn(Optional.empty());
 
-		assertThrows(ResourceNotFoundException.class, () -> bookService.findById(1L));
+		assertThrows(BookNotFoundException.class, () -> bookService.findById(1L));
 	}
 
 	@Test
@@ -103,7 +103,7 @@ class BookServiceTest {
 	@Test
 	void create_shouldFail_whenNoAuthors() {
 
-		BookRequestDTO dto = BookRequestDTO.builder().title("Domain-Driven Design").isbn("9780134757599")
+		BookCreateDTO dto = BookCreateDTO.builder().title("Domain-Driven Design").isbn("9780134757599")
 				.publicationYear(2003).availableCopies(5).authorIds(Set.of()) // No authors
 				.categoryId(1L).build();
 
@@ -117,8 +117,8 @@ class BookServiceTest {
 	
 	@Test
 	void create_shouldIncrementCounter() {
-		BookRequestDTO dto = new BookRequestDTO(null, "new title", "123456123456", 2026, null, Set.of(1L, 2L), 1L);
-		Book book = new Book(1L, "new title", "123456123456", 2026, null, new Category(1L, "Fiction"), Set.of(new Author(1L, "Author 1", null)));
+		BookCreateDTO dto = new BookCreateDTO(null, "new title", "123456123456", 2026, null, Set.of(1L), 1L);
+		Book book = new Book(1L, "new title", "123456123456", 2026, null, new Category(1L, "Fiction"));
 
 		when(bookMapper.toEntity(dto)).thenReturn(book);
 		when(bookRepository.save(book)).thenReturn(book);

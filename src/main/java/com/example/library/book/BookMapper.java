@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
 import com.example.library.author.domain.Author;
-import com.example.library.book.dto.BookRequestDTO;
+import com.example.library.book.dto.BookCreateDTO;
 import com.example.library.book.dto.BookResponseDTO;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
@@ -21,7 +21,7 @@ public interface BookMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "authors", ignore = true)
-	Book toEntity(BookRequestDTO dto);
+	Book toEntity(BookCreateDTO dto);
     
     default Set<Long> mapAuthors(Set<Author> authors) {
         return authors.stream()

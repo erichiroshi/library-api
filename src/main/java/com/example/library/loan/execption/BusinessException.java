@@ -1,4 +1,4 @@
-package com.example.library.exceptions.exceptionsDeletar;
+package com.example.library.loan.execption;
 
 public class BusinessException extends RuntimeException {
 

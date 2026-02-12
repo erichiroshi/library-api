@@ -1,11 +1,11 @@
 package com.example.library.book;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.library.book.dto.BookRequestDTO;
+import com.example.library.book.dto.BookCreateDTO;
 import com.example.library.book.dto.BookResponseDTO;
+import com.example.library.book.dto.PageResponseDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -36,14 +37,14 @@ public class BookController {
 	}
 
 	@PostMapping
-	public ResponseEntity<BookResponseDTO> create(@Valid @RequestBody BookRequestDTO dto) {
+	public ResponseEntity<BookResponseDTO> create(@Valid @RequestBody BookCreateDTO dto) {
 		BookResponseDTO created = bookService.create(dto);
 		return ResponseEntity.status(HttpStatus.CREATED).body(created);
 	}
 
 	@GetMapping
-	public ResponseEntity<List<BookResponseDTO>> findAll() {
-		return ResponseEntity.ok(bookService.findAll());
+	public ResponseEntity<PageResponseDTO<BookResponseDTO>> findAll(Pageable pageable) {
+		return ResponseEntity.ok(bookService.findAll(pageable));
 	}
 
 	@Operation(
@@ -58,6 +59,12 @@ public class BookController {
 	public ResponseEntity<BookResponseDTO> findById(@PathVariable Long id) {
 		log.info("Requisição GET /books/{}", id);
 		return ResponseEntity.ok(bookService.findById(id));
+	}
+	
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+		bookService.deleteById(id);
+		return ResponseEntity.noContent().build();
 	}
 
 }

@@ -3,12 +3,13 @@ package com.example.library.book.dto;
 import java.util.Set;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
-public record BookRequestDTO(
+public record BookCreateDTO(
 		Long id,
 	    
 		@NotBlank
@@ -22,6 +23,8 @@ public record BookRequestDTO(
 		Integer availableCopies,
 		
 		@NotNull
+		@NotEmpty(message = "At least one author must be informed")
 		Set<Long> authorIds,
+		
 		Long categoryId
 ) {}
