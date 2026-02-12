@@ -1,4 +1,4 @@
-package com.example.library.api.controllers;
+package com.example.library.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -33,7 +33,7 @@ import com.example.library.security.filter.JwtAuthenticationFilter;
 	    )
 	)
 @ActiveProfiles("test")
-class CategoryControllerTest {
+class CategoryControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
