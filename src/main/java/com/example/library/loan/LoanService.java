@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.library.book.Book;
 import com.example.library.book.BookRepository;
-import com.example.library.exceptions.exceptionsDeletar.BusinessException;
+import com.example.library.loan.execption.BusinessException;
 import com.example.library.user.User;
 import com.example.library.user.UserRepository;
 
