@@ -1,12 +1,18 @@
 package com.example.library.category;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.library.category.dto.CategoryRequestDTO;
+import com.example.library.category.dto.CategoryCreateDTO;
 import com.example.library.category.dto.CategoryResponseDTO;
+import com.example.library.category.dto.PageResponseDTO;
+import com.example.library.category.exceptions.CategoryAlreadyExistsException;
+import com.example.library.category.exceptions.CategoryNotFoundException;
 
 @Service
 public class CategoryService {
@@ -20,29 +26,56 @@ public class CategoryService {
 	}
 
 	@Transactional
-	public CategoryResponseDTO create(CategoryRequestDTO dto) {
+	public CategoryResponseDTO create(CategoryCreateDTO dto) {
 
-		if (repository.existsByNameIgnoreCase(dto.name())) {
-			System.out.println("Category with name " + dto.name() + " already exists.");
+		Optional<Category> entity = repository.findByNameIgnoreCase(dto.name());
+
+		if (entity.isPresent()) {
+			throw new CategoryAlreadyExistsException(dto.name());
 		}
 
 		Category category = mapper.toEntity(dto);
 
-		Category saved = repository.save(category);
-		return mapper.toDTO(saved);
-	}
-
-	@Transactional(readOnly = true)
-	public CategoryResponseDTO findById(Long id) {
-		Category category = repository.findById(id).get();
+		category = repository.save(category);
+		
 		return mapper.toDTO(category);
 	}
 
 	@Transactional(readOnly = true)
-	public List<CategoryResponseDTO> findAll() {
-		return repository.findAll()
-				.stream()
-				.map(mapper::toDTO)
-				.toList();
+	public CategoryResponseDTO findById(Long id) {
+		Category category = find(id);
+		return mapper.toDTO(category);
+	}
+
+	@Transactional(readOnly = true)
+	public PageResponseDTO<CategoryResponseDTO> findAll(Pageable pageable) {
+
+	    Page<Category> page = repository.findAll(pageable);
+	    
+	    List<CategoryResponseDTO> content =
+	            page.getContent()
+	                .stream()
+	                .map(mapper::toDTO)
+	                .toList();
+
+
+	    return new PageResponseDTO<>(
+	            content,
+	            page.getNumber(),
+	            page.getSize(),
+	            page.getTotalElements(),
+	            page.getTotalPages()
+	    );
+	}
+
+	@Transactional
+	public void deleteById(Long id) {
+		find(id);
+		repository.deleteById(id);
+	}
+
+	private Category find(Long id) {
+		return repository.findById(id)
+				.orElseThrow(() -> new CategoryNotFoundException(id));
 	}
 }

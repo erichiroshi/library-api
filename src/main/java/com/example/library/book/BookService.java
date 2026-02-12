@@ -16,9 +16,9 @@ import com.example.library.book.dto.BookRequestDTO;
 import com.example.library.book.dto.BookResponseDTO;
 import com.example.library.category.Category;
 import com.example.library.category.CategoryRepository;
-import com.example.library.exceptions.exceptions.BusinessException;
-import com.example.library.exceptions.exceptions.InvalidOperationException;
-import com.example.library.exceptions.exceptions.ResourceNotFoundException;
+import com.example.library.exceptions.exceptionsDeletar.BusinessException;
+import com.example.library.exceptions.exceptionsDeletar.InvalidOperationException;
+import com.example.library.exceptions.exceptionsDeletar.ResourceNotFoundException;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;

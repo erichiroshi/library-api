@@ -1,4 +1,4 @@
-package com.example.library.exceptions.exceptions;
+package com.example.library.exceptions.exceptionsDeletar;
 
 public class InvalidOperationException extends BusinessException {
 

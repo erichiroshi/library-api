@@ -3,9 +3,9 @@ package com.example.library.category.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record CategoryRequestDTO(
+public record CategoryCreateDTO(
 
 		@NotBlank 
-		@Size(max = 100) 
+		@Size(max = 25) 
 		String name
 ) {}

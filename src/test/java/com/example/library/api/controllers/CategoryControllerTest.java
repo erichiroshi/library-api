@@ -1,5 +1,6 @@
 package com.example.library.api.controllers;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -12,13 +13,16 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.library.category.CategoryController;
 import com.example.library.category.CategoryService;
-import com.example.library.exceptions.exceptions.ResourceNotFoundException;
+import com.example.library.category.dto.CategoryResponseDTO;
+import com.example.library.category.dto.PageResponseDTO;
+import com.example.library.category.exceptions.CategoryNotFoundException;
 import com.example.library.security.JwtAuthenticationFilter;
 
 @WebMvcTest(
@@ -41,8 +45,11 @@ class CategoryControllerTest {
     private CacheManager cacheManager;
     
     @Test
-    void shouldReturnOk() throws Exception {
-        when(service.findAll()).thenReturn(List.of());
+	void shouldReturnOk() throws Exception {
+		PageResponseDTO<CategoryResponseDTO> response = new PageResponseDTO<>(List.of(), 0, 10, 0, 0);
+
+		when(service.findAll(any(Pageable.class))).thenReturn(response);
+
 
         mockMvc.perform(get("/api/categories"))
                .andExpect(status().isOk());
@@ -51,7 +58,7 @@ class CategoryControllerTest {
     @Test
     void shouldReturn404WhenNotFound() throws Exception {
         when(service.findById(1L))
-                .thenThrow(new ResourceNotFoundException("Not found"));
+                .thenThrow(new CategoryNotFoundException(1L));
 
         mockMvc.perform(get("/api/categories/1"))
                 .andExpect(status().isNotFound());
