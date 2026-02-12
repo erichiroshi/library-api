@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-import com.example.library.author.Author;
+import com.example.library.author.domain.Author;
 import com.example.library.book.dto.BookRequestDTO;
 import com.example.library.book.dto.BookResponseDTO;
 

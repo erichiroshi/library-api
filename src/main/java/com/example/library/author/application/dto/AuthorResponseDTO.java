@@ -1,4 +1,4 @@
-package com.example.library.author.dto;
+package com.example.library.author.application.dto;
 
 public record AuthorResponseDTO(
 	    Long id,

@@ -1,8 +1,8 @@
-package com.example.library.author.dto;
+package com.example.library.author.application.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record AuthorRequestDTO(
+public record AuthorCreateDTO(
 
 		@NotBlank
 		String name,

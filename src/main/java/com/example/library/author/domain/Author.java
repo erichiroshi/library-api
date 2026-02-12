@@ -1,4 +1,4 @@
-package com.example.library.author;
+package com.example.library.author.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

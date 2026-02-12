@@ -1,4 +1,4 @@
-package com.example.library.author;
+package com.example.library.author.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

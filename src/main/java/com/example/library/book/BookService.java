@@ -10,8 +10,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.library.author.Author;
-import com.example.library.author.AuthorRepository;
+import com.example.library.author.domain.Author;
+import com.example.library.author.domain.AuthorRepository;
 import com.example.library.book.dto.BookRequestDTO;
 import com.example.library.book.dto.BookResponseDTO;
 import com.example.library.category.domain.Category;
