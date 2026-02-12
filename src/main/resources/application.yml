@@ -2,6 +2,12 @@ spring:
   application:
     name: library
 
+  jpa:
+    open-in-view: false
+
+  sql:
+    init:
+      mode: never
+
   profiles:
-    active:
-    - test
+    active: dev
