@@ -1,4 +1,4 @@
-package com.example.library.security;
+package com.example.library.security.filter;
 
 import java.io.IOException;
 
@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.example.library.security.service.JwtService;
 import com.example.library.user.CustomUserDetailsService;
 
 import jakarta.servlet.FilterChain;

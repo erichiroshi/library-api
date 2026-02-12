@@ -1,10 +1,11 @@
-package com.example.library.category;
+package com.example.library.category.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.example.library.category.dto.CategoryCreateDTO;
-import com.example.library.category.dto.CategoryResponseDTO;
+import com.example.library.category.application.dto.CategoryCreateDTO;
+import com.example.library.category.application.dto.CategoryResponseDTO;
+import com.example.library.category.domain.Category;
 
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {

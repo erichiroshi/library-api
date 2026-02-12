@@ -28,8 +28,8 @@ import com.example.library.book.BookRepository;
 import com.example.library.book.BookService;
 import com.example.library.book.dto.BookRequestDTO;
 import com.example.library.book.dto.BookResponseDTO;
-import com.example.library.category.Category;
-import com.example.library.category.CategoryRepository;
+import com.example.library.category.domain.Category;
+import com.example.library.category.domain.CategoryRepository;
 import com.example.library.exceptions.exceptionsDeletar.InvalidOperationException;
 import com.example.library.exceptions.exceptionsDeletar.ResourceNotFoundException;
 

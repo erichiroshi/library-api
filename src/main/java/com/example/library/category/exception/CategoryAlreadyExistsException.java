@@ -1,10 +1,10 @@
-package com.example.library.category.exceptions;
+package com.example.library.category.exception;
 
 import java.net.URI;
 
 import org.springframework.http.HttpStatus;
 
-import com.example.library.exceptions.ApiException;
+import com.example.library.shared.excpetion.ApiException;
 
 public class CategoryAlreadyExistsException extends ApiException {
 

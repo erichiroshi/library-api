@@ -1,4 +1,4 @@
-package com.example.library.config;
+package com.example.library.shared.config;
 
 import java.time.Duration;
 import java.util.List;

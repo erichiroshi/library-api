@@ -1,4 +1,4 @@
-package com.example.library.security;
+package com.example.library.security.web;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.library.security.dto.LoginRequest;
 import com.example.library.security.dto.LoginResponse;
+import com.example.library.security.service.JwtService;
 
 @RestController
 @RequestMapping("/auth")

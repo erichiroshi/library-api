@@ -1,4 +1,4 @@
-package com.example.library.exceptions.handler;
+package com.example.library.shared.excpetion;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -14,8 +14,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import com.example.library.exceptions.ApiException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

@@ -1,4 +1,4 @@
-package com.example.library.category;
+package com.example.library.category.application;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,11 +8,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.library.category.dto.CategoryCreateDTO;
-import com.example.library.category.dto.CategoryResponseDTO;
-import com.example.library.category.dto.PageResponseDTO;
-import com.example.library.category.exceptions.CategoryAlreadyExistsException;
-import com.example.library.category.exceptions.CategoryNotFoundException;
+import com.example.library.category.application.dto.CategoryCreateDTO;
+import com.example.library.category.application.dto.CategoryResponseDTO;
+import com.example.library.category.application.dto.PageResponseDTO;
+import com.example.library.category.domain.Category;
+import com.example.library.category.domain.CategoryRepository;
+import com.example.library.category.exception.CategoryAlreadyExistsException;
+import com.example.library.category.exception.CategoryNotFoundException;
+import com.example.library.category.mapper.CategoryMapper;
 
 @Service
 public class CategoryService {

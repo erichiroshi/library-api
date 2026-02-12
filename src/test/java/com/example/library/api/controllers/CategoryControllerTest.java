@@ -18,12 +18,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.example.library.category.CategoryController;
-import com.example.library.category.CategoryService;
-import com.example.library.category.dto.CategoryResponseDTO;
-import com.example.library.category.dto.PageResponseDTO;
-import com.example.library.category.exceptions.CategoryNotFoundException;
-import com.example.library.security.JwtAuthenticationFilter;
+import com.example.library.category.application.CategoryService;
+import com.example.library.category.application.dto.CategoryResponseDTO;
+import com.example.library.category.application.dto.PageResponseDTO;
+import com.example.library.category.exception.CategoryNotFoundException;
+import com.example.library.category.web.CategoryController;
+import com.example.library.security.filter.JwtAuthenticationFilter;
 
 @WebMvcTest(
 	    controllers = CategoryController.class,

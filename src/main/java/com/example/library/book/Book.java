@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.example.library.author.Author;
-import com.example.library.category.Category;
+import com.example.library.category.domain.Category;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

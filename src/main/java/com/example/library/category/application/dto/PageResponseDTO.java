@@ -1,4 +1,4 @@
-package com.example.library.category.dto;
+package com.example.library.category.application.dto;
 
 import java.util.List;
 
