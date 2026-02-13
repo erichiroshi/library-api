@@ -42,7 +42,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.organization=Eric Hiroshi
             -Dsonar.projectKey=eric-hiroshi
+            -Dsonar.organization=Eric Hiroshi
             -Dsonar.host.url=https://sonarcloud.io
 
