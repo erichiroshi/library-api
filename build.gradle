@@ -194,10 +194,17 @@ tasks.withType(Copy).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += "--enable-preview"
+}
+
 sonar {
   properties {
     property "sonar.projectKey", "library-api"
     property "sonar.organization", "erichiroshi"
     property "sonar.host.url", "https://sonarcloud.io"
+    property "sonar.java.source", "25"
+    property "sonar.java.enablePreview", "true"
+    property "sonar.exclusions", "**/mapper/*Impl.java"
   }
 }

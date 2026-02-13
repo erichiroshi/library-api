@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/erichiroshi/library-api/actions/workflows/ci.yml/badge.svg)
 ![CI](https://github.com/erichiroshi/library-api/actions/workflows/readme-pdf.yml/badge.svg)
-[![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=erichiroshi_library-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=erichiroshi_library-api)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=library-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=library-api)
 [![codecov](https://codecov.io/github/erichiroshi/library-api/graph/badge.svg?token=Y71AMP148X)](https://codecov.io/github/erichiroshi/library-api)
 ![Java](https://img.shields.io/badge/Java-25-red)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen)
