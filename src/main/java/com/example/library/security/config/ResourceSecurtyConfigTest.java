@@ -24,7 +24,7 @@ public class ResourceSecurtyConfigTest {
     SecurityFilterChain h2SecurityFilterChain(HttpSecurity http) {
         http
             .securityMatcher(PathRequest.toH2Console())
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.disable()) // NOSONAR - API stateless com JWT, CSRF não se aplica
             .headers(headers -> headers.frameOptions(FrameOptionsConfig::disable));
 
         return http.build();
@@ -33,7 +33,7 @@ public class ResourceSecurtyConfigTest {
 	@Bean
     @Order(2)
 	SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) {
-	    http.csrf(AbstractHttpConfigurer::disable)	     
+	    http.csrf(AbstractHttpConfigurer::disable) // NOSONAR - API stateless com JWT, CSRF não se aplica
 	    	.sessionManagement(session ->
 	            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 	        )

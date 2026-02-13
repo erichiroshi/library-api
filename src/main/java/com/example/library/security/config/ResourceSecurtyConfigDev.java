@@ -18,7 +18,7 @@ public class ResourceSecurtyConfigDev {
 	
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) {
-	    http.csrf(AbstractHttpConfigurer::disable)	     
+	    http.csrf(AbstractHttpConfigurer::disable) // NOSONAR - API stateless com JWT, CSRF não se aplica	     
 	    	.sessionManagement(session ->
 	            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 	        )

@@ -32,7 +32,7 @@ import com.example.library.security.filter.JwtAuthenticationFilter;
 	        classes = JwtAuthenticationFilter.class
 	    )
 	)
-@ActiveProfiles("test")
+@ActiveProfiles("it")
 class CategoryControllerIT {
 
     @Autowired

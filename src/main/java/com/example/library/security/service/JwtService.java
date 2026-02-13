@@ -1,11 +1,13 @@
 package com.example.library.security.service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -18,9 +20,15 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtService {
 
-    private static final String SECRET = "my-secret-key-my-secret-key-my-secret-key";
-    
-    private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
+	   private final SecretKey key;
+		
+	    public JwtService(@Value("${JWT_SECRET_KEY}") String secret) {
+	        if (secret == null || secret.trim().isEmpty()) {
+	            throw new IllegalStateException("SECRET_KEY não pode ser null ou vazio. Verifique application.properties ou variáveis de ambiente.");
+	        }
+	        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+	    }
+
 
     public String generateToken(UserDetails user) {
 		return Jwts.builder()

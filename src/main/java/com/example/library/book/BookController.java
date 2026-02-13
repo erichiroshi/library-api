@@ -19,7 +19,6 @@ import com.example.library.book.dto.PageResponseDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -51,10 +50,8 @@ public class BookController {
 		    summary = "Buscar livro por ID",
 		    description = "Retorna os dados de um livro existente"
 		)
-		@ApiResponses({
-		    @ApiResponse(responseCode = "200", description = "Livro encontrado"),
-		    @ApiResponse(responseCode = "404", description = "Livro não encontrado")
-		})
+    @ApiResponse(responseCode = "200", description = "Livro encontrado")
+    @ApiResponse(responseCode = "404", description = "Livro não encontrado")
 	@GetMapping("/{id}")
 	public ResponseEntity<BookResponseDTO> findById(@PathVariable Long id) {
 		log.info("Requisição GET /books/{}", id);

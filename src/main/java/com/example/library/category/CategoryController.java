@@ -19,7 +19,6 @@ import com.example.library.category.dto.PageResponseDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -45,10 +44,8 @@ public class CategoryController {
 	}
 
     @Operation(summary = "Find category by id")
-	@ApiResponses({
-	    @ApiResponse(responseCode = "200", description = "Category found"),
-	    @ApiResponse(responseCode = "404", description = "Category not found")
-	})
+    @ApiResponse(responseCode = "200", description = "Category found")
+    @ApiResponse(responseCode = "404", description = "Category not found")
 	@GetMapping("/{id}")
 	public ResponseEntity<CategoryResponseDTO> findById(@PathVariable Long id) {
 		return ResponseEntity.ok(service.findById(id));

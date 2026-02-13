@@ -3,3 +3,5 @@ spring:
     enabled: true
   cache:
     type: redis
+
+JWT_SECRET_KEY: "default-insecure-key-for-tests-only-do-not-use-in-production"
