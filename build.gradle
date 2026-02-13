@@ -198,7 +198,7 @@ tasks.withType(Copy).configureEach {
 sonarqube {
     properties {
         property "sonar.projectKey", "erichiroshi"
-        property "sonar.organization", "Eric Hiroshi"
+        property "sonar.host.url", "https://your-sonarqube-server"
         property "sonar.login", System.getenv("SONAR_TOKEN")
     }
 }
