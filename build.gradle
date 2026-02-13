@@ -7,16 +7,12 @@ plugins {
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-description = 'Spring Library Book Repository'
+description = 'Library Service'
 
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(25)
 	}
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
 }
 
 repositories {
@@ -54,6 +50,7 @@ configurations {
 ext {
     mapstructVersion = "1.6.3"
     lombokMapstructBindingVersion = "0.2.0"
+   	testcontainersVersion = "1.19.7"
 }
 
 dependencies {
@@ -63,9 +60,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
+    // Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // Actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
     // H2 DataBase
-	runtimeOnly 'com.h2database:h2'
-	implementation 'org.springframework.boot:spring-boot-h2console'
+	testImplementation 'com.h2database:h2'
 	
 	// PostgreSQL Database
 	runtimeOnly 'org.postgresql:postgresql'
@@ -74,44 +76,37 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-flyway'
 	implementation 'org.flywaydb:flyway-database-postgresql'
 
- 	// Lombok
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+    // Caching + Redis
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+ 	// MapStruct + Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // MapStruct
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-
-    // Integração Lombok + MapStruct
 	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
 
 	// OpenAPI / Swagger	
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
-	
-	// Spring Security + JWT
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
-    
-    // Caching + Redis
-    implementation 'org.springframework.boot:spring-boot-starter-cache'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     	
 	// Tests
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+   	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+   	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	
 	// Testcontainers
-	testImplementation platform("org.testcontainers:testcontainers-bom:1.19.7")
+	testImplementation platform("org.testcontainers:testcontainers-bom:${testcontainersVersion}")
 	testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
     
-    // Actuator + Prometheus
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // Prometheus
     implementation 'io.micrometer:micrometer-registry-prometheus'
 	
 }
@@ -126,10 +121,9 @@ jacocoTestReport {
     reports {
        xml.required = true
        html.required = true
-       csv.required = false
     }
     
-     afterEvaluate {
+    afterEvaluate {
         classDirectories.setFrom(
             files(classDirectories.files.collect {
                 fileTree(dir: it, exclude: [
@@ -158,43 +152,27 @@ jacocoTestReport {
 }
 
 test {
-    finalizedBy jacocoTestReport
+	useJUnitPlatform()
+	systemProperty "spring.profiles.active", "test"
+	finalizedBy jacocoTestReport
 }
 
 jacocoTestCoverageVerification {
-
     dependsOn test
 
     violationRules {
-
         rule {
             element = 'BUNDLE'
-
             limit {
                 counter = 'LINE'
                 value = 'COVEREDRATIO'
                 minimum = 0.30
             }
-
-            excludes = [
-                    '**/dto/**',
-                    '**/config/**',
-                    '**/mapper/**',
-                    '**/*MapperImpl.class',
-                    '**/*Application.class',
-                    '**/exception/**',
-                    '**/enums/**'
-            ]
         }
     }
 }
 
 check.dependsOn jacocoTestCoverageVerification
-
-tasks.named('test') {
-    useJUnitPlatform()
-    systemProperty "spring.profiles.active", "test"
-}
 
 tasks.register('integrationTest', Test) {
     description = 'Runs integration tests'
@@ -204,7 +182,6 @@ tasks.register('integrationTest', Test) {
     classpath = sourceSets.integrationTest.runtimeClasspath
     
     useJUnitPlatform()
-    
     shouldRunAfter test
 }
 
@@ -215,4 +192,3 @@ tasks.named('check') {
 tasks.withType(Copy).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
-
