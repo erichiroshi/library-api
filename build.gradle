@@ -197,9 +197,8 @@ tasks.withType(Copy).configureEach {
 
 sonarqube {
     properties {
-        property "sonar.projectKey", "eric-hiroshi"
+        property "sonar.projectKey", "erichiroshi"
         property "sonar.organization", "Eric Hiroshi"
-        property "sonar.host.url", "https://sonarcloud.io/project/overview?id=erichiroshi_library-api"
         property "sonar.login", System.getenv("SONAR_TOKEN")
     }
 }
