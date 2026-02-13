@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://prod-server:5432/library
-    username: prod_user
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://postgres:5432/library
+    username: postgres
+    password: postgres
 
   jpa:
     hibernate:
@@ -22,7 +22,7 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
 
 # Actuator
@@ -33,8 +33,17 @@ management:
         include: health,info,metrics,prometheus
   endpoint:
     health:
+      probes:
+        enabled: true
       show-details: always
 
 logging:
   level:
     '[com.example.library]': INFO
+
+# Springdoc
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

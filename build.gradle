@@ -198,6 +198,11 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += "--enable-preview"
 }
 
+tasks.withType(Test).configureEach {
+    jvmArgs += "--enable-preview"
+}
+
+
 sonar {
   properties {
     property "sonar.projectKey", "library-api"
