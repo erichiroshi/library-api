@@ -3,6 +3,8 @@ plugins {
 	id 'org.springframework.boot' version '4.0.2'
 	id 'io.spring.dependency-management' version '1.1.7'
     id 'jacoco'
+    id "org.sonarqube" version "5.0.1"
+
 }
 
 group = 'com.example'
@@ -191,4 +193,13 @@ tasks.named('check') {
 
 tasks.withType(Copy).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "eric-hiroshi"
+        property "sonar.organization", "Eric Hiroshi"
+        property "sonar.host.url", "https://sonarcloud.io/project/overview?id=erichiroshi_library-api"
+        property "sonar.login", System.getenv("SONAR_TOKEN")
+    }
 }

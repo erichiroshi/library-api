@@ -36,13 +36,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: build/reports/jacoco/test/jacocoTestReport.xml
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v2
+      - name: Build and SonarQube
+        run: ./gradlew build sonarqube
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=eric-hiroshi
-            -Dsonar.organization=Eric Hiroshi
-            -Dsonar.host.url=https://sonarcloud.io
-
