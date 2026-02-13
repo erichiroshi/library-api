@@ -1,4 +1,4 @@
-package com.example.library.book;
+package com.example.library.book.mapper;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -7,7 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-import com.example.library.author.domain.Author;
+import com.example.library.author.Author;
+import com.example.library.book.Book;
 import com.example.library.book.dto.BookCreateDTO;
 import com.example.library.book.dto.BookResponseDTO;
 

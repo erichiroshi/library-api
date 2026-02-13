@@ -1,4 +1,4 @@
-package com.example.library.category.web;
+package com.example.library.category;
 
 import java.net.URI;
 
@@ -13,10 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.example.library.category.application.CategoryService;
-import com.example.library.category.application.dto.CategoryCreateDTO;
-import com.example.library.category.application.dto.CategoryResponseDTO;
-import com.example.library.category.application.dto.PageResponseDTO;
+import com.example.library.category.dto.CategoryCreateDTO;
+import com.example.library.category.dto.CategoryResponseDTO;
+import com.example.library.category.dto.PageResponseDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

@@ -1,4 +1,4 @@
-package com.example.library.author.application.dto;
+package com.example.library.author.dto;
 
 import java.util.List;
 

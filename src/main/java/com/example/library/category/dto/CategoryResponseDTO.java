@@ -1,4 +1,4 @@
-package com.example.library.category.application.dto;
+package com.example.library.category.dto;
 
 public record CategoryResponseDTO(
 	    Long id,

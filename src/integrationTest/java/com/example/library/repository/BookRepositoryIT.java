@@ -13,10 +13,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.example.library.author.domain.Author;
+import com.example.library.author.Author;
 import com.example.library.book.Book;
 import com.example.library.book.BookRepository;
-import com.example.library.category.domain.Category;
+import com.example.library.category.Category;
 import com.example.library.config.NoCacheTestITConfig;
 
 @Testcontainers

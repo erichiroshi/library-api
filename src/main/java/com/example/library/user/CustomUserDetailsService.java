@@ -25,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 		});
 
 		log.info("User found: {}", username);
-		
+
 		return user;
 	}
 }

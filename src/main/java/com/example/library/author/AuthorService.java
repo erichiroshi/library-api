@@ -1,4 +1,4 @@
-package com.example.library.author.application;
+package com.example.library.author;
 
 import java.util.List;
 
@@ -7,11 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.library.author.application.dto.AuthorCreateDTO;
-import com.example.library.author.application.dto.AuthorResponseDTO;
-import com.example.library.author.application.dto.PageResponseDTO;
-import com.example.library.author.domain.Author;
-import com.example.library.author.domain.AuthorRepository;
+import com.example.library.author.dto.AuthorCreateDTO;
+import com.example.library.author.dto.AuthorResponseDTO;
+import com.example.library.author.dto.PageResponseDTO;
 import com.example.library.author.exception.AuthorNotFoundException;
 import com.example.library.author.mapper.AuthorMapper;
 

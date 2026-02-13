@@ -1,4 +1,4 @@
-package com.example.library.category.domain;
+package com.example.library.category;
 
 import java.util.Optional;
 

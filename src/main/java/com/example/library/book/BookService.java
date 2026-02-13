@@ -14,16 +14,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.library.author.domain.Author;
-import com.example.library.author.domain.AuthorRepository;
+import com.example.library.author.Author;
+import com.example.library.author.AuthorRepository;
 import com.example.library.book.dto.BookCreateDTO;
 import com.example.library.book.dto.BookResponseDTO;
 import com.example.library.book.dto.PageResponseDTO;
 import com.example.library.book.exception.BookAlreadyExistsException;
 import com.example.library.book.exception.BookNotFoundException;
 import com.example.library.book.exception.InvalidOperationException;
-import com.example.library.category.domain.Category;
-import com.example.library.category.domain.CategoryRepository;
+import com.example.library.book.mapper.BookMapper;
+import com.example.library.category.Category;
+import com.example.library.category.CategoryRepository;
 import com.example.library.category.exception.CategoryNotFoundException;
 
 import io.micrometer.core.instrument.Counter;

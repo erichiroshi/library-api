@@ -3,9 +3,9 @@ package com.example.library.author.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.example.library.author.application.dto.AuthorCreateDTO;
-import com.example.library.author.application.dto.AuthorResponseDTO;
-import com.example.library.author.domain.Author;
+import com.example.library.author.Author;
+import com.example.library.author.dto.AuthorCreateDTO;
+import com.example.library.author.dto.AuthorResponseDTO;
 
 @Mapper(componentModel = "spring")
 public interface AuthorMapper {

@@ -1,4 +1,4 @@
-package com.example.library.category.domain;
+package com.example.library.author;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,18 +13,21 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "tb_category")
+@Table(name = "tb_author")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class Category {
+public class Author {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, unique = true, length = 100)
+	@Column(nullable = false, length = 150)
 	private String name;
+
+	@Column(columnDefinition = "TEXT")
+	private String biography;
 }

@@ -1,4 +1,4 @@
-package com.example.library.author.web;
+package com.example.library.author;
 
 import java.net.URI;
 
@@ -13,10 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.example.library.author.application.AuthorService;
-import com.example.library.author.application.dto.AuthorCreateDTO;
-import com.example.library.author.application.dto.AuthorResponseDTO;
-import com.example.library.author.application.dto.PageResponseDTO;
+import com.example.library.author.dto.AuthorCreateDTO;
+import com.example.library.author.dto.AuthorResponseDTO;
+import com.example.library.author.dto.PageResponseDTO;
 
 import jakarta.validation.Valid;
 
