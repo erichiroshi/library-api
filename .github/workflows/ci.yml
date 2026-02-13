@@ -39,13 +39,22 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: build/reports/jacoco/test/jacocoTestReport.xml,build/reports/jacoco/integrationTest/jacocoIntegrationTestReport.xml
 
-      - name: SonarQube Scan
-        env:
-          SONAR_TOKEN: 330445999c5bbbbbbb69c0051da2c4c9b4d7e193
-          SONAR_PROJECTKEY: erichiroshi_library-api
-          SONAR_ORGANIZATION: erichiroshi
-          SONAR_HOST_URL: https://sonarcloud.io
-        run: ./gradlew sonar --info || echo "Sonar falhou, mas continuando..."
-
       - name: Build Docker image
         run: docker build -t library-api .
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Build and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew build sonar --info || echo "Sonar falhou, mas continuando o build..."

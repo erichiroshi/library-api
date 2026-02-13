@@ -3,8 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '4.0.2'
 	id 'io.spring.dependency-management' version '1.1.7'
     id 'jacoco'
-    id 'org.sonarqube' version '7.2.2.6593'
-
+    id "org.sonarqube" version "7.1.0.6387"
 }
 
 group = 'com.example'
@@ -199,9 +198,5 @@ sonar {
   properties {
     property "sonar.projectKey", "erichiroshi_library-api"
     property "sonar.organization", "erichiroshi"
-    property "sonar.host.url", "https://sonarcloud.io"
-    property "sonar.login", "330445999c5bbbbbbb69c0051da2c4c9b4d7e193" // ou use o token diretamente se não estiver em secrets
-    property "sonar.qualitygate.wait", "true" // Espera Quality Gate passar
-    property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/jacocoTestReport.xml,${buildDir}/reports/jacoco/integrationTest/jacocoIntegrationTestReport.xml"
-    }
+  }
 }
