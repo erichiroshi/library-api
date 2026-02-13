@@ -3,7 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '4.0.2'
 	id 'io.spring.dependency-management' version '1.1.7'
     id 'jacoco'
-    id 'org.sonarqube' version '7.2.2.6593'
+    id 'org.sonarqube' version '7.1.0.6387'
 
 }
 
@@ -195,10 +195,9 @@ tasks.withType(Copy).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-sonarqube {
-    properties {
-        property "sonar.projectKey", "erichiroshi"
-        property "sonar.host.url", "https://your-sonarqube-server"
-        property "sonar.login", System.getenv("SONAR_TOKEN")
-    }
+sonar {
+  properties {
+    property "sonar.projectKey", "erichiroshi_library-api"
+    property "sonar.organization", "erichiroshi"
+  }
 }

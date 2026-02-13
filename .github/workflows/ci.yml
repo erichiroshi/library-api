@@ -37,6 +37,6 @@ jobs:
           files: build/reports/jacoco/test/jacocoTestReport.xml
 
       - name: Build and SonarQube
-        run: ./gradlew build sonarqube
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew build sonar --info
