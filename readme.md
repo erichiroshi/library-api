@@ -15,7 +15,7 @@ API REST desenvolvida em Java com **Spring Boot**, projetada para simular um bac
 O projeto tem como objetivo consolidar conhecimentos em desenvolvimento backend moderno, indo além de CRUDs simples, com foco em qualidade de código, manutenibilidade e confiabilidade.
 
 ---
- 
+
 ## Visão Geral
 
 A **Library API** permite gerenciar livros, autores, categorias, usuários e empréstimos, fornecendo endpoints REST seguros, documentados e testados. O projeto segue uma arquitetura em camadas bem definida e utiliza tecnologias amplamente adotadas no ecossistema Java.
