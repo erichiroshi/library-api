@@ -19,14 +19,13 @@ jobs:
       - name: Install Pandoc and LaTeX
         run: |
           set -euo pipefail
+          export DEBIAN_FRONTEND=noninteractive
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             pandoc \
             texlive-xetex \
+            texlive-latex-recommended \
             texlive-fonts-recommended
-          pandoc --version
-          xelatex --version
-
 
       - name: Generate README PDF
         run: |
@@ -36,7 +35,6 @@ jobs:
             --pdf-engine=xelatex \
             -V mainfont="DejaVu Sans" \
             -V fontsize=11pt
-
 
       - name: Upload README PDF
         uses: actions/upload-artifact@v4
