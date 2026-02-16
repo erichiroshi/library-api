@@ -9,23 +9,33 @@ on:
 jobs:
   docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install Pandoc
-        run: sudo apt-get update && sudo apt-get install -y pandoc
-
-      - name: Install Tectonic
+      - name: Install Pandoc and Tectonic
         run: |
-          curl -fsSL https://drop-sh.fullyjustified.net | sh
-          sudo mv tectonic /usr/local/bin/tectonic
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends pandoc tectonic
+          pandoc --version
+          tectonic --version
 
       - name: Generate README PDF
-        run: pandoc readme_pdf.md -o library.pdf --pdf-engine=tectonic -V mainfont="DejaVu Sans" -V fontsize=11pt
+        run: |
+          set -euo pipefail
+          pandoc readme_pdf.md \
+            -o library.pdf \
+            --pdf-engine=tectonic \
+            -V mainfont="DejaVu Sans" \
+            -V fontsize=11pt
 
       - name: Upload README PDF
         uses: actions/upload-artifact@v4
         with:
           name: library-readme-pdf
           path: library.pdf
+          if-no-files-found: error
