@@ -10,11 +10,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # ─── Variável de ambiente necessária para o JwtService inicializar ───
+    env:
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0 # Necessário para SonarCloud analisar deltas corretamente
 
       - name: Set up JDK 25
         uses: actions/setup-java@v4
@@ -23,42 +27,37 @@ jobs:
           java-version: '25'
           cache: gradle
 
-      - name: Grant execute permission for Gradle
-        run: chmod +x gradlew
-
-      - name: Run unit tests + coverage
-        run: ./gradlew clean test jacocoTestReport
-
-      - name: Run integration tests + coverage
-        run: ./gradlew integrationTest jacocoTestReport
-
-      - name: Verify coverage threshold
-        run: ./gradlew jacocoTestCoverageVerification
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de  # v5.5.2 - pinned commit SHA for security
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: build/reports/jacoco/test/jacocoTestReport.xml,build/reports/jacoco/integrationTest/jacocoIntegrationTestReport.xml
-
-      - name: Build Docker image
-        run: docker build -t library-api .
-
-      - name: Cache SonarQube packages
+      - name: Cache SonarCloud packages
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle
-          
-      - name: Build and analyze
+      - name: Grant execute permission for Gradle
+        run: chmod +x gradlew
+
+      - name: Build, Test, Coverage and Sonar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew build sonar --info
+        run: |
+          ./gradlew clean build \
+            jacocoTestReport \
+            jacocoTestCoverageVerification \
+            sonar --info
+
+      - name: SonarCloud Quality Gate check
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de  # v5.5.2 - pinned SHA
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: build/reports/jacoco/test/jacocoTestReport.xml
+
+      # ─── Build Docker ───
+      - name: Build Docker image
+        run: docker build -t library-api .

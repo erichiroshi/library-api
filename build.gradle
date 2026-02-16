@@ -38,7 +38,6 @@ sourceSets {
     }
 }
 
-
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -112,68 +111,9 @@ dependencies {
 	
 }
 
-jacoco {
-    toolVersion = "0.8.14"
-}
-
-jacocoTestReport {
-    dependsOn test
-    
-    reports {
-       xml.required = true
-       html.required = true
-    }
-    
-    afterEvaluate {
-        classDirectories.setFrom(
-            files(classDirectories.files.collect {
-                fileTree(dir: it, exclude: [
-                        // DTOs
-                        '**/dto/**',
-
-                        // Configurações
-                        '**/config/**',
-
-                        // MapStruct
-                        '**/mapper/**',
-                        '**/*MapperImpl.class',
-
-                        // Main / Bootstrap
-                        '**/*Application.class',
-
-                        // Exception / Error
-                        '**/exception/**',
-
-                        // Enums simples
-                        '**/enums/**'
-                ])
-            })
-        )
-    }
-}
-
-test {
-	useJUnitPlatform()
-	systemProperty "spring.profiles.active", "test"
-	finalizedBy jacocoTestReport
-}
-
-jacocoTestCoverageVerification {
-    dependsOn test
-
-    violationRules {
-        rule {
-            element = 'BUNDLE'
-            limit {
-                counter = 'LINE'
-                value = 'COVEREDRATIO'
-                minimum = 0.20
-            }
-        }
-    }
-}
-
-check.dependsOn jacocoTestCoverageVerification
+// ─────────────────────────────────────────────
+// INTEGRATION TEST TASK
+// ─────────────────────────────────────────────
 
 tasks.register('integrationTest', Test) {
     description = 'Runs integration tests'
@@ -183,12 +123,113 @@ tasks.register('integrationTest', Test) {
     classpath = sourceSets.integrationTest.runtimeClasspath
     
     useJUnitPlatform()
+    systemProperty "spring.profiles.active", "it"
     shouldRunAfter test
+
+    // Gera o .exec separado para permitir consolidação com unit tests
+    jacoco {
+        destinationFile = layout.buildDirectory.file("jacoco/integrationTest.exec").get().asFile
+    }
+    finalizedBy jacocoTestReport
 }
 
 tasks.named('check') {
     dependsOn tasks.integrationTest
 }
+
+// ─────────────────────────────────────────────
+// JACOCO
+// ─────────────────────────────────────────────
+
+jacoco {
+    toolVersion = "0.8.14"
+}
+
+tasks.named("jacocoTestReport") {
+    dependsOn(tasks.named("test"))
+    dependsOn(tasks.named("integrationTest"))
+
+    reports {
+       xml.required = true   // Necessário para SonarCloud e Codecov
+       html.required = true  // Útil para visualização local
+    }
+
+    // Consolida os execution data de unit + integration tests
+    executionData.setFrom(
+        fileTree(layout.buildDirectory).include(
+            "jacoco/test.exec",
+            "jacoco/integrationTest.exec"
+        )
+    )
+    
+    classDirectories.setFrom(
+        files(
+            sourceSets.main.output.asFileTree.matching {
+                exclude(
+                    // DTOs — sem lógica testável
+                    '**/dto/**',
+
+                    // Configurações — testadas pelos testes de contexto
+                    '**/config/**',
+
+                    // MapStruct — gerado automaticamente
+                    '**/mapper/**',
+                    '**/*MapperImpl.class',
+
+                    // Bootstrap
+                    '**/*Application.class',
+
+                    // Exceções — apenas estrutura, sem lógica
+                    '**/exception/**',
+
+                    // Enums simples
+                    '**/enums/**'
+                )
+            }
+        )
+    )
+    
+}
+
+// ─────────────────────────────────────────────
+// TESTES
+// ─────────────────────────────────────────────
+
+test {
+	useJUnitPlatform()
+	systemProperty "spring.profiles.active", "test"
+	finalizedBy jacocoTestReport
+}
+
+tasks.named("jacocoTestCoverageVerification") {
+    dependsOn(tasks.named("jacocoTestReport"))
+
+    violationRules {
+        rule {
+            element = 'BUNDLE'
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                // NOTA: 0.20 (20%) é muito baixo para o nível do projeto.
+                minimum = 0.20
+            }
+        }
+    }
+
+    // Consolida os execution data — mesma fonte do jacocoTestReport
+    executionData.setFrom(
+        fileTree(layout.buildDirectory).include(
+            "jacoco/test.exec",
+            "jacoco/integrationTest.exec"
+        )
+    )
+}
+
+check.dependsOn jacocoTestCoverageVerification
+
+// ─────────────────────────────────────────────
+// MISC
+// ─────────────────────────────────────────────
 
 tasks.withType(Copy).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -202,6 +243,9 @@ tasks.withType(Test).configureEach {
     jvmArgs += "--enable-preview"
 }
 
+// ─────────────────────────────────────────────
+// SONARCLOUD
+// ─────────────────────────────────────────────
 
 sonar {
   properties {
@@ -211,5 +255,7 @@ sonar {
     property "sonar.java.source", "25"
     property "sonar.java.enablePreview", "true"
     property "sonar.exclusions", "**/mapper/*Impl.java"
+    property "sonar.coverage.jacoco.xmlReportPaths",
+             "build/reports/jacoco/test/jacocoTestReport.xml"
   }
 }
