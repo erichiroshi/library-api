@@ -32,6 +32,7 @@ import com.example.library.book.exception.InvalidOperationException;
 import com.example.library.book.mapper.BookMapper;
 import com.example.library.category.Category;
 import com.example.library.category.CategoryRepository;
+import com.example.library.shared.config.delaycachetest.ArtificialDelayService;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -55,12 +56,15 @@ class BookServiceTest {
 
 	private MeterRegistry meterRegistry;
 	
+	@Mock
+	private ArtificialDelayService delayService;
+	
 	private BookService bookService;
 	
 	@BeforeEach
 	void setUp() {
 		meterRegistry = new SimpleMeterRegistry();
-		bookService = new BookService(bookRepository, authorRepository, categoryRepository, bookMapper, meterRegistry);
+		bookService = new BookService(bookRepository, authorRepository, categoryRepository, bookMapper, meterRegistry, delayService);
 	}
 
 	@Test

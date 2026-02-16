@@ -26,6 +26,7 @@ import com.example.library.book.mapper.BookMapper;
 import com.example.library.category.Category;
 import com.example.library.category.CategoryRepository;
 import com.example.library.category.exception.CategoryNotFoundException;
+import com.example.library.shared.config.delaycachetest.ArtificialDelayService;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -40,15 +41,18 @@ public class BookService {
 	private final CategoryRepository categoryRepository;
 	private final BookMapper mapper;
 	
+	private final ArtificialDelayService delayService;
+	
     private final Counter bookCreatedCounter;
 
 	public BookService(BookRepository repository, AuthorRepository authorRepository,
-			CategoryRepository categoryRepository, BookMapper bookMapper, MeterRegistry registry) {
+			CategoryRepository categoryRepository, BookMapper bookMapper, MeterRegistry registry, ArtificialDelayService delayService) {
 
 		this.repository = repository;
 		this.authorRepository = authorRepository;
 		this.categoryRepository = categoryRepository;
 		this.mapper = bookMapper;
+		this.delayService = delayService;
         this.bookCreatedCounter =
                 Counter.builder("library.books.created")
                        .description("Quantidade de livros criados")
@@ -93,7 +97,7 @@ public class BookService {
 
 	@Cacheable(
 		    value = "books",
-		    key = "'page0:size:' + #pageable.pageSize + ':sort:' + #pageable.sort.toString()",
+		    key = "'size:' + #pageable.pageSize + ':sort:' + #pageable.sort",
 		    condition = "#pageable.pageNumber == 0"
 		)
 	@Transactional(readOnly = true)
@@ -120,15 +124,11 @@ public class BookService {
 	@Transactional(readOnly = true)
 	public BookResponseDTO findById(Long id) {
 		log.info("Searching book with id={}", id);
-		
-		try {
-		    Thread.sleep(2000); // 2 segundos
-		} catch (InterruptedException _) {
-		    Thread.currentThread().interrupt();
-		}
+
+		delayService.delay();
 
 		Book book = find(id);
-		
+
 		return mapper.toDTO(book);
 	}
 

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 
-import com.example.library.shared.excpetion.ApiException;
+import com.example.library.shared.exception.ApiException;
 
 public class InvalidOperationException extends ApiException {
 

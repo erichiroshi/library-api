@@ -11,9 +11,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.example.library.security.filter.JwtAuthenticationFilter;
 
-@Profile("dev")
+@Profile("prod")
 @Configuration
-public class ResourceSecurtyConfigDev {
+public class ResourceSecurtyConfigProd {
 
 	
 	@Bean
@@ -24,6 +24,7 @@ public class ResourceSecurtyConfigDev {
 	        )
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+						.requestMatchers("/actuator/**").hasRole("ADMIN")
 						.anyRequest().authenticated()
 	        )
 	        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

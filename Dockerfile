@@ -26,3 +26,6 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 #		docker run -d --network library-api_backend -p 8080:8080 -e SPRING_PROFILES_ACTIVE=prod library-api
 
 #		docker compose -f docker-compose.dev.yml up -d
+
+#		alias resetdb="docker-compose down -v && docker compose -f docker-compose.dev.yml up -d"
+

@@ -1,4 +1,4 @@
-package com.example.library.shared.excpetion;
+package com.example.library.shared.exception;
 
 import java.net.URI;
 
