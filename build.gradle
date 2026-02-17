@@ -215,8 +215,7 @@ tasks.named("jacocoTestCoverageVerification") {
             limit {
                 counter = 'LINE'
                 value = 'COVEREDRATIO'
-                // NOTA: 0.20 (20%) é muito baixo para o nível do projeto.
-                minimum = 0.20
+                minimum = 0.80
             }
         }
     }
@@ -259,7 +258,15 @@ sonar {
     property "sonar.host.url", "https://sonarcloud.io"
     property "sonar.java.source", "25"
     property "sonar.java.enablePreview", "true"
-    property "sonar.exclusions", "**/mapper/*Impl.java"
+    property "sonar.exclusions", """
+                **/dto/**,
+                **/config/**,
+                **/mapper/**,
+                **/*MapperImpl.java,
+                **/*Application.java,
+                **/exception/**,
+                **/enums/**
+                """
     property "sonar.coverage.jacoco.xmlReportPaths",
              "build/reports/jacoco/test/jacocoTestReport.xml"
   }
