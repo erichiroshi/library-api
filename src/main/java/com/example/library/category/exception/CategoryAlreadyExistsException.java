@@ -10,7 +10,7 @@ public class CategoryAlreadyExistsException extends ApiException {
 
 	public CategoryAlreadyExistsException(String detail) {
 
-		final HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+		final HttpStatus httpStatus = HttpStatus.CONFLICT;
 		final String title = "Category Already Exists";
 		detail = "Category Already Exists: " + detail;
 		final URI type = URI.create("https://api.library/errors/resource-already-exists");

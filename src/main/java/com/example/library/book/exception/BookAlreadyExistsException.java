@@ -10,7 +10,7 @@ public class BookAlreadyExistsException extends ApiException {
 
 	public BookAlreadyExistsException(String isbn) {
 
-		HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+		HttpStatus httpStatus = HttpStatus.CONFLICT;
 		String title = "Book Already Exists";
 		String detail = "Book Already Exists. ISBN: " + isbn;
 		URI type = URI.create("https://api.library/errors/book-already-exists");

@@ -44,10 +44,15 @@ public class LoanService {
     // ─────────────────────────────────────────────
     // CRIAR EMPRÉSTIMO
     // ─────────────────────────────────────────────
+	
 	@Transactional
 	public LoanResponseDTO create(LoanCreateDTO dto) {
-
-        User user = getAuthenticatedUser();
+		
+		User user = getAuthenticatedUser();
+        
+		for (Long bookId : dto.booksId()) {
+			bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+		}
 
         log.info("Creating loan for user={} books={}", user.getEmail(), dto.booksId());
         
@@ -90,6 +95,7 @@ public class LoanService {
 	// ─────────────────────────────────────────────
     // DEVOLVER EMPRÉSTIMO
     // ─────────────────────────────────────────────
+	
 	@Transactional
 	public LoanResponseDTO returnLoan(Long loanId) {
 
@@ -124,6 +130,7 @@ public class LoanService {
     // ─────────────────────────────────────────────
     // CANCELAR EMPRÉSTIMO
     // ─────────────────────────────────────────────
+	
     @Transactional
     public LoanResponseDTO cancelLoan(Long loanId) {
 
@@ -152,6 +159,7 @@ public class LoanService {
     // ─────────────────────────────────────────────
     // MARCAR COMO VENCIDO (uso interno / scheduler)
     // ─────────────────────────────────────────────
+    
     @Transactional
     public void markOverdue() {
         List<Loan> overdueLoans = loanRepository.findOverdueLoans(LocalDate.now());
@@ -165,6 +173,7 @@ public class LoanService {
     // ─────────────────────────────────────────────
     // CONSULTAS
     // ─────────────────────────────────────────────
+    
     @Transactional(readOnly = true)
 	public LoanResponseDTO findById(Long loanId) {
     	User user = getAuthenticatedUser();

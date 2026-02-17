@@ -20,7 +20,19 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     boolean existsByIsbn(String isbn);
     
-	@Modifying
+    /**
+     * Decrementa atomicamente as cópias disponíveis.
+     * Retorna 0 se não havia cópias (availableCopies já era 0) — sem UPDATE executado.
+     *
+     * clearAutomatically = true: após o UPDATE, o cache de primeiro nível do JPA
+     * é limpo. Sem isso, chamadas a findById() na mesma transação retornariam
+     * o valor antigo em memória, ignorando o UPDATE executado no banco.
+     *
+     * flushAutomatically = true: garante que operações pendentes (inserts/updates
+     * via dirty checking) são enviadas ao banco ANTES do UPDATE, evitando
+     * inconsistências de ordem de execução.
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)  // ← limpa o cache após o UPDATE
 	@Query("""
 
 			UPDATE Book b

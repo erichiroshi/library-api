@@ -22,7 +22,7 @@ public class JwtService {
 
 	   private final SecretKey key;
 		
-	    public JwtService(@Value("${JWT_SECRET_KEY}") String secret) {
+	    public JwtService(@Value("${jwt.secret-key}") String secret) {
 	        if (secret == null || secret.trim().isEmpty()) {
 	            throw new IllegalStateException("SECRET_KEY não pode ser null ou vazio. Verifique application.properties ou variáveis de ambiente.");
 	        }

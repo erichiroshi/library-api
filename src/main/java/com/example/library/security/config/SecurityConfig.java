@@ -8,8 +8,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@EnableMethodSecurity
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
 	@Bean

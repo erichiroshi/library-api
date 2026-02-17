@@ -72,7 +72,7 @@ public class GlobalExceptionHandler {
 
 		ProblemDetail problem = setProblemDetail(
 				HttpStatus.BAD_REQUEST, 
-				"Validation error", 
+				"Validation Error", 
                 "One or more fields are invalid. See 'errors' for details.",
                 URI.create("https://api.library/errors/validation")
         );

@@ -1,7 +1,22 @@
 spring:
+  datasource:
+    url: jdbc:tc:postgresql:16:///testdb
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate  # Flyway gerencia o schema
+    show-sql: false
+  
   flyway:
     enabled: true
-  cache:
-    type: redis
-
-JWT_SECRET_KEY: "default-insecure-key-for-tests-only-do-not-use-in-production"
+    locations: classpath:db/migration/common
+  
+# JWT - valor de teste
+jwt:
+  secret-key: test-secret-key-for-integration-tests-that-must-be-at-least-256-bits-long-for-hs256
+  
+logging:
+  level:
+    '[com.example.library]': DEBUG
+    '[org.springframework.security]': DEBUG

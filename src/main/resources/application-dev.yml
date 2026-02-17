@@ -45,4 +45,5 @@ logging:
     '[org.hibernate.SQL]': DEBUG
     '[org.hibernate.orm.jdbc.bind]': TRACE
 
-JWT_SECRET_KEY: ${SECRET_KEY:my-secret-key-my-secret-key-my-secret-key}
+jwt:
+  secret-key:: ${SECRET_KEY:my-secret-key-my-secret-key-my-secret-key}

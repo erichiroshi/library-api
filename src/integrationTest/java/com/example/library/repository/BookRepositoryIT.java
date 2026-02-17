@@ -5,56 +5,36 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 
 import com.example.library.author.Author;
 import com.example.library.book.Book;
 import com.example.library.book.BookRepository;
 import com.example.library.category.Category;
-import com.example.library.config.NoCacheTestITConfig;
 
-@Testcontainers
 @DataJpaTest
-@ActiveProfiles("it")
-@Import(NoCacheTestITConfig.class)
 class BookRepositoryIT {
-	
-	@SuppressWarnings("resource")
-	@Container
-    static PostgreSQLContainer<?> postgres =
-        new PostgreSQLContainer<>("postgres:16")
-            .withDatabaseName("library_test")
-            .withUsername("test")
-            .withPassword("test");
-    
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
-    
+
 	@Autowired
 	private BookRepository bookRepository;
+
+	@Autowired
+	private TestEntityManager em;
 
 	@Test
 	void shouldPersistBook() {
 
+		Category category = em.persist(new Category(null, "Tech"));
+		Author author = em.persist(new Author(null, "Eric", "biography"));
+
 		Book book = new Book();
 		book.setTitle("Domain-Driven Design");
 		book.setIsbn("123456");
-		book.getAuthors().add(new Author(1L, "Eric", "biography"));
-		book.setCategory(new Category(1L, "Tech"));
+		book.setCategory(category);
+		book.getAuthors().add(author);
 
 		Book saved = bookRepository.save(book);
 
 		assertNotNull(saved.getId());
 	}
-
 }

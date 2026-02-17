@@ -15,7 +15,7 @@ public record BookCreateDTO(
 		@NotBlank
 		String title,
 		
-	    @Size(min = 10, max = 13)
+	    @Size(min = 10, max = 15)
 		String isbn,
 		
 	    @NotNull

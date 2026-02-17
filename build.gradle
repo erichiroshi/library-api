@@ -100,11 +100,16 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
    	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
    	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+   	
+   	// Test Security
+	testImplementation("org.springframework.security:spring-security-test")
 	
 	// Testcontainers
 	testImplementation platform("org.testcontainers:testcontainers-bom:${testcontainersVersion}")
 	testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
+	testImplementation 'org.testcontainers:jdbc'
+    
     
     // Prometheus
     implementation 'io.micrometer:micrometer-registry-prometheus'
