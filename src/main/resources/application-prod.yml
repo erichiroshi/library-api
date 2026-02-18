@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/library
+    url: jdbc:postgresql://localhost:5432/library	#usar postgres no docker, localhost localmente
     username: postgres
     password: postgres
 
@@ -22,7 +22,7 @@ spring:
 
   data:
     redis:
-      host: redis
+      host: localhost	#usar redis no docker, localhost localmente
       port: 6379
 
 # Actuator
@@ -47,3 +47,6 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+jwt:
+  secret-key:: ${SECRET_KEY:my-secret-key-my-secret-key-my-secret-key}

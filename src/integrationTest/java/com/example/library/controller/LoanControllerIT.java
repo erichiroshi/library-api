@@ -1,13 +1,5 @@
 package com.example.library.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +12,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.example.library.author.Author;
@@ -36,9 +29,18 @@ import com.example.library.loan.LoanRepository;
 import com.example.library.loan.LoanStatus;
 import com.example.library.user.User;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
+@Transactional
 @ActiveProfiles("it")
 @DisplayName("LoanController - Integration Tests")
 class LoanControllerIT extends BaseControllerIT {
@@ -64,12 +66,6 @@ class LoanControllerIT extends BaseControllerIT {
 
     @BeforeEach
     void setUp() {
-        loanRepository.deleteAll();
-        bookRepository.deleteAll();
-        authorRepository.deleteAll();
-        categoryRepository.deleteAll();
-        userRepository.deleteAll();
-
         category = new Category();
         category.setName("Technology");
         category = categoryRepository.save(category);

@@ -1,9 +1,5 @@
 package com.example.library.services;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +37,15 @@ import com.example.library.loan.mapper.LoanMapper;
 import com.example.library.user.User;
 import com.example.library.user.UserRepository;
 import com.example.library.user.exception.UserNotFoundException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("LoanService - Unit Tests")
