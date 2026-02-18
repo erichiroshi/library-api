@@ -1,4 +1,4 @@
-package com.example.library.loan.execption;
+package com.example.library.loan.exception;
 
 import java.net.URI;
 

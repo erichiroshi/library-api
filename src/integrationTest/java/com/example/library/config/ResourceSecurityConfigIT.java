@@ -13,7 +13,7 @@ import com.example.library.security.filter.JwtAuthenticationFilter;
 
 @Profile("it")
 @Configuration
-public class ResourceSecurtyConfigIT {
+public class ResourceSecurityConfigIT {
 
 	
 	@Bean
