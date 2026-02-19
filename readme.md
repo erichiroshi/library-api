@@ -147,9 +147,11 @@ Exemplo de métrica customizada:
 
 A documentação interativa está disponível via Swagger:
 
-```
-http://localhost:8080/swagger-ui.html
-```
+
+Swagger UI: http://localhost:8080/swagger-ui/index.html
+
+OpenAPI JSON: http://localhost:8080/v3/api-docs
+
 
 ---
 

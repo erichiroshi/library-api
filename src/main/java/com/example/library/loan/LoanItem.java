@@ -21,8 +21,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
-public class LoanItem {
+@EqualsAndHashCode(of = "id", callSuper = false)
+public class LoanItem extends BaseEntity {
 
 	@EmbeddedId
 	private LoanItemId id = new LoanItemId();

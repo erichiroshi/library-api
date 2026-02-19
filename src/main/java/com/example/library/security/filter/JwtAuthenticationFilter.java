@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.library.jwt.JwtService;
+import com.example.library.security.jwt.JwtService;
 import com.example.library.user.CustomUserDetailsService;
 
 import jakarta.servlet.FilterChain;

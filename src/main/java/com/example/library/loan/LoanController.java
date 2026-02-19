@@ -26,7 +26,7 @@ import jakarta.validation.Valid;
 
 @Tag(name = "Loans", description = "Endpoints para gerenciamento de empréstimos de livros")
 @RestController
-@RequestMapping("/api/loans")
+@RequestMapping("/api/v1/loans")
 public class LoanController {
 
 	private final LoanService service;

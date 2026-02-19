@@ -51,9 +51,13 @@ ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:InitialRAMPercentage=50.0",
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-
+LABEL org.opencontainers.image.title="Library API"
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.authors="erichiroshi"
 
 #		docker compose up -d
+
+#		docker exec -i library-api-postgres-1 psql -U postgres -d library < seed_realistic_dataset.sql
 
 #		docker build -t library-api .
 

@@ -22,26 +22,26 @@ public class OpenApiConfig {
     OpenAPI libraryOpenAPI() {
         return new OpenAPI()
         		.info(apiInfo())
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
-                .components(new Components()
-                        .addSecuritySchemes("bearerAuth",
-                                new SecurityScheme()
-                                        .name("bearerAuth")
-                                        .description("""
-                                                Insira o token JWT gerado após o login:
-                                                
-                                                access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-                                                """)
-                                        .type(SecurityScheme.Type.HTTP)
-                                        .scheme("bearer")
-                                        .bearerFormat("JWT")
-                        )
+                .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
+                .components(components()
                 )
                 .externalDocs(new ExternalDocumentation()
                         .description("GitHub Repository")
                         .url("https://github.com/erichiroshi/library-api"))
                 .tags(apiTags());		
     }
+    
+    private Components components() {
+		return new Components().addSecuritySchemes("Bearer Authentication",
+				new SecurityScheme()
+				.description("""
+						Insira o token JWT gerado após o login:
+						access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+						""")
+				.type(SecurityScheme.Type.HTTP)
+				.scheme("bearer")
+				.bearerFormat("JWTd"));
+	}
     
 	private Info apiInfo() {
 		return new Info()

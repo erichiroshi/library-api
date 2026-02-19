@@ -4,6 +4,13 @@ spring:
     username: postgres
     password: postgres
 
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -23,11 +30,16 @@ spring:
 # Redis
   cache:
     type: redis
-
   data:
     redis:
       host: localhost
       port: 6379
+      timeout: 60000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
 
 # ═══════════════════════════════════════════════════════════════════
 # SCHEDULED TASKS
@@ -53,7 +65,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: '*'
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: always
@@ -71,14 +83,15 @@ logging:
 jwt:
   # Chave secreta para assinatura do JWT (mínimo 256 bits para HS256)
   # PRODUÇÃO: usar variável de ambiente JWT_SECRET_KEY
-  secret-key: ${JWT_SECRET_KEY:your-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256}
+  # Dev pode usar default, mas AVISAR no log
+  secret-key: ${JWT_SECRET_KEY:dev-insecure-key-for-local-development-only-do-not-use-in-production}
   
   # Duração do access token em segundos (15 minutos = 900 segundos)
-  # Dev: access token de 1 hora (mais conveniente)
-  access-token-seconds: 3600
+  # Dev: access token de 30 minutos (mais conveniente)
+  access-token-seconds: 1800
 
   # Duração do refresh token em dias (7 dias é padrão seguro)
   # Produção: 7 dias
-  # Desenvolvimento: 30 dias (conveniência)
-  refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:30}
+  # Desenvolvimento: 14 dias (conveniência)
+  refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:14}
 

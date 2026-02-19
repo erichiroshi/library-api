@@ -70,7 +70,7 @@ class InvalidRefreshTokenExceptionTest {
         InvalidRefreshTokenException exception = new InvalidRefreshTokenException("token");
 
         // Assert
-        assertThat(exception).isInstanceOf(com.example.library.shared.exception.ApiException.class);
+        assertThat(exception).isInstanceOf(com.example.library.common.exception.ApiException.class);
     }
 
     @Test

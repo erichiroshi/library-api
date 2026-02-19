@@ -85,7 +85,7 @@ class BookControllerIT {
     // ═══════════════════════════════════════════════════════════════════
 
     @Nested
-    @DisplayName("POST /api/books - criar livro")
+    @DisplayName("POST /api/v1/books - criar livro")
     class CreateBookTests {
 
         @Test
@@ -105,7 +105,7 @@ class BookControllerIT {
                 """.formatted(author.getId(), category.getId());
 
             // Act & Assert
-            mockMvc.perform(post("/api/books")
+            mockMvc.perform(post("/api/v1/books")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestBody))
                 .andExpect(status().isCreated())
@@ -135,7 +135,7 @@ class BookControllerIT {
                 """.formatted(author.getId(), category.getId());
 
             // Act & Assert
-            mockMvc.perform(post("/api/books")
+            mockMvc.perform(post("/api/v1/books")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestBody))
                 .andExpect(status().isConflict())
@@ -159,7 +159,7 @@ class BookControllerIT {
                 """.formatted(category.getId());
 
             // Act & Assert
-            mockMvc.perform(post("/api/books")
+            mockMvc.perform(post("/api/v1/books")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestBody))
                 .andExpect(status().isBadRequest());
@@ -182,7 +182,7 @@ class BookControllerIT {
                 """.formatted(author.getId());
 
             // Act & Assert
-            mockMvc.perform(post("/api/books")
+            mockMvc.perform(post("/api/v1/books")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestBody))
                 .andExpect(status().isNotFound())
@@ -195,14 +195,14 @@ class BookControllerIT {
     // ═══════════════════════════════════════════════════════════════════
 
     @Nested
-    @DisplayName("GET /api/books/{id} - buscar por ID")
+    @DisplayName("GET /api/v1/books/{id} - buscar por ID")
     class GetBookByIdTests {
 
         @Test
         @DisplayName("Deve retornar livro quando existe")
         @WithMockUser(roles = "USER")
         void shouldReturnBookWhenExists() throws Exception {
-            mockMvc.perform(get("/api/books/{id}", book.getId()))
+            mockMvc.perform(get("/api/v1/books/{id}", book.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(book.getId()))
                 .andExpect(jsonPath("$.title").value("Clean Code"))
@@ -213,7 +213,7 @@ class BookControllerIT {
         @DisplayName("Deve retornar 404 quando livro não existe")
         @WithMockUser(roles = "USER")
         void shouldReturn404WhenBookNotFound() throws Exception {
-            mockMvc.perform(get("/api/books/{id}", 999L))
+            mockMvc.perform(get("/api/v1/books/{id}", 999L))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Book Not Found"));
         }
@@ -224,14 +224,14 @@ class BookControllerIT {
     // ═══════════════════════════════════════════════════════════════════
 
     @Nested
-    @DisplayName("GET /api/books - listar todos")
+    @DisplayName("GET /api/v1/books - listar todos")
     class GetAllBooksTests {
 
         @Test
         @DisplayName("Deve retornar página de livros")
         @WithMockUser(roles = "USER")
         void shouldReturnPageOfBooks() throws Exception {
-            mockMvc.perform(get("/api/books")
+            mockMvc.perform(get("/api/v1/books")
                     .param("page", "0")
                     .param("size", "10"))
                 .andExpect(status().isOk())
@@ -249,7 +249,7 @@ class BookControllerIT {
             bookRepository.deleteAll();
 
             // Act & Assert
-            mockMvc.perform(get("/api/books")
+            mockMvc.perform(get("/api/v1/books")
                     .param("page", "0")
                     .param("size", "10"))
                 .andExpect(status().isOk())
@@ -261,7 +261,7 @@ class BookControllerIT {
         @DisplayName("Deve retornar 400 quando campo de ordenação inválido")
         @WithMockUser(roles = "USER")
         void shouldReturn400WhenInvalidSortField() throws Exception {
-            mockMvc.perform(get("/api/books")
+            mockMvc.perform(get("/api/v1/books")
                     .param("page", "0")
                     .param("size", "10")
                     .param("sort", "invalidField,asc"))
@@ -275,7 +275,7 @@ class BookControllerIT {
     // ═══════════════════════════════════════════════════════════════════
 
     @Nested
-    @DisplayName("DELETE /api/books/{id} - deletar livro")
+    @DisplayName("DELETE /api/v1/books/{id} - deletar livro")
     class DeleteBookTests {
 
         @Test
@@ -283,7 +283,7 @@ class BookControllerIT {
         @WithMockUser(roles = "ADMIN")
         void shouldDeleteBook() throws Exception {
             // Act
-            mockMvc.perform(delete("/api/books/{id}", book.getId()))
+            mockMvc.perform(delete("/api/v1/books/{id}", book.getId()))
                 .andExpect(status().isNoContent());
 
             // Assert - verificar que foi deletado
@@ -294,7 +294,7 @@ class BookControllerIT {
         @DisplayName("Deve retornar 404 ao tentar deletar livro inexistente")
         @WithMockUser(roles = "ADMIN")
         void shouldReturn404WhenDeletingNonExistent() throws Exception {
-            mockMvc.perform(delete("/api/books/{id}", 999L))
+            mockMvc.perform(delete("/api/v1/books/{id}", 999L))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Book Not Found"));
         }
@@ -303,7 +303,7 @@ class BookControllerIT {
         @DisplayName("Deve retornar 403 quando usuário comum tenta deletar")
         @WithMockUser(roles = "USER")
         void shouldReturn403WhenUserTriesToDelete() throws Exception {
-            mockMvc.perform(delete("/api/books/{id}", book.getId()))
+            mockMvc.perform(delete("/api/v1/books/{id}", book.getId()))
                 .andExpect(status().isForbidden());
         }
     }
@@ -321,7 +321,7 @@ class BookControllerIT {
         @WithMockUser(roles = "USER")
         void shouldReturnFreshDataWithoutCache() throws Exception {
             // Primeira busca
-            mockMvc.perform(get("/api/books/{id}", book.getId()))
+            mockMvc.perform(get("/api/v1/books/{id}", book.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Clean Code"));
 
@@ -330,7 +330,7 @@ class BookControllerIT {
             bookRepository.save(book);
 
             // Segunda busca - deve retornar o título atualizado (sem cache)
-            mockMvc.perform(get("/api/books/{id}", book.getId()))
+            mockMvc.perform(get("/api/v1/books/{id}", book.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Clean Code - Updated"));
         }

@@ -15,7 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import io.jsonwebtoken.JwtException;
 
-import com.example.library.jwt.JwtService;
+import com.example.library.security.jwt.JwtService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;

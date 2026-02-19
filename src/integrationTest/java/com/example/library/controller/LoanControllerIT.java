@@ -91,13 +91,13 @@ class LoanControllerIT extends BaseControllerIT {
     // ═══════════════════════════════════════════════════════════════════
 
     @Nested
-    @DisplayName("POST /api/loans - criar empréstimo")
+    @DisplayName("POST /api/v1/loans - criar empréstimo")
     class CreateLoanTests {
 
         @Test
         @DisplayName("Deve criar empréstimo e associar ao usuário autenticado")
         void shouldCreateLoanForAuthenticatedUser() throws Exception {
-            mockMvc.perform(asUser(post("/api/loans")
+            mockMvc.perform(asUser(post("/api/v1/loans")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"booksId": [%d]}
@@ -118,7 +118,7 @@ class LoanControllerIT extends BaseControllerIT {
             availableBook.setAvailableCopies(0);
             bookRepository.save(availableBook);
 
-            mockMvc.perform(asUser(post("/api/loans"))
+            mockMvc.perform(asUser(post("/api/v1/loans"))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"booksId": [%d]}
@@ -130,7 +130,7 @@ class LoanControllerIT extends BaseControllerIT {
         @Test
         @DisplayName("Deve retornar 404 quando livro não existe")
         void shouldReturn404WhenBookNotFound() throws Exception {
-            mockMvc.perform(asUser(post("/api/loans")
+            mockMvc.perform(asUser(post("/api/v1/loans")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"booksId": [999]}
@@ -141,7 +141,7 @@ class LoanControllerIT extends BaseControllerIT {
         @Test
         @DisplayName("Deve retornar 400 quando booksId está vazio")
         void shouldReturn400WhenBooksIdEmpty() throws Exception {
-            mockMvc.perform(asUser(post("/api/loans")
+            mockMvc.perform(asUser(post("/api/v1/loans")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"booksId": []}
@@ -169,7 +169,7 @@ class LoanControllerIT extends BaseControllerIT {
                 """.formatted(availableBook.getId(), book2.getId());
 
             // Act & Assert
-            mockMvc.perform(asUser(post("/api/loans")
+            mockMvc.perform(asUser(post("/api/v1/loans")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestBody)))
                 .andExpect(status().isCreated())
@@ -183,7 +183,7 @@ class LoanControllerIT extends BaseControllerIT {
     // ═══════════════════════════════════════════════════════════════════
 
     @Nested
-    @DisplayName("GET /api/loans/{id} - buscar por ID")
+    @DisplayName("GET /api/v1/loans/{id} - buscar por ID")
     class GetLoanByIdTests {
 
         @Test
@@ -191,7 +191,7 @@ class LoanControllerIT extends BaseControllerIT {
         void shouldGetOwnLoan() throws Exception {
             Loan loan = createLoan(testUser, availableBook);
 
-            mockMvc.perform(asUser(get("/api/loans/{id}", loan.getId())))
+            mockMvc.perform(asUser(get("/api/v1/loans/{id}", loan.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(loan.getId()))
                 .andExpect(jsonPath("$.userId").value(testUser.getName()));
@@ -205,7 +205,7 @@ class LoanControllerIT extends BaseControllerIT {
             // tokenForNewUser() cria um terceiro usuário sem ROLE_ADMIN
             String otherToken = tokenForNewUser("other@example.com", "ROLE_USER");
 
-            mockMvc.perform(get("/api/loans/{id}", loan.getId())
+            mockMvc.perform(get("/api/v1/loans/{id}", loan.getId())
                     .header("Authorization", "Bearer " + otherToken))
                 .andExpect(status().isNotFound());
         }
@@ -215,7 +215,7 @@ class LoanControllerIT extends BaseControllerIT {
         void adminShouldGetAnyLoan() throws Exception {
             Loan loan = createLoan(testUser, availableBook);
 
-            mockMvc.perform(asAdmin(get("/api/loans/{id}", loan.getId())))
+            mockMvc.perform(asAdmin(get("/api/v1/loans/{id}", loan.getId())))
                 .andExpect(status().isOk());
         }
 
@@ -225,7 +225,7 @@ class LoanControllerIT extends BaseControllerIT {
             Loan loan = createLoan(testUser, availableBook);
             String otherToken = tokenForNewUser("other2@example.com", "ROLE_USER");
 
-            mockMvc.perform(patch("/api/loans/{id}/return", loan.getId())
+            mockMvc.perform(patch("/api/v1/loans/{id}/return", loan.getId())
                     .header("Authorization", "Bearer " + otherToken))
                 .andExpect(status().isNotFound());
         }
@@ -235,7 +235,7 @@ class LoanControllerIT extends BaseControllerIT {
         void adminShouldReturnAnyLoan() throws Exception {
             Loan loan = createLoan(testUser, availableBook);
 
-            mockMvc.perform(asAdmin(patch("/api/loans/{id}/return", loan.getId())))
+            mockMvc.perform(asAdmin(patch("/api/v1/loans/{id}/return", loan.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("RETURNED"));
         }
@@ -243,7 +243,7 @@ class LoanControllerIT extends BaseControllerIT {
         @Test
         @DisplayName("Deve retornar 404 quando empréstimo não existe")
         void shouldReturn404WhenLoanNotFound() throws Exception {
-            mockMvc.perform(asUser(get("/api/loans/{id}", 999L)))
+            mockMvc.perform(asUser(get("/api/v1/loans/{id}", 999L)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Loan Not Found"));
         }
@@ -254,7 +254,7 @@ class LoanControllerIT extends BaseControllerIT {
     // ═══════════════════════════════════════════════════════════════════
 
     @Nested
-    @DisplayName("GET /api/loans/me - meus empréstimos")
+    @DisplayName("GET /api/v1/loans/me - meus empréstimos")
     class GetMyLoansTests {
 
         @Test
@@ -270,7 +270,7 @@ class LoanControllerIT extends BaseControllerIT {
             book2 = bookRepository.save(book2);
             createLoan(adminUser, book2);
 
-            mockMvc.perform(asUser(get("/api/loans/me")))
+            mockMvc.perform(asUser(get("/api/v1/loans/me")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].userId").value(testUser.getName()));
@@ -279,7 +279,7 @@ class LoanControllerIT extends BaseControllerIT {
         @Test
         @DisplayName("Retorna lista vazia quando não há empréstimos")
         void shouldReturnEmptyList() throws Exception {
-            mockMvc.perform(asUser(get("/api/loans/me")))
+            mockMvc.perform(asUser(get("/api/v1/loans/me")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
         }
@@ -290,7 +290,7 @@ class LoanControllerIT extends BaseControllerIT {
     // ═══════════════════════════════════════════════════════════════════
 
     @Nested
-    @DisplayName("PATCH /api/loans/{id}/return - devolver empréstimo")
+    @DisplayName("PATCH /api/v1/loans/{id}/return - devolver empréstimo")
     class ReturnLoanTests {
 
         @Test
@@ -299,7 +299,7 @@ class LoanControllerIT extends BaseControllerIT {
             Loan loan = createLoan(testUser, availableBook);
             int copiesBefore = bookRepository.findById(availableBook.getId()).orElseThrow().getAvailableCopies();
 
-            mockMvc.perform(asUser(patch("/api/loans/{id}/return", loan.getId())))
+            mockMvc.perform(asUser(patch("/api/v1/loans/{id}/return", loan.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("RETURNED"))
                 .andExpect(jsonPath("$.returnDate").exists());
@@ -316,7 +316,7 @@ class LoanControllerIT extends BaseControllerIT {
             loan.setReturnDate(LocalDate.now());
             loanRepository.save(loan);
 
-            mockMvc.perform(asUser(patch("/api/loans/{id}/return", loan.getId())))
+            mockMvc.perform(asUser(patch("/api/v1/loans/{id}/return", loan.getId())))
                 .andExpect(status().isConflict());
         }
     }
@@ -326,7 +326,7 @@ class LoanControllerIT extends BaseControllerIT {
     // ═══════════════════════════════════════════════════════════════════
 
 	@Nested
-    @DisplayName("PATCH /api/loans/{id}/cancel - cancelar empréstimo")
+    @DisplayName("PATCH /api/v1/loans/{id}/cancel - cancelar empréstimo")
     class CancelLoanTests {
 
         @Test
@@ -335,7 +335,7 @@ class LoanControllerIT extends BaseControllerIT {
             Loan loan = createLoan(testUser, availableBook);
             int copiesBefore = bookRepository.findById(availableBook.getId()).orElseThrow().getAvailableCopies();
 
-            mockMvc.perform(asUser(patch("/api/loans/{id}/cancel", loan.getId())))
+            mockMvc.perform(asUser(patch("/api/v1/loans/{id}/cancel", loan.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELED"));
 
@@ -353,42 +353,42 @@ class LoanControllerIT extends BaseControllerIT {
     class AdminEndpointsTests {
 
         @Test
-        @DisplayName("GET /api/loans - ADMIN deve listar todos os empréstimos")
+        @DisplayName("GET /api/v1/loans - ADMIN deve listar todos os empréstimos")
         void adminShouldListAll() throws Exception {
             createLoan(testUser, availableBook);
 
-            mockMvc.perform(asAdmin(get("/api/loans")))
+            mockMvc.perform(asAdmin(get("/api/v1/loans")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
         }
 
         @Test
-        @DisplayName("GET /api/loans - USER comum deve receber 403")
+        @DisplayName("GET /api/v1/loans - USER comum deve receber 403")
         void userShouldReceive403() throws Exception {
-            mockMvc.perform(asUser(get("/api/loans")))
+            mockMvc.perform(asUser(get("/api/v1/loans")))
                 .andExpect(status().isForbidden());
         }
         
         @Test
-        @DisplayName("GET /api/loans/user/{userId} - ADMIN deve listar por usuário")
+        @DisplayName("GET /api/v1/loans/user/{userId} - ADMIN deve listar por usuário")
         void adminShouldListByUser() throws Exception {
             createLoan(testUser, availableBook);
 
-            mockMvc.perform(asAdmin(get("/api/loans/user/{userId}", testUser.getId())))
+            mockMvc.perform(asAdmin(get("/api/v1/loans/user/{userId}", testUser.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].userId").value(testUser.getName()));
         }
         
         @Test
-        @DisplayName("GET /api/loans/overdue - ADMIN deve listar vencidos")
+        @DisplayName("GET /api/v1/loans/overdue - ADMIN deve listar vencidos")
         void adminShouldListOverdue() throws Exception {
             Loan overdue = createLoan(testUser, availableBook);
             overdue.setDueDate(LocalDate.now().minusDays(1));
             overdue.setStatus(LoanStatus.WAITING_RETURN);
             loanRepository.save(overdue);
 
-            mockMvc.perform(asAdmin(get("/api/loans/overdue")))
+            mockMvc.perform(asAdmin(get("/api/v1/loans/overdue")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
         }

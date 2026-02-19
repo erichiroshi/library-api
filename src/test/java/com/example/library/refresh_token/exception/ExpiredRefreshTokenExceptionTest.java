@@ -72,7 +72,7 @@ class ExpiredRefreshTokenExceptionTest {
         ExpiredRefreshTokenException exception = new ExpiredRefreshTokenException(Instant.now());
 
         // Assert
-        assertThat(exception).isInstanceOf(com.example.library.shared.exception.ApiException.class);
+        assertThat(exception).isInstanceOf(com.example.library.common.exception.ApiException.class);
     }
 
     @Test

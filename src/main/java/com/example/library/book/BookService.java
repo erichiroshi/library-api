@@ -26,7 +26,7 @@ import com.example.library.book.mapper.BookMapper;
 import com.example.library.category.Category;
 import com.example.library.category.CategoryRepository;
 import com.example.library.category.exception.CategoryNotFoundException;
-import com.example.library.shared.config.delay_cache_test.ArtificialDelayService;
+import com.example.library.common.config.delay_cache_test.ArtificialDelayService;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;

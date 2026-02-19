@@ -27,7 +27,7 @@ import jakarta.validation.Valid;
 
 @Tag(name = "Books", description = "Endpoints para gerenciamento de livros")
 @RestController
-@RequestMapping("/api/books")
+@RequestMapping("/api/v1/books")
 public class BookController {
 
 	private static final Logger log = LoggerFactory.getLogger(BookController.class);

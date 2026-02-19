@@ -17,11 +17,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.example.library.auth.dto.LoginRequestDTO;
+import com.example.library.auth.dto.LogoutRequest;
 import com.example.library.auth.dto.RefreshTokenDTO;
 import com.example.library.auth.dto.TokenResponseDTO;
-import com.example.library.jwt.JwtService;
 import com.example.library.refresh_token.RefreshToken;
 import com.example.library.refresh_token.RefreshTokenService;
+import com.example.library.security.jwt.JwtService;
 import com.example.library.user.User;
 
 import lombok.RequiredArgsConstructor;
@@ -75,6 +76,12 @@ public class AuthController {
 						newAccess, 
 						newRefresh.getToken(), 
 						OffsetDateTime.ofInstant(jwtService.getExpirationDate(newAccess), ZoneId.systemDefault())));
+	}
+	
+	@PostMapping("/logout")
+	public ResponseEntity<Void> logout(@RequestBody LogoutRequest request) {
+	    refreshTokenService.invalidate(request.refreshToken());
+	    return ResponseEntity.noContent().build();
 	}
 
 }

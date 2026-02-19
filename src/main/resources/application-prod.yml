@@ -8,6 +8,9 @@ spring:
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
 # JPA/Hibernate
   jpa:
@@ -29,8 +32,14 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_URL}	#usar redis no docker, localhost localmente
-      port: 6379
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      timeout: 60000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
 
 # SCHEDULED TASKS
   task:
@@ -44,24 +53,24 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,prometheus
+        include: health,info,prometheus
   endpoint:
     health:
       probes:
         enabled: true
-      show-details: always
+      show-details: never
 
 # Logging
 logging:
   level:
-    root: INFO
+    '[com.example.library]': INFO
 
 # Springdoc
 springdoc:
   api-docs:
-    enabled: true
+    enabled: false
   swagger-ui:
-    enabled: true
+    enabled: false
 
 # Configurações de segurança e JWT
 jwt:

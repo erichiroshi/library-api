@@ -51,4 +51,9 @@ public class RefreshTokenService {
 
 		return refresh;
 	}
+
+	public void invalidate(String refreshToken) {
+		RefreshToken refresh = validate(refreshToken);
+		repository.delete(refresh);
+	}
 }

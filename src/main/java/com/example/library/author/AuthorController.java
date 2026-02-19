@@ -25,7 +25,7 @@ import jakarta.validation.Valid;
 
 @Tag(name = "Authors", description = "Endpoints para gerenciamento de autores")
 @RestController
-@RequestMapping("/api/authors")
+@RequestMapping("/api/v1/authors")
 public class AuthorController {
 
 	private final AuthorService service;

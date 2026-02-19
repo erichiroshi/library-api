@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import com.example.library.jwt.JwtService;
+import com.example.library.security.jwt.JwtService;
 import com.example.library.user.User;
 import com.example.library.user.UserRepository;
 

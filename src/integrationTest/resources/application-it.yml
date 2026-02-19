@@ -8,9 +8,21 @@ spring:
       ddl-auto: validate  # Flyway gerencia o schema
     show-sql: false
   
-  flyway:
+  flyway: 
     enabled: true
-    locations: classpath:db/migration/common
+    locations:
+      - classpath:db/migration/common
+
+# Redis
+  cache:
+    type: none
+
+management:
+  endpoints:
+    web:
+      exposure:
+        exclude:
+        - '*'
   
 # JWT - valor de teste
 jwt:

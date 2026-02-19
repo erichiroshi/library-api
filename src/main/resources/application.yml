@@ -1,13 +1,17 @@
 spring:
   application:
     name: library
-
+    
   jpa:
     open-in-view: false
-
-  sql:
-    init:
-      mode: never
-
+    properties:
+      hibernate:
+        '[jdbc.batch_size]': 20
+        '[order_inserts]': true
+        '[order_updates]': true
+  
+  jackson:
+    default-property-inclusion: non_null
+  
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}

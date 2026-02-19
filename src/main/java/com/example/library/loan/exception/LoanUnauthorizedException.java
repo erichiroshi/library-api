@@ -4,7 +4,7 @@ import java.net.URI;
 
 import org.springframework.http.HttpStatus;
 
-import com.example.library.shared.exception.ApiException;
+import com.example.library.common.exception.ApiException;
 
 /**
  * Lançada quando um usuário tenta acessar um empréstimo que não é seu.

@@ -48,14 +48,14 @@ class CategoryControllerIT {
     }
 
     @Nested
-    @DisplayName("POST /api/categories")
+    @DisplayName("POST /api/v1/categories")
     class CreateTests {
 
         @Test
         @DisplayName("ADMIN deve criar categoria com sucesso")
         @WithMockUser(roles = "ADMIN")
         void shouldCreateCategory() throws Exception {
-            mockMvc.perform(post("/api/categories")
+            mockMvc.perform(post("/api/v1/categories")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Science"}
@@ -70,7 +70,7 @@ class CategoryControllerIT {
         @DisplayName("Deve retornar 409 quando categoria já existe")
         @WithMockUser(roles = "ADMIN")
         void shouldReturn409WhenExists() throws Exception {
-            mockMvc.perform(post("/api/categories")
+            mockMvc.perform(post("/api/v1/categories")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Technology"}
@@ -82,7 +82,7 @@ class CategoryControllerIT {
         @DisplayName("Deve retornar 400 quando nome está em branco")
         @WithMockUser(roles = "ADMIN")
         void shouldReturn400WhenNameBlank() throws Exception {
-            mockMvc.perform(post("/api/categories")
+            mockMvc.perform(post("/api/v1/categories")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": ""}
@@ -96,7 +96,7 @@ class CategoryControllerIT {
         @DisplayName("Deve retornar 403 quando usuário comum tenta criar")
         @WithMockUser(roles = "USER")
         void shouldReturn403ForUser() throws Exception {
-            mockMvc.perform(post("/api/categories")
+            mockMvc.perform(post("/api/v1/categories")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Science"}
@@ -106,14 +106,14 @@ class CategoryControllerIT {
     }
 
     @Nested
-    @DisplayName("GET /api/categories/{id}")
+    @DisplayName("GET /api/v1/categories/{id}")
     class GetByIdTests {
 
         @Test
         @DisplayName("Deve retornar categoria quando existe")
         @WithMockUser
         void shouldReturnCategory() throws Exception {
-            mockMvc.perform(get("/api/categories/{id}", category.getId()))
+            mockMvc.perform(get("/api/v1/categories/{id}", category.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Technology"));
         }
@@ -122,20 +122,20 @@ class CategoryControllerIT {
         @DisplayName("Deve retornar 404 quando não existe")
         @WithMockUser
         void shouldReturn404() throws Exception {
-            mockMvc.perform(get("/api/categories/{id}", 999L))
+            mockMvc.perform(get("/api/v1/categories/{id}", 999L))
                 .andExpect(status().isNotFound());
         }
     }
 
     @Nested
-    @DisplayName("GET /api/categories")
+    @DisplayName("GET /api/v1/categories")
     class GetAllTests {
 
         @Test
         @DisplayName("Deve listar categorias paginadas")
         @WithMockUser
         void shouldListCategories() throws Exception {
-            mockMvc.perform(get("/api/categories"))
+            mockMvc.perform(get("/api/v1/categories"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].name").value("Technology"));
@@ -147,7 +147,7 @@ class CategoryControllerIT {
         void shouldReturnEmptyPage() throws Exception {
             categoryRepository.deleteAll();
 
-            mockMvc.perform(get("/api/categories"))
+            mockMvc.perform(get("/api/v1/categories"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isEmpty())
                 .andExpect(jsonPath("$.totalElements").value(0));
@@ -155,14 +155,14 @@ class CategoryControllerIT {
     }
 
     @Nested
-    @DisplayName("DELETE /api/categories/{id}")
+    @DisplayName("DELETE /api/v1/categories/{id}")
     class DeleteTests {
 
         @Test
         @DisplayName("ADMIN deve deletar categoria com sucesso")
         @WithMockUser(roles = "ADMIN")
         void shouldDeleteCategory() throws Exception {
-            mockMvc.perform(delete("/api/categories/{id}", category.getId()))
+            mockMvc.perform(delete("/api/v1/categories/{id}", category.getId()))
                 .andExpect(status().isNoContent());
 
             assertThat(categoryRepository.findById(category.getId())).isEmpty();
@@ -172,7 +172,7 @@ class CategoryControllerIT {
         @DisplayName("Deve retornar 404 ao deletar categoria inexistente")
         @WithMockUser(roles = "ADMIN")
         void shouldReturn404WhenDeleting() throws Exception {
-            mockMvc.perform(delete("/api/categories/{id}", 999L))
+            mockMvc.perform(delete("/api/v1/categories/{id}", 999L))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Category Not Found"));
         }
@@ -181,7 +181,7 @@ class CategoryControllerIT {
         @DisplayName("Deve retornar 403 quando usuário comum tenta deletar")
         @WithMockUser(roles = "USER")
         void shouldReturn403ForUser() throws Exception {
-            mockMvc.perform(delete("/api/categories/{id}", category.getId()))
+            mockMvc.perform(delete("/api/v1/categories/{id}", category.getId()))
                 .andExpect(status().isForbidden());
         }
     }
