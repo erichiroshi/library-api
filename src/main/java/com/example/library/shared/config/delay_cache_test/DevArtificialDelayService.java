@@ -1,4 +1,4 @@
-package com.example.library.shared.config.delaycachetest;
+package com.example.library.shared.config.delay_cache_test;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;

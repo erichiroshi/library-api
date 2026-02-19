@@ -66,9 +66,6 @@ dependencies {
     // Actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-    // H2 DataBase
-	testImplementation 'com.h2database:h2'
-	
 	// PostgreSQL Database
 	runtimeOnly 'org.postgresql:postgresql'
 	
@@ -184,9 +181,6 @@ tasks.named("jacocoTestReport") {
                     // Bootstrap
                     '**/*Application.class',
 
-                    // Exceções — apenas estrutura, sem lógica
-                    '**/exception/**',
-
                     // Enums simples
                     '**/enums/**'
                 )
@@ -264,7 +258,6 @@ sonar {
                 **/mapper/**,
                 **/*MapperImpl.java,
                 **/*Application.java,
-                **/exception/**,
                 **/enums/**
                 """
     property "sonar.coverage.jacoco.xmlReportPaths",

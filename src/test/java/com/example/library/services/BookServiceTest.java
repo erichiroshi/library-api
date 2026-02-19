@@ -36,7 +36,7 @@ import com.example.library.book.mapper.BookMapper;
 import com.example.library.category.Category;
 import com.example.library.category.CategoryRepository;
 import com.example.library.category.exception.CategoryNotFoundException;
-import com.example.library.shared.config.delaycachetest.ArtificialDelayService;
+import com.example.library.shared.config.delay_cache_test.ArtificialDelayService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
