@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-@Tag(name = "Books", description = "Gerenciamento de livros")
+@Tag(name = "Books", description = "Endpoints para gerenciamento de livros")
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
@@ -38,6 +38,12 @@ public class BookController {
 		this.bookService = bookService;
 	}
 
+	@Operation(
+		    summary = "Criar novo livro",
+		    description = "Cria um novo livro com os dados fornecidos"
+		)
+	@ApiResponse(responseCode = "201", description = "Livro criado com sucesso")
+	@ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
 	@PostMapping
 	public ResponseEntity<BookResponseDTO> create(@Valid @RequestBody BookCreateDTO dto) {
 		BookResponseDTO response = bookService.create(dto);
@@ -45,6 +51,11 @@ public class BookController {
 		return ResponseEntity.created(uri).body(response);
 	}
 
+	@Operation(
+		    summary = "Listar livros",
+		    description = "Retorna uma lista paginada de livros existentes"
+		)
+	@ApiResponse(responseCode = "200", description = "Lista de livros retornada com sucesso")
 	@GetMapping
 	public ResponseEntity<PageResponseDTO<BookResponseDTO>> findAll(Pageable pageable) {
 		return ResponseEntity.ok(bookService.findAll(pageable));
@@ -55,13 +66,19 @@ public class BookController {
 		    description = "Retorna os dados de um livro existente"
 		)
     @ApiResponse(responseCode = "200", description = "Livro encontrado")
-    @ApiResponse(responseCode = "404", description = "Livro não encontrado")
+	@ApiResponse(responseCode = "404", description = "Livro não encontrado")
 	@GetMapping("/{id}")
 	public ResponseEntity<BookResponseDTO> findById(@PathVariable Long id) {
 		log.info("Requisição GET /books/{}", id);
 		return ResponseEntity.ok(bookService.findById(id));
 	}
 	
+	@Operation(
+		    summary = "Deletar livro por ID",
+		    description = "Remove um livro existente do sistema"
+		)
+	@ApiResponse(responseCode = "204", description = "Livro deletado com sucesso")
+	@ApiResponse(responseCode = "404", description = "Livro não encontrado")
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> deleteById(@PathVariable Long id) {

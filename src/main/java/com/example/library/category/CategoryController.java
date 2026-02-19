@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-@Tag(name = "Categories", description = "Category management")
+@Tag(name = "Categories", description = "Endpoints para gerenciamento de categorias de livros")
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
@@ -59,6 +59,9 @@ public class CategoryController {
 		return ResponseEntity.ok(service.findAll(pageable));
 	}
 	
+	@Operation(summary = "Delete category by id")
+	@ApiResponse(responseCode = "204", description = "Category deleted")
+	@ApiResponse(responseCode = "404", description = "Category not found")
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> deleteById(@PathVariable Long id) {

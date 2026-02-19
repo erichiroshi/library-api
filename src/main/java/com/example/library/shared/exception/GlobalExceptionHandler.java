@@ -11,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,6 +37,19 @@ public class GlobalExceptionHandler {
                 "You do not have permission to perform this action.",
                 URI.create("https://api.library/errors/access-denied")
         );
+    }
+    
+    @ExceptionHandler(BadCredentialsException.class)
+    public ProblemDetail handleAuthorizationDenied(BadCredentialsException ex) {
+    	
+    	log.warn("Bad Credentials | reason={}", ex.getMessage());
+    	
+    	return setProblemDetail(
+    			HttpStatus.BAD_REQUEST,
+    			"Bad Credentials",
+    			ex.getMessage(),
+    			URI.create("https://api.library/errors/bad-credentials")
+    			);
     }
     
     // ─────────────────────────────────────────────

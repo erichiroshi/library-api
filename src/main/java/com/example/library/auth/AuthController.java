@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.example.library.auth.dto.LoginRequestDTO;
 import com.example.library.auth.dto.RefreshTokenDTO;
 import com.example.library.auth.dto.TokenResponseDTO;
@@ -23,6 +26,7 @@ import com.example.library.user.User;
 
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Auth", description = "Endpoints para autenticação e renovação de tokens JWT")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
@@ -32,6 +36,8 @@ public class AuthController {
 	private final JwtService jwtService;
 	private final RefreshTokenService refreshTokenService;
 	
+	@Operation(summary = "Autenticar usuário e obter tokens JWT",
+			description = "Autentica o usuário usando username e password, e retorna um access token JWT e um refresh token.")
 	@PostMapping("/login")
 	public TokenResponseDTO login(@RequestBody LoginRequestDTO request) {
 
@@ -48,6 +54,8 @@ public class AuthController {
 						OffsetDateTime.ofInstant(jwtService.getExpirationDate(accessToken), ZoneId.systemDefault()));
 	}
 	
+	@Operation(summary = "Renovar tokens JWT usando refresh token",
+			description = "Valida o refresh token e, se válido, gera um novo access token e um novo refresh token (token rotation).")
 	@PostMapping("/refresh")
 	public ResponseEntity<TokenResponseDTO> refresh(@RequestBody RefreshTokenDTO refreshToken) {
 

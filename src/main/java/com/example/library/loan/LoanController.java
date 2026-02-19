@@ -16,11 +16,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.example.library.loan.dto.LoanCreateDTO;
 import com.example.library.loan.dto.LoanResponseDTO;
 
 import jakarta.validation.Valid;
 
+@Tag(name = "Loans", description = "Endpoints para gerenciamento de empréstimos de livros")
 @RestController
 @RequestMapping("/api/loans")
 public class LoanController {
@@ -31,10 +35,10 @@ public class LoanController {
 		this.service = service;
 	}
 
-	/**
-	 * POST /api/loans
-	 * Cria um novo empréstimo para o usuário autenticado.
-	 */
+	@Operation(
+			summary = "Criar um novo empréstimo", 
+			description = "Permite que um usuário solicite um empréstimo de um livro. O status inicial é WAITING_RETURN."
+			)
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<LoanResponseDTO> create(@Valid @RequestBody LoanCreateDTO dto) {
@@ -47,70 +51,67 @@ public class LoanController {
 		return ResponseEntity.created(uri).body(response);
 	}
 
-	/**
-	 * GET /api/loans/{id}
-	 * Busca um empréstimo por id.
-	 * Usuário comum vê só o próprio; ADMIN vê qualquer um (validação no Service).
-	 */
-	 @GetMapping("/{loanId}")
+	@Operation(
+			summary = "Buscar empréstimo por ID", 
+			description = "Retorna os detalhes de um empréstimo específico. Usuário comum só pode acessar seus próprios empréstimos; ADMIN pode acessar qualquer um."
+			)
+	@GetMapping("/{loanId}")
 	public ResponseEntity<LoanResponseDTO> findById(@PathVariable Long loanId) {
 		return ResponseEntity.ok(service.findById(loanId));
 	}
 
-     /**
-     * GET /api/loans/me
-     * Lista todos os empréstimos do usuário autenticado.
-     */
+	@Operation(
+			summary = "Listar meus empréstimos",
+			description = "Retorna uma lista de todos os empréstimos do usuário autenticado. Usuário comum vê apenas os próprios; ADMIN vê todos."
+			)
     @GetMapping("/me")
     public ResponseEntity<List<LoanResponseDTO>> findMyLoans() {
         return ResponseEntity.ok(service.findMyLoans());
     }
-    
-    /**
-     * GET /api/loans
-     * Lista todos os empréstimos — apenas ADMIN.
-     */
+
+    @Operation(
+    		summary = "Listar todos os empréstimos",
+    		description = "Retorna uma lista de todos os empréstimos no sistema. Apenas ADMIN pode acessar este endpoint."
+			)
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<LoanResponseDTO>> findAll() {
         return ResponseEntity.ok(service.findAll());
     }
     
-    /**
-     * GET /api/loans/user/{userId}
-     * Lista empréstimos de um usuário específico — apenas ADMIN.
-     */
+	@Operation(
+			summary = "Listar empréstimos por usuário",
+			description = "Retorna uma lista de empréstimos para um usuário específico. Apenas ADMIN pode acessar este endpoint."
+			)
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<LoanResponseDTO>> findByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(service.findByUser(userId));
     }
     
-    /**
-     * GET /api/loans/overdue
-     * Lista empréstimos vencidos — apenas ADMIN.
-     */
+	@Operation(
+			summary = "Listar empréstimos atrasados",
+			description = "Retorna uma lista de empréstimos que estão atrasados (status WAITING_RETURN e data de devolução prevista já passou). Apenas ADMIN pode acessar este endpoint."
+			)
     @GetMapping("/overdue")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<LoanResponseDTO>> findOverdue() {
         return ResponseEntity.ok(service.findOverdue());
     }
     
-    /**
-     * PATCH /api/loans/{loanId}/return
-     * Devolve um empréstimo ativo.
-     * Usuário comum só pode devolver o próprio; ADMIN pode devolver qualquer um.
-     */
+	@Operation(
+			summary = "Registrar devolução de empréstimo",
+			description = "Marca um empréstimo como DEVOLVED. Usuário comum só pode devolver seus próprios empréstimos; ADMIN pode devolver qualquer um."
+			)
     @PatchMapping("/{loanId}/return")
     public ResponseEntity<LoanResponseDTO> returnLoan(@PathVariable Long loanId) {
         return ResponseEntity.ok(service.returnLoan(loanId));
     }
     
-    /**
-     * PATCH /api/loans/{loanId}/cancel
-     * Cancela um empréstimo WAITING_RETURN.
-     * Usuário comum só pode cancelar o próprio; ADMIN pode cancelar qualquer um.
-     */
+    @Operation(
+			summary = "Cancelar empréstimo",
+			description = "Permite que um usuário cancele um empréstimo que ainda não foi devolvido. O status do empréstimo é atualizado para CANCELED. Usuário comum só pode cancelar seus próprios empréstimos; ADMIN pode cancelar qualquer um."
+			)
     @PatchMapping("/{loanId}/cancel")
     public ResponseEntity<LoanResponseDTO> cancelLoan(@PathVariable Long loanId) {
         return ResponseEntity.ok(service.cancelLoan(loanId));
