@@ -1,4 +1,4 @@
-package com.example.library.security.service;
+package com.example.library.jwt;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -21,6 +20,9 @@ import io.jsonwebtoken.security.Keys;
 public class JwtService {
 
 	   private final SecretKey key;
+	   
+	   @Value("${jwt.access-token-seconds}")
+	   private Long accessTokenSeconds;
 		
 	    public JwtService(@Value("${jwt.secret-key}") String secret) {
 	        if (secret == null || secret.trim().isEmpty()) {
@@ -29,7 +31,6 @@ public class JwtService {
 	        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 	    }
 
-
     public String generateToken(UserDetails user) {
 		return Jwts.builder()
                 .subject(user.getUsername())
@@ -37,10 +38,14 @@ public class JwtService {
                         .map(GrantedAuthority::getAuthority)
                         .toList())
                 .issuedAt(new Date())
-                .expiration(Date.from(Instant.now().plus(2, ChronoUnit.HOURS)))
+                .expiration(Date.from(Instant.now().plus(accessTokenSeconds, ChronoUnit.SECONDS)))
                 .signWith(key)
                 .compact();
     }
+    
+    public Instant getExpirationDate(String token) {
+		return parseClaims(token).getExpiration().toInstant();
+	}
 
 	public String extractUsername(String token) {
 		return parseClaims(token).getSubject();
@@ -50,7 +55,7 @@ public class JwtService {
 		try {
 			parseClaims(token);
 			return true;
-		} catch (JwtException _) {
+		} catch (Exception _) {
 			return false;
 		}
 	}

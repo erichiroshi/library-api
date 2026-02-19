@@ -6,7 +6,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
 
 # Flyway
@@ -24,6 +24,13 @@ spring:
     redis:
       host: localhost	#usar redis no docker, localhost localmente
       port: 6379
+
+# SCHEDULED TASKS
+  task:
+    scheduling:
+      pool:
+        # Número de threads para tarefas agendadas
+        size: 2 
 
 # Actuator
 management:
@@ -49,4 +56,11 @@ springdoc:
     enabled: false
 
 jwt:
-  secret-key:: ${SECRET_KEY:my-secret-key-my-secret-key-my-secret-key}
+  # Prod: SEMPRE usar variável de ambiente
+  secret-key: ${JWT_SECRET_KEY:my-secret-key-my-secret-key-my-secret-key}
+
+  # Prod: access token de 15 minutos (mais seguro)
+  access-token-seconds: ${JWT_ACCESS_TOKEN-SECONDS:900}
+
+  # Prod: refresh token de 7 dias
+  refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:7}

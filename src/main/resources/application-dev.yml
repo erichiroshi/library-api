@@ -29,6 +29,25 @@ spring:
       host: localhost
       port: 6379
 
+# ═══════════════════════════════════════════════════════════════════
+# SCHEDULED TASKS
+# ═══════════════════════════════════════════════════════════════════
+  task:
+    scheduling:
+      pool:
+        # Número de threads para tarefas agendadas
+        size: 2
+
+# Configuração do cleanup job (opcional - customizar cron)
+# refresh-token:
+#   cleanup:
+#     # Cron: todo dia às 2h AM
+#     cron: 0 0 2 * * *
+#     # Alternativas:
+#     # - A cada hora: 0 0 * * * *
+#     # - A cada 6 horas: 0 0 */6 * * *
+#     # - Toda segunda às 3h AM: 0 0 3 * * MON		
+
 # Actuator
 management:
   endpoints:
@@ -45,5 +64,21 @@ logging:
     '[org.hibernate.SQL]': DEBUG
     '[org.hibernate.orm.jdbc.bind]': TRACE
 
+# ═══════════════════════════════════════════════════════════════════
+# JWT & REFRESH TOKEN CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════
+
 jwt:
-  secret-key:: ${SECRET_KEY:my-secret-key-my-secret-key-my-secret-key}
+  # Chave secreta para assinatura do JWT (mínimo 256 bits para HS256)
+  # PRODUÇÃO: usar variável de ambiente JWT_SECRET_KEY
+  secret-key: ${JWT_SECRET_KEY:your-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256}
+  
+  # Duração do access token em segundos (15 minutos = 900 segundos)
+  # Dev: access token de 1 hora (mais conveniente)
+  access-token-seconds: 3600
+
+  # Duração do refresh token em dias (7 dias é padrão seguro)
+  # Produção: 7 dias
+  # Desenvolvimento: 30 dias (conveniência)
+  refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:30}
+

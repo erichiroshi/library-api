@@ -15,7 +15,9 @@ spring:
 # JWT - valor de teste
 jwt:
   secret-key: test-secret-key-for-integration-tests-that-must-be-at-least-256-bits-long-for-hs256
-  
+  access-token-seconds: 900 # 15 minutes
+  refresh-token-days: 7 # 7 days
+
 logging:
   level:
     '[com.example.library]': DEBUG
