@@ -1,12 +1,18 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/library	#usar postgres no docker, localhost localmente
-    username: postgres
-    password: postgres
+    url: ${DB_URL}	#usar postgres no docker, localhost localmente
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
+# HikariCP
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+
+# JPA/Hibernate
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
 
 # Flyway
@@ -15,6 +21,7 @@ spring:
     baseline-on-migrate: true
     locations: 
       - classpath:db/migration/common
+    clean-disabled: true
 
 # Redis
   cache:
@@ -22,7 +29,7 @@ spring:
 
   data:
     redis:
-      host: localhost	#usar redis no docker, localhost localmente
+      host: ${REDIS_URL}	#usar redis no docker, localhost localmente
       port: 6379
 
 # SCHEDULED TASKS
@@ -37,27 +44,29 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,prometheus
   endpoint:
     health:
       probes:
         enabled: true
       show-details: always
 
+# Logging
 logging:
   level:
-    '[com.example.library]': INFO
+    root: INFO
 
 # Springdoc
 springdoc:
   api-docs:
-    enabled: false
+    enabled: true
   swagger-ui:
-    enabled: false
+    enabled: true
 
+# Configurações de segurança e JWT
 jwt:
   # Prod: SEMPRE usar variável de ambiente
-  secret-key: ${JWT_SECRET_KEY:my-secret-key-my-secret-key-my-secret-key}
+  secret-key: ${JWT_SECRET_KEY}
 
   # Prod: access token de 15 minutos (mais seguro)
   access-token-seconds: ${JWT_ACCESS_TOKEN-SECONDS:900}

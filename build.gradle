@@ -107,7 +107,6 @@ dependencies {
     testImplementation 'org.testcontainers:postgresql'
 	testImplementation 'org.testcontainers:jdbc'
     
-    
     // Prometheus
     implementation 'io.micrometer:micrometer-registry-prometheus'
 	
@@ -180,9 +179,6 @@ tasks.named("jacocoTestReport") {
 
                     // Bootstrap
                     '**/*Application.class',
-
-                    // Enums simples
-                    '**/enums/**'
                 )
             }
         )
@@ -258,7 +254,6 @@ sonar {
                 **/mapper/**,
                 **/*MapperImpl.java,
                 **/*Application.java,
-                **/enums/**
                 """
     property "sonar.coverage.jacoco.xmlReportPaths",
              "build/reports/jacoco/test/jacocoTestReport.xml"

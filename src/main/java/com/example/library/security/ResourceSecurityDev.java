@@ -1,4 +1,4 @@
-package com.example.library.security.config;
+package com.example.library.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,9 +11,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.example.library.security.filter.JwtAuthenticationFilter;
 
-@Profile("prod")
+@Profile("dev")
 @Configuration
-public class ResourceSecurityConfigProd {
+public class ResourceSecurityDev {
 
 	
 	@Bean
@@ -23,8 +23,7 @@ public class ResourceSecurityConfigProd {
 	            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 	        )
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-						.requestMatchers("/actuator/**").hasRole("ADMIN")
+						.requestMatchers("/auth/**", "/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 						.anyRequest().authenticated()
 	        )
 	        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

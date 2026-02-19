@@ -58,8 +58,9 @@ class JwtServiceTest {
             String token = jwtService.generateToken(testUser);
 
             // Assert
-            assertThat(token).isNotNull();
-            assertThat(token).isNotEmpty();
+            assertThat(token)
+            	.isNotNull()
+            	.isNotEmpty();
             assertThat(token.split("\\.")).hasSize(3); // header.payload.signature
         }
 
@@ -126,8 +127,9 @@ class JwtServiceTest {
             Instant expirationDate = jwtService.getExpirationDate(token);
 
             // Assert
-            assertThat(expirationDate).isNotNull();
-            assertThat(expirationDate).isAfter(Instant.now());
+            assertThat(expirationDate)
+            	.isNotNull()
+            	.isAfter(Instant.now());
         }
 
         @Test

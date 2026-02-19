@@ -1,31 +1,64 @@
-# ---------- Build Stage ----------
+# =========================================================
+# =============== BUILD STAGE =============================
+# =========================================================
 FROM gradle:9.2.1-jdk25 AS build
-
 WORKDIR /app
 
-COPY . .
+# Copia apenas arquivos necessários primeiro (melhora cache)
+COPY gradle gradle
+COPY build.gradle settings.gradle gradlew ./
+
+RUN gradle --no-daemon dependencies || true
+
+# Agora copia o restante
+COPY src src
 
 RUN gradle clean bootJar --no-daemon
 
-# ---------- Runtime Stage ----------
+# =========================================================
+# =============== RUNTIME STAGE ===========================
+# =========================================================
 FROM eclipse-temurin:25-jre
+
+# Segurança: evitar locale/timezone inconsistentes
+ENV LANG=C.UTF-8
 
 WORKDIR /app
 
-RUN addgroup --system spring && adduser --system spring --ingroup spring
-USER spring:spring
+# Instala curl para healthcheck (leve)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY --from=build /app/build/libs/*.jar app.jar
+# Cria usuário não-root
+RUN addgroup --system spring \
+    && adduser --system --ingroup spring spring
+	
+# Copia o JAR
+COPY --from=build /app/build/libs/*.jar app.jar	
+
+# Ajusta permissões
+RUN chown -R spring:spring /app
+
+USER spring
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# JVM tuning profissional para container
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:InitialRAMPercentage=50.0", "-XX:MaxRAMPercentage=75.0", "-XX:+ExitOnOutOfMemoryError", "-XX:+AlwaysPreTouch", "-jar", "/app/app.jar"]
+
+# Healthcheck robusto
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+
+
+#		docker compose up -d
 
 #		docker build -t library-api .
 
-#		docker run -d --network library-api_backend -p 8080:8080 -e SPRING_PROFILES_ACTIVE=prod library-api
-
 #		docker compose -f docker-compose.dev.yml up -d
+#		docker run -d --network library-api_backend -p 8080:8080 --env-file .env library-api
 
 #		alias resetdb="docker-compose down -v && docker compose -f docker-compose.dev.yml up -d"
 
