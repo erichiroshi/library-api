@@ -25,7 +25,7 @@ jobs:
         run: pandoc readme_pdf.md -o library.pdf --pdf-engine=tectonic -V mainfont="DejaVu Sans" -V fontsize=11pt
 
       - name: Upload README PDF
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: library-readme-pdf
           path: library.pdf
