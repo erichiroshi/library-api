@@ -61,5 +61,8 @@ jobs:
         
       # ─── Build Docker ───
       - name: Validate Docker Build
-        run: docker build -t library-api:${{ github.sha }} . \
-             -t library-api:latest .
+        run: |
+          docker build \
+            -t library-api:${{ github.sha }} \
+            -t library-api:latest \
+            .
