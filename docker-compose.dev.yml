@@ -81,4 +81,3 @@ volumes:
   redis_data:
   pgadmin_data:
   prometheus_data:
-  grafana_data:

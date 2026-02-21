@@ -18,7 +18,7 @@ A **Library API** permite gerenciar livros, autores, categorias, usuários e emp
 ## Tecnologias Utilizadas
 
 ### Backend
-- **Java 21 (LTS)**
+- **Java 25 (LTS)**
 - **Spring Boot**
   - Spring Web (API REST)
   - Spring Data JPA (persistência)
@@ -140,9 +140,11 @@ Exemplo de métrica customizada:
 
 A documentação interativa está disponível via Swagger:
 
-```
-http://localhost:8080/swagger-ui.html
-```
+
+Swagger UI: http://localhost:8080/swagger-ui/index.html
+
+OpenAPI JSON: http://localhost:8080/v3/api-docs
+
 
 ---
 

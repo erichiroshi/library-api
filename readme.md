@@ -4,7 +4,7 @@
 ![CI](https://github.com/erichiroshi/library-api/actions/workflows/readme-pdf.yml/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=library-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=library-api)
 [![codecov](https://codecov.io/github/erichiroshi/library-api/graph/badge.svg?token=Y71AMP148X)](https://codecov.io/github/erichiroshi/library-api)
-![Java](https://img.shields.io/badge/Java-25-red)
+![Java](https://img.shields.io/badge/Java-21+-red)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 ![Redis](https://img.shields.io/badge/Redis-Cache-red)
@@ -25,7 +25,7 @@ A **Library API** permite gerenciar livros, autores, categorias, usuários e emp
 ## Tecnologias Utilizadas
 
 ### Backend
-- **Java 25**
+- **Java 21+ LTS**
 - **Spring Boot**
   - Spring Web (API REST)
   - Spring Data JPA (persistência)
@@ -147,11 +147,9 @@ Exemplo de métrica customizada:
 
 A documentação interativa está disponível via Swagger:
 
-
 Swagger UI: http://localhost:8080/swagger-ui/index.html
 
 OpenAPI JSON: http://localhost:8080/v3/api-docs
-
 
 ---
 
@@ -189,15 +187,14 @@ docker-compose up -d
 ```
 
 Serviços disponíveis:
-- PostgreSQL - localhost:5432
-- Redis - localhost:6379
-- pgAdmin - http://localhost:5050/
-- Prometheus - http://localhost:9090/
-- Grafana - http://localhost:3000/ (login admin/admin)
+- PostgreSQL - http://localhost:5432
+- Redis - http://localhost:6379
+- pgAdmin - http://localhost:5050 (login admin@admin.com/admin)
+- Prometheus - http://localhost:9090
+- Grafana - http://localhost:3000 (login admin/admin)
 
 Rodar pela ide
 - API: `http://localhost:8080`
-
 
 ---
 
@@ -221,6 +218,8 @@ Rodar pela ide
 
 ## Observabilidade
 
+Application → Actuator → Micrometer → Prometheus → Grafana
+
 - Actuator:
   ```
   http://localhost:8080/actuator
@@ -232,6 +231,13 @@ Rodar pela ide
   ```
 
 - Grafana: dashboards configurados para visualização de métricas
+
+### Services
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000
+
+### Dashboards
+- Library API Overview
 
 ---
 
@@ -255,13 +261,56 @@ O projeto conta com pipeline automatizado para:
 
 ---
 
+## Arquitetura
+
+### Estrutura de Camadas
+
+```
+┌─────────────────────────────────────┐
+│         Controllers (REST)          │
+│   @RestController / @RequestMapping │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│         Services (Business)         │
+│   @Service / @Transactional         │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│    Repositories (Persistence)       │
+│        JpaRepository                │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│          PostgreSQL                 │
+└─────────────────────────────────────┘
+```
+
+---
+
+
+
+---
+
+## Métricas do Projeto
+
+- **Linhas de Código:** ~8.000
+- **Testes Unitários:** 66
+- **Testes Integração:** 59
+- **Cobertura:** 80%+
+- **Serviços Docker:** 6
+- **Endpoints REST:** 25+
+
+---
+
 ## Próximos Passos Possíveis
 
-- Rate limiting
-- Versionamento de API
-- Auditoria (createdAt, updatedAt, createdBy)
+- Versionamento de API - IMPLEMENTADO (/api/v1)
+- Auditoria (createdAt, updatedAt, createdBy) - IMPLEMENTADO (BaseEntity)
+- Rate limiting (Bucket4j ou Resilience4j)
 - OpenTelemetry (tracing distribuído)
-- Deploy em cloud
+- Deploy em cloud (AWS ECS ou Render)
+- Implementar HATEOAS
 
 ---
 

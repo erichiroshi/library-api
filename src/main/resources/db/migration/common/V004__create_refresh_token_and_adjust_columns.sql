@@ -45,6 +45,8 @@ CREATE INDEX idx_refresh_token_user
 -- Otimiza query: DELETE FROM tb_refresh_tokens WHERE expiry_date < NOW()
 CREATE INDEX idx_refresh_token_expiry 
 	ON tb_refresh_tokens(expiry_date);
+	
+CREATE UNIQUE INDEX idx_refresh_token_unique ON tb_refresh_tokens(token);
 
 -- Comentários para documentação
 COMMENT ON TABLE tb_refresh_tokens IS 'Stores JWT refresh tokens for token rotation strategy';

@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,12 +28,15 @@ class JwtServiceTest {
 
     private JwtService jwtService;
     private UserDetails testUser;
+    
+    @Autowired
+    private Environment environment;
 
     @BeforeEach
     void setUp() {
         // Chave de 256 bits para HMAC-SHA256
         String secretKey = "test-secret-key-that-must-be-at-least-256-bits-long-for-hmac-sha256-algorithm";
-        jwtService = new JwtService(secretKey);
+        jwtService = new JwtService(secretKey, environment);
         
         // Configurar expiração via reflection (simula @Value)
         ReflectionTestUtils.setField(jwtService, "accessTokenSeconds", 900L); // 15 minutos
@@ -352,7 +357,7 @@ class JwtServiceTest {
         @DisplayName("Deve lançar exceção quando secret key é null")
         void shouldThrowExceptionWhenSecretKeyIsNull() {
             // Act & Assert
-            assertThatThrownBy(() -> new JwtService(null))
+            assertThatThrownBy(() -> new JwtService(null, environment))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("SECRET_KEY não pode ser null ou vazio");
         }
@@ -361,7 +366,7 @@ class JwtServiceTest {
         @DisplayName("Deve lançar exceção quando secret key é vazia")
         void shouldThrowExceptionWhenSecretKeyIsEmpty() {
             // Act & Assert
-            assertThatThrownBy(() -> new JwtService(""))
+            assertThatThrownBy(() -> new JwtService("", environment))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("SECRET_KEY não pode ser null ou vazio");
         }
@@ -370,7 +375,7 @@ class JwtServiceTest {
         @DisplayName("Deve lançar exceção quando secret key é apenas espaços")
         void shouldThrowExceptionWhenSecretKeyIsBlank() {
             // Act & Assert
-            assertThatThrownBy(() -> new JwtService("   "))
+            assertThatThrownBy(() -> new JwtService("   ", environment))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("SECRET_KEY não pode ser null ou vazio");
         }
@@ -382,7 +387,7 @@ class JwtServiceTest {
             String validKey = "a-valid-256-bit-secret-key-for-hmac-sha256-algorithm-that-is-long-enough";
 
             // Act & Assert
-            assertThatCode(() -> new JwtService(validKey))
+            assertThatCode(() -> new JwtService(validKey, environment))
                 .doesNotThrowAnyException();
         }
     }

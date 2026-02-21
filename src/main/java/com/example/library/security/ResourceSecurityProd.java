@@ -24,7 +24,7 @@ public class ResourceSecurityProd {
 	        )
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/auth/**").permitAll()
-						.requestMatchers("/actuator/**").hasRole("ADMIN")
+						.requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
 						.anyRequest().authenticated()
 	        )
 	        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

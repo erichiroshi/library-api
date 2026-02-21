@@ -40,7 +40,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     restart: unless-stopped
     networks:
@@ -51,7 +51,14 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - grafana_data:/var/lib/grafana
+      # provisioning config
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+
+      # banco interno (persistência real)
+      - ./monitoring/grafana/data:/var/lib/grafana
+    environment:
+      - GF_ALERTING_ENABLED=true
+      - GF_UNIFIED_ALERTING_ENABLED=true
     depends_on:
       - prometheus
     restart: unless-stopped
@@ -74,6 +81,14 @@ services:
       - backend
 
   library-api:
+      deploy:
+        resources:
+          limits:
+            cpus: '1'
+            memory: 1G
+          reservations:
+            cpus: '0.5'
+            memory: 512M
       build: .
       image: library-api
       environment:
@@ -82,6 +97,8 @@ services:
         DB_USERNAME: ${DB_USERNAME}
         DB_PASSWORD: ${DB_PASSWORD}
         JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+        REDIS_HOST: ${REDIS_HOST}
+        REDIS_PORT: ${REDIS_PORT}
       ports:
         - "8080:8080"
       depends_on:
@@ -91,7 +108,13 @@ services:
           condition: service_healthy
       networks:
         - backend
-      restart: unless-stopped	  
+      restart: unless-stopped
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+        interval: 30s
+        timeout: 10s
+        retries: 3
+        start_period: 40s
 
 networks:
   backend:
@@ -101,4 +124,3 @@ volumes:
   redis_data:
   pgadmin_data:
   prometheus_data:
-  grafana_data:

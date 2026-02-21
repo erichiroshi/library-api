@@ -37,8 +37,10 @@ public class AuthController {
 	private final JwtService jwtService;
 	private final RefreshTokenService refreshTokenService;
 	
-	@Operation(summary = "Autenticar usuário e obter tokens JWT",
-			description = "Autentica o usuário usando username e password, e retorna um access token JWT e um refresh token.")
+	@Operation(
+			summary = "Autenticar usuário e obter tokens JWT",
+			description = "Autentica o usuário usando username e password, e retorna um access token JWT e um refresh token."
+			)
 	@PostMapping("/login")
 	public TokenResponseDTO login(@RequestBody LoginRequestDTO request) {
 
@@ -55,8 +57,10 @@ public class AuthController {
 						OffsetDateTime.ofInstant(jwtService.getExpirationDate(accessToken), ZoneId.systemDefault()));
 	}
 	
-	@Operation(summary = "Renovar tokens JWT usando refresh token",
-			description = "Valida o refresh token e, se válido, gera um novo access token e um novo refresh token (token rotation).")
+	@Operation(
+			summary = "Renovar tokens JWT usando refresh token",
+			description = "Valida o refresh token e, se válido, gera um novo access token e um novo refresh token (token rotation)."
+			)
 	@PostMapping("/refresh")
 	public ResponseEntity<TokenResponseDTO> refresh(@RequestBody RefreshTokenDTO refreshToken) {
 
@@ -78,6 +82,10 @@ public class AuthController {
 						OffsetDateTime.ofInstant(jwtService.getExpirationDate(newAccess), ZoneId.systemDefault())));
 	}
 	
+	@Operation(
+			summary = "Realizar o logout usando refresh token",
+			description = "Deleta refresh token do bd."
+			)
 	@PostMapping("/logout")
 	public ResponseEntity<Void> logout(@RequestBody LogoutRequest request) {
 	    refreshTokenService.invalidate(request.refreshToken());
