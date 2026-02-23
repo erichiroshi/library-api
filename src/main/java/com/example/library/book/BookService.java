@@ -14,6 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+
 import com.example.library.author.Author;
 import com.example.library.author.AuthorRepository;
 import com.example.library.book.dto.BookCreateDTO;
@@ -27,9 +30,6 @@ import com.example.library.category.Category;
 import com.example.library.category.CategoryRepository;
 import com.example.library.category.exception.CategoryNotFoundException;
 import com.example.library.common.config.delay_cache_test.ArtificialDelayService;
-
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
 
 @Service
 public class BookService {

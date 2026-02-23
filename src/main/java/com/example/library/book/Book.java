@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.example.library.author.Author;
 import com.example.library.category.Category;
+import com.example.library.common.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,6 +1,7 @@
 package com.example.library.loan;
 
 import com.example.library.book.Book;
+import com.example.library.common.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;

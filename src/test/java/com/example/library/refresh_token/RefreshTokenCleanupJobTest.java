@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -61,8 +63,19 @@ class RefreshTokenCleanupJobTest {
         // Assert
         Instant capturedInstant = instantCaptor.getValue();
         // O instant passado deve estar entre o momento antes e depois da chamada
-        assert capturedInstant.isAfter(beforeCall.minusSeconds(1));
-        assert capturedInstant.isBefore(afterCall.plusSeconds(1));
+        assertNotNull(capturedInstant);
+
+        assertTrue(
+            capturedInstant.isAfter(beforeCall.minusSeconds(1)),
+            "Instant deve ser posterior ao momento antes da chamada"
+        );
+
+        assertTrue(
+            capturedInstant.isBefore(afterCall.plusSeconds(1)),
+            "Instant deve ser anterior ao momento depois da chamada"
+        );
+        
+        verify(repository).deleteByExpiryDateBefore(instantCaptor.getValue());
     }
 
     @Test

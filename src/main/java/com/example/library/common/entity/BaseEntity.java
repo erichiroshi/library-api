@@ -1,4 +1,4 @@
-package com.example.library.loan;
+package com.example.library.common.entity;
 
 import java.time.LocalDateTime;
 

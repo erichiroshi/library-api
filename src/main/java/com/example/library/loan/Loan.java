@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.example.library.common.entity.BaseEntity;
 import com.example.library.user.User;
 
 import jakarta.persistence.CascadeType;
