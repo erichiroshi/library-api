@@ -17,7 +17,7 @@ build/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
-.env
+#.env #arquivo liberado - projeto de estudos
 
 ### IntelliJ IDEA ###
 .idea

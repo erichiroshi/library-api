@@ -54,15 +54,3 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
 LABEL org.opencontainers.image.title="Library API"
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.authors="erichiroshi"
-
-#		docker compose up -d
-
-#		docker exec -i library-api-postgres-1 psql -U postgres -d library < seed_realistic_dataset.sql
-
-#		docker build -t library-api .
-
-#		docker compose -f docker-compose.dev.yml up -d
-#		docker run -d --network library-api_backend -p 8080:8080 --env-file .env library-api
-
-#		alias resetdb="docker-compose down -v && docker compose -f docker-compose.dev.yml up -d"
-

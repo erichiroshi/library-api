@@ -1,18 +1,24 @@
-# Library-API
+# 📚 Library API — Spring Boot 4 + JWT + Docker + Observability
 
 ![CI](https://github.com/erichiroshi/library-api/actions/workflows/ci.yml/badge.svg)
-![CI](https://github.com/erichiroshi/library-api/actions/workflows/readme-pdf.yml/badge.svg)
+![PDF](https://github.com/erichiroshi/library-api/actions/workflows/readme-pdf.yml/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=library-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=library-api)
 [![codecov](https://codecov.io/github/erichiroshi/library-api/graph/badge.svg?token=Y71AMP148X)](https://codecov.io/github/erichiroshi/library-api)
-![Java](https://img.shields.io/badge/Java-21+-red)
+![Java](https://img.shields.io/badge/Java-25-red)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 ![Redis](https://img.shields.io/badge/Redis-Cache-red)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
 
-API REST desenvolvida em Java com **Spring Boot**, projetada para simular um backend de produção, aplicando boas práticas de arquitetura, segurança, testes automatizados, observabilidade e CI/CD.
+Backend projetado com foco em previsibilidade, observabilidade e isolamento de responsabilidades.
 
-O projeto tem como objetivo consolidar conhecimentos em desenvolvimento backend moderno, indo além de CRUDs simples, com foco em qualidade de código, manutenibilidade e confiabilidade.
+🔐 Autenticação JWT  
+🧠 Arquitetura em camadas bem definida  
+🗄 PostgreSQL + Flyway  
+⚡ Cache distribuído com Redis  
+📊 Observabilidade com Micrometer + Prometheus + Grafana  
+🧪 Testes unitários e integração com Testcontainers  
+🚀 CI/CD com cobertura mínima obrigatória  
 
 ---
 
@@ -22,10 +28,138 @@ A **Library API** permite gerenciar livros, autores, categorias, usuários e emp
 
 ---
 
-## Tecnologias Utilizadas
+## 🚀 Quick Start
 
-### Backend
-- **Java 21+ LTS**
+O projeto possui dois modos de execução:
+
+- **dev** → ambiente voltado para desenvolvimento e avaliação
+- **prod** → ambiente containerizado simulando produção
+
+---
+
+### Clone o projeto
+
+```bash
+git clone https://github.com/erichiroshi/library-api.git
+cd library-api
+```
+
+### 🟢 Modo Desenvolvimento (recomendado para avaliação)
+
+Nesse modo a infraestrutura é executada via Docker e a aplicação pode ser iniciada via container ou IDE.
+
+### 1️⃣ Subir infraestrutura
+
+```bash
+docker compose -f docker-compose.dev.yml up -d
+```
+A rede `library-api_backend` é criada automaticamente.
+
+Serviços iniciados:
+- PostgreSQL: localhost:5432
+- Redis: localhost:6379
+- pgAdmin: http://localhost:5050 (login admin@admin.com/admin)
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000 (login admin/admin)
+
+### 2️⃣ Subir aplicação
+Opção A — Container:
+```bash
+docker build -t library-api .
+docker run -d --network library-api_backend -p 8080:8080 --env-file .env.dev library-api
+```
+
+Opção B — IDE:
+```bash
+./graldew clean build
+```
+Refresh gradle project  
+Executar a aplicação.
+
+Acesse:
+- API: http://localhost:8080/api/v1
+- Swagger: http://localhost:8080/swagger-ui/index.html
+
+Usário admin para teste: joao.silva@email.com senha: 123456
+
+Características do profile `dev`
+- Swagger habilitado
+- Banco de dados populado com seed inicial
+- Configuração voltada para testes manuais
+- Logs detalhados
+
+## 🏭 Modo Produção (simulado)
+
+Executa toda a stack containerizada utilizando o profile prod.
+
+```bash
+docker compose up -d
+```
+Características do profile `prod`
+
+- Swagger desabilitado
+- Banco de dados inicial vazio
+- Configuração mais restritiva
+- Ambiente totalmente containerizado
+- Stateless (JWT) + cache compartilhado (Redis)
+
+**Caso queiro testar no perfil de `prod`, rode a mesma seed de `dev`, via cli-bash:
+```bash
+docker exec -i library-api-postgres-1 psql -U postgres -d library < seed_realistic_dataset.sql
+```
+
+## 🧯 Encerrar ambiente
+
+Para encerrar o ambiente:
+```bash
+docker compose down
+```
+
+---
+
+## Postman
+### Importe sua API
+
+Arquivo na pasta raiz para importar no postman, para testar a api.  
+`Library-API.postman_collection.json`
+
+---
+
+## 🧠 Problema que este projeto resolve
+
+Simula um backend real com:
+
+- Controle de empréstimos
+- Autenticação segura
+- Cache em consultas frequentes
+- Métricas expostas para monitoramento
+- Versionamento de banco automatizado
+- Vai além de um CRUD simples.
+
+---
+
+## 🏗 Decisões Arquiteturais
+✔ Separação Controller / Service / Repository  
+Evita vazamento de regra de negócio para camada HTTP.
+
+✔ DTOs + MapStruct  
+Isolamento de domínio e controle explícito de exposição.
+
+✔ Cache no nível de serviço  
+Independente da camada web.
+
+✔ Testcontainers  
+Banco real nos testes de integração.
+
+✔ Threshold de cobertura  
+Pipeline falha abaixo do mínimo definido.
+
+---
+
+## 🛠 Stack Tecnológica
+
+### Core
+- **Java 25 LTS**
 - **Spring Boot**
   - Spring Web (API REST)
   - Spring Data JPA (persistência)
@@ -37,13 +171,6 @@ A **Library API** permite gerenciar livros, autores, categorias, usuários e emp
 ### Persistência
 - **PostgreSQL** (Banco relacional)
 - **Flyway** (Versionamento de schema)
-- **H2** (Banco de testes)
-
-### Serialização e Mapeamento
-- **Jackson** (Serialização e desserialização JSON)
-- **DTOs** (Isolamento do modelo de domínio)
-- **MapStruct** (Mapeamento automático)
-- **Bean Validation (Jakarta Validation)** (Validação declarativa de entrada)
 
 ### Cache
 - **Redis** (Cache distribuído)
@@ -64,253 +191,82 @@ A **Library API** permite gerenciar livros, autores, categorias, usuários e emp
 - **Logging estruturado** (Verificar fluxo)
 - **GitHub Actions** (CI/CD)
 
----
-
-## Funcionalidades e Diferenciais
-
-- Autenticação e autorização com JWT
-- Cache distribuído com Redis usando Spring Cache
-- Versionamento de banco de dados com Flyway
-- Tratamento global de exceções com `@ControllerAdvice` e `ProblemDetail`
-- Logs estruturados para rastreabilidade
-- Métricas de aplicação expostas via Actuator
-- Monitoramento com Prometheus e dashboards no Grafana
-- Testes unitários e de integração com banco real via Testcontainers
-- Pipeline CI/CD com verificação automática de cobertura mínima de testes
+### Serialização e Mapeamento
+- **Jackson** (Serialização e desserialização JSON)
+- **DTOs** (Isolamento do modelo de domínio)
+- **MapStruct** (Mapeamento automático)
+- **Bean Validation (Jakarta Validation)** (Validação declarativa de entrada)
 
 ---
 
-## Testes Automatizados
+## 📊 Observabilidade
 
-O projeto possui uma estratégia de testes dividida em:
-
-- **Testes unitários**: validação de regras de negócio e serviços
-- **Testes de repositório**: usando `@DataJpaTest`
-- **Testes de integração**: com PostgreSQL real via Testcontainers
-
-A cobertura de código é monitorada com **JaCoCo**, com threshold mínimo configurado.  
-O pipeline falha automaticamente caso a cobertura fique abaixo do valor definido.
-
----
-
-## Cache com Redis
-
-O cache é aplicado na camada de serviço utilizando `@Cacheable`, garantindo:
-
-- Separação entre lógica de negócio e camada HTTP
-- Reutilização do cache por diferentes fluxos
-- Melhor desempenho em consultas frequentes
-
-Durante testes automatizados, o comportamento de cache é isolado para garantir previsibilidade e confiabilidade dos testes.
-
----
-
-## Observabilidade
-
-A aplicação expõe métricas através do Spring Actuator e Micrometer, permitindo:
-
-- Monitoramento de performance
-- Contagem de eventos de negócio
-- Integração com Prometheus
-- Visualização via Grafana
-
-Exemplo de métrica customizada:
-- Quantidade de livros criados
-
----
-
-## Rotas Principais
-
-### Autenticação
-- `POST /auth/login`
-
-### Categorias
-- `GET /categories`
-- `GET /categories/{id}`
-- `POST /categories`
-
-### Livros
-- `GET /books`
-- `GET /books/{id}`
-- `POST /books`
-
-### Autores
-- `GET /authors`
-- `GET /authors/{id}`
-- `POST /authors`
-
-*(Demais rotas podem ser consultadas via Swagger)*
-
----
-
-## Documentação da API
-
-A documentação interativa está disponível via Swagger:
-
-Swagger UI: http://localhost:8080/swagger-ui/index.html
-
-OpenAPI JSON: http://localhost:8080/v3/api-docs
-
----
-
-## Perfis de Execução
-
-- `test`: utilizado para testes automatizados
-  - Cache desabilitado
-  - Flyway desabilitado
-  - Banco em memória
-
----
-
-## Seed de Dados (Perfil de Teste)
-
-No perfil `test`, o projeto utiliza um **seed de dados** para facilitar:
-- Testes manuais via Postman
-- Simulação de cenários reais
-- Validação de regras de negócio
-
----
-
-## Como Clonar o Projeto
-
-```bash
-git clone https://github.com/erichiroshi/library-api.git
-cd library-api
-```
-
----
-
-## Como Executar com Docker
-
-```bash
-docker-compose up -d
-```
-
-Serviços disponíveis:
-- PostgreSQL - http://localhost:5432
-- Redis - http://localhost:6379
-- pgAdmin - http://localhost:5050 (login admin@admin.com/admin)
-- Prometheus - http://localhost:9090
-- Grafana - http://localhost:3000 (login admin/admin)
-
-Rodar pela ide
-- API: `http://localhost:8080`
-
----
-
-## Executar Localmente 
-
-```bash
-./gradlew clean build
-./gradlew bootRun
-```
-
----
-
-## Executar Testes
-
-```bash
-./gradlew test
-./gradlew integrationTest
-```
-
----
-
-## Observabilidade
-
+Fluxo:  
 Application → Actuator → Micrometer → Prometheus → Grafana
 
-- Actuator:
-  ```
-  http://localhost:8080/actuator
-  ```
-
-- Métricas Prometheus:
-  ```
-  http://localhost:8080/actuator/prometheus
-  ```
-
-- Grafana: dashboards configurados para visualização de métricas
-
-### Services
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000
-
-### Dashboards
-- Library API Overview
+Métricas customizadas:
+- Livros criados
+- Tempo de resposta
+- Contadores de endpoints
 
 ---
 
-## CI/CD
+## 🧪 Estratégia de Testes
 
-O projeto conta com pipeline automatizado para:
-- Build
-- Execução de testes
-- Validação de qualidade
+Unit tests isolando regra de negócio  
+@DataJpaTest para repositórios  
+Integração com banco real  
+Pipeline com validação automática  
 
----
-
-## Boas Práticas Aplicadas
-
-- Separação clara de camadas (Controller, Service, Repository)
-- DTOs para evitar exposição de entidades
-- Cache aplicado no nível de Service
-- Profiles para isolar infraestrutura em testes
-- Testes previsíveis e reproduzíveis
-- Logs claros e padronizados
+Cobertura atual: 80%+
 
 ---
 
-## Arquitetura
+## 📦 Endpoints Principais
 
-### Estrutura de Camadas
+POST /auth/login  
+GET /books  
+POST /books  
+GET /authors  
+POST /categories
+
+Documentação completa via Swagger.
+
+---
+
+## 📐 Arquitetura
 
 ```
-┌─────────────────────────────────────┐
-│         Controllers (REST)          │
-│   @RestController / @RequestMapping │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│         Services (Business)         │
-│   @Service / @Transactional         │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│    Repositories (Persistence)       │
-│        JpaRepository                │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│          PostgreSQL                 │
-└─────────────────────────────────────┘
+Controller → Service → Repository → Database
 ```
 
----
+Responsabilidades claramente delimitadas.
+Sem anêmico acoplamento entre camadas.
 
+## 📈 Métricas do Projeto
 
+- ~8.000 linhas
+- 120+ testes
+- 25+ endpoints
+- 6 serviços Docker
 
----
+## 🔮 Próximos Passos
 
-## Métricas do Projeto
-
-- **Linhas de Código:** ~8.000
-- **Testes Unitários:** 66
-- **Testes Integração:** 59
-- **Cobertura:** 80%+
-- **Serviços Docker:** 6
-- **Endpoints REST:** 25+
-
----
-
-## Próximos Passos Possíveis
-
-- Versionamento de API - IMPLEMENTADO (/api/v1)
-- Auditoria (createdAt, updatedAt, createdBy) - IMPLEMENTADO (BaseEntity)
+- AWS S3
 - Rate limiting (Bucket4j ou Resilience4j)
 - OpenTelemetry (tracing distribuído)
 - Deploy em cloud (AWS ECS ou Render)
 - Implementar HATEOAS
+- Tracing distribuído
+- Micro Serviços
+
+---
+
+## Autor
+Eric Hiroshi  
+Backend Engineer — Java / Spring
+- LinkedIn: [**Eric Hiroshi**](https://www.linkedin.com/in/eric-hiroshi/)
+- Licença: [MIT](LICENSE)
 
 ---
 
@@ -337,15 +293,6 @@ Para contribuir:
 
 ---
 
-## Referências e Créditos
-Este projeto foi desenvolvido com foco em aprendizado profundo de backend Java moderno, simulando desafios reais encontrados em ambientes profissionais.
-
-- Desenvolvido por [**Eric Hiroshi**](https://github.com/erichiroshi)
-- LinkedIn: [**Eric Hiroshi**](https://www.linkedin.com/in/eric-hiroshi/)
-- Licença: [MIT](LICENSE)
-
----
-
 ## Documentação em PDF
 
 A versão em PDF da documentação técnica é gerada automaticamente via GitHub Actions
@@ -356,5 +303,3 @@ e está disponível na aba **Releases** do projeto.
 <p align="center">
   <em>“Código limpo é aquele que expressa a intenção com simplicidade e precisão.”</em>
 </p>
-
----
