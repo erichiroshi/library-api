@@ -107,8 +107,8 @@ A rede `library-api_backend` é criada automaticamente.
 
 **Opção A — Container:**
 ```bash
-docker build -t library-api .
-docker run -d --network library-api_backend -p 8080:8080 --env-file .env.dev library-api
+docker build -t library-api:latest .
+docker run -d --network library-api_backend -p 8080:8080 --env-file .env.dev library-api:latest
 ```
 
 **Opção B — IDE:**
