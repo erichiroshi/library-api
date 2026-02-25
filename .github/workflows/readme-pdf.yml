@@ -22,7 +22,14 @@ jobs:
           sudo mv tectonic /usr/local/bin/tectonic
 
       - name: Generate README PDF
-        run: pandoc readme_pdf.md -o library.pdf --pdf-engine=tectonic -V mainfont="DejaVu Sans" -V fontsize=11pt
+        run: |
+          pandoc readme_pdf.md -o library.pdf \
+            --pdf-engine=tectonic \
+            -V mainfont="DejaVu Sans" \
+            -V monofont="DejaVu Sans Mono" \
+            -V fontsize=11pt \
+            -V geometry:margin=1.5cm \
+            -V linestretch=1.05
 
       - name: Upload README PDF
         uses: actions/upload-artifact@v4

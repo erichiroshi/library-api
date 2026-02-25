@@ -90,7 +90,7 @@ docker compose -f docker-compose.dev.yml up -d
 ```
 A rede `library-api_backend` é criada automaticamente.
 
-**Serviços iniciados:**
+**Serviços iniciados:**  
 - PostgreSQL: `localhost:5432`  
 - Redis: `localhost:6379`  
 - pgAdmin: http://localhost:5050 (login `admin@admin.com` / `admin`)  
@@ -507,16 +507,16 @@ Roadmap de evolução:
 
 Contribuições são muito bem-vindas! Este projeto está aberto para:
 
-### Para Iniciantes
-Issues marcadas com `good-first-issue`:
-- [EASY] Adicionar endpoint GET /books/popular
-- [EASY] Melhorar mensagens de erro
-- [MEDIUM] Adicionar paginação customizada
+### Para Iniciantes  
+Issues marcadas com `good-first-issue`:  
+- [EASY] Adicionar endpoint GET /books/popular  
+- [EASY] Melhorar mensagens de erro  
+- [MEDIUM] Adicionar paginação customizada  
 
-### Para Experientes
-- [HARD] Implementar rate limiting (Bucket4j)
-- [HARD] Adicionar tracing distribuído (OpenTelemetry)
-- [HARD] Quebrar em microservices
+### Para Experientes  
+- [HARD] Implementar rate limiting (Bucket4j)  
+- [HARD] Adicionar tracing distribuído (OpenTelemetry)  
+- [HARD] Quebrar em microservices  
 
 ### Processo de Contribuição
 
