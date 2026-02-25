@@ -81,10 +81,17 @@ jwt:
   
   # Duração do access token em segundos (15 minutos = 900 segundos)
   # Dev: access token de 30 minutos (mais conveniente)
-  access-token-seconds: 1800
+  access-token-seconds: ${JWT_ACCESS_TOKEN-SECONDS:1800}
 
   # Duração do refresh token em dias (7 dias é padrão seguro)
   # Produção: 7 dias
   # Desenvolvimento: 14 dias (conveniência)
   refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:14}
 
+  # AWS - BUCKET
+aws:
+  access-key-id: ${AWS_KEY}
+  secret-access-key: ${AWS_SECRET}
+s3:
+  bucket: ${BUCKET_NAME:library-api-s3}
+  region: ${BUCKET_REGION:sa-east-1}

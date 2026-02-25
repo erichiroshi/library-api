@@ -34,3 +34,11 @@ logging:
   level:
     '[com.example.library]': DEBUG
     '[org.springframework.security]': DEBUG
+
+  # AWS - BUCKET
+aws:
+  access-key-id: chave-aws-teste
+  secret-access-key: chave-aws-teste
+s3:
+  bucket: bucket-teste
+  region: region-teste

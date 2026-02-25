@@ -60,6 +60,7 @@ ext {
     springdocVersion = "3.0.1"
     jjwtVersion = "0.13.0"
    	testcontainersVersion = "2.0.3"
+   	awsS3Version = "2.42.1"
 }
 
 dependencies {
@@ -118,7 +119,9 @@ dependencies {
     
     // Prometheus
     implementation 'io.micrometer:micrometer-registry-prometheus'
-	
+    
+    // AWS SDK (para integração com S3)
+	implementation "software.amazon.awssdk:s3:${awsS3Version}"
 }
 
 // ─────────────────────────────────────────────
