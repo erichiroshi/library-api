@@ -29,7 +29,7 @@ class FlywayMigrationIT {
 	@Test
 	void shouldHaveDatabaseNameTestDB() throws Exception {
 		try (var conn = dataSource.getConnection()) {
-			assertThat(conn.getCatalog()).isEqualTo("test");
+			assertThat(conn.getCatalog()).isEqualTo("testdb");
 		}
 	}
 }

@@ -1,43 +1,50 @@
 > Este documento é a versão técnica da documentação do projeto,
 > utilizada para geração do PDF via CI.
 
-# 📚 Library API — Spring Boot 4 + JWT + Docker + Observability
+# Library API — Spring Boot 4 + JWT + Docker + Observability
 
 Backend production-ready projetado com foco em previsibilidade, observabilidade e isolamento de responsabilidades.
 
-🔐 Autenticação JWT com Refresh Token Rotation
-🧠 Arquitetura em camadas bem definida
-🗄 PostgreSQL + Flyway (versionamento automático)
-⚡ Cache distribuído com Redis
-📊 Observabilidade completa (Micrometer + Prometheus + Grafana)
-🧪 Testes de integração com Testcontainers (banco real)
-🚀 CI/CD com quality gate obrigatório (80%+ cobertura) 
+Autenticação JWT com Refresh Token Rotation  
+Arquitetura em camadas bem definida  
+PostgreSQL + Flyway (versionamento automático)  
+Cache distribuído com Redis  
+Observabilidade completa (Micrometer + Prometheus + Grafana)  
+Testes de integração com Testcontainers (banco real)  
+CI/CD com quality gate obrigatório (80%+ cobertura)  
 
 ---
 
-## 📑 Índice
+## Índice
 
-- [Visão Geral](#-visão-geral)
-- [Requisitos](#-requisitos)
-- [Quick Start](#-quick-start)
-  - [Modo Desenvolvimento](#-modo-desenvolvimento-recomendado-para-avaliação)
-  - [Modo Produção](#-modo-produção-simulado)
-- [Problema que Resolve](#-problema-que-este-projeto-resolve)  
-- [Stack Tecnológica](#-stack-tecnológica)
-- [Arquitetura](#-arquitetura)
-- [Decisões Arquiteturais](#-decisões-arquiteturais)
-- [Observabilidade](#-observabilidade)
-- [Estratégia de Testes](#-estratégia-de-testes)
-- [Endpoints Principais](#-endpoints-principais)
-- [Métricas do Projeto](#-métricas-do-projeto)
-- [Próximos Passos](#-próximos-passos)
-- [Screenshots](#-screenshots)
-- [Contribuições](#-como-contribuir)
-- [Autor](#autor)
+  - [Visão Geral](#visão-geral)
+  - [Requisitos](#requisitos)
+  - [Quick Start](#quick-start)
+    - [Modo Desenvolvimento (recomendado para avaliação)](#modo-desenvolvimento-recomendado-para-avaliação)
+    - [Modo Produção (simulado)](#modo-produção-simulado)
+  - [Postman Collection](#postman-collection)
+  - [Problema que este Projeto Resolve](#problema-que-este-projeto-resolve)
+  - [Stack Tecnológica](#stack-tecnológica)
+  - [Arquitetura](#arquitetura)
+  - [Decisões Arquiteturais](#decisões-arquiteturais)
+  - [Observabilidade](#observabilidade-2)
+  - [Estratégia de Testes](#estratégia-de-testes)
+  - [Endpoints Principais](#endpoints-principais)
+  - [Métricas do Projeto](#métricas-do-projeto)
+  - [Próximos Passos](#próximos-passos)
+  - [Screenshots](#screenshots)
+  - [Como Contribuir](#como-contribuir)
+  - [Autor](#autor)
 
 ---
 
-## 📋 Requisitos
+## Visão Geral
+
+A **Library API** simula um backend de produção real para gerenciar livros, autores, categorias, usuários e empréstimos. 
+
+---
+
+## Requisitos
 
 ### Obrigatórios
 - **Docker** 20.10+ & **Docker Compose** 2.0+
@@ -56,17 +63,11 @@ git --version             # git version 2.30+
 
 ---
 
-## 📑 Visão Geral
-
-A **Library API** simula um backend de produção real para gerenciar livros, autores, categorias, usuários e empréstimos. 
-
----
-
-## 🚀 Quick Start
+## Quick Start
 
 O projeto possui dois modos de execução:
 
-- **dev** → ambiente voltado para desenvolvimento e avaliação
+- **dev** → ambiente voltado para desenvolvimento e avaliação  
 - **prod** → ambiente containerizado simulando produção
 
 ---
@@ -78,11 +79,11 @@ git clone https://github.com/erichiroshi/library-api.git
 cd library-api
 ```
 
-### 🟢 Modo Desenvolvimento (recomendado para avaliação)
+### Modo Desenvolvimento (recomendado para avaliação)
 
 Nesse modo a infraestrutura é executada via Docker e a aplicação pode ser iniciada via container ou IDE.
 
-### 1️⃣ Subir infraestrutura
+### 1️ Subir infraestrutura
 
 ```bash
 docker compose -f docker-compose.dev.yml up -d
@@ -90,13 +91,13 @@ docker compose -f docker-compose.dev.yml up -d
 A rede `library-api_backend` é criada automaticamente.
 
 **Serviços iniciados:**
-- PostgreSQL: `localhost:5432`
-- Redis: `localhost:6379`
-- pgAdmin: http://localhost:5050 (login `admin@admin.com` / `admin`)
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000 (login `admin` / `admin`)
+- PostgreSQL: `localhost:5432`  
+- Redis: `localhost:6379`  
+- pgAdmin: http://localhost:5050 (login `admin@admin.com` / `admin`)  
+- Prometheus: http://localhost:9090  
+- Grafana: http://localhost:3000 (login `admin` / `admin`)  
 
-### 2️⃣ Subir aplicação
+### 2️ Subir aplicação
 
 **Opção A — Container:**
 ```bash
@@ -110,21 +111,21 @@ docker run -d --network library-api_backend -p 8080:8080 --env-file .env.dev lib
 ```
 Refresh Gradle project → Executar a aplicação
 
-**Acesse:**
-- API: http://localhost:8080/api/v1
+**Acesse:**  
+- API: http://localhost:8080/api/v1  
 - Swagger: http://localhost:8080/swagger-ui/index.html
 
 **Usuário admin para teste:**  
 Email: joao.silva@email.com  
 Senha: 123456
 
-**Características do profile `dev`:**
-- ✅ Swagger habilitado
-- ✅ Banco de dados populado com seed inicial
-- ✅ Configuração voltada para testes manuais
-- ✅ Logs detalhados
+**Características do profile `dev`:**  
+- Swagger habilitado  
+- Banco de dados populado com seed inicial  
+- Configuração voltada para testes manuais  
+- Logs detalhados
 
-## 🏭 Modo Produção (simulado)
+## Modo Produção (simulado)
 
 Executa toda a stack containerizada utilizando o profile `prod`.
 
@@ -133,11 +134,11 @@ docker compose up -d
 ```
 **Características do profile `prod`:**
 
-- ✅ Swagger desabilitado
-- ✅ Banco de dados inicial vazio
-- ✅ Configuração mais restritiva
-- ✅ Ambiente totalmente containerizado
-- ✅ Stateless (JWT) + cache compartilhado (Redis)
+- Swagger desabilitado  
+- Banco de dados inicial vazio  
+- Configuração mais restritiva  
+- Ambiente totalmente containerizado  
+- Stateless (JWT) + cache compartilhado (Redis)
 
 **Populando banco em prod:**
 ```bash
@@ -146,7 +147,7 @@ docker exec -i library-api-postgres-1 psql -U postgres -d library < seed_realist
 
 ---
 
-## 🧯 Encerrar ambiente
+## Encerrar ambiente
 
 Para encerrar o ambiente:
 ```bash
@@ -160,39 +161,39 @@ docker compose down -v
 
 ---
 
-## 📦 Postman Collection
+## Postman Collection
 
 Importe a collection para testar a API:
 
-📁 `Library-API.postman_collection.json` (na raiz do projeto)
+`Library-API.postman_collection.json` (na raiz do projeto)
 
 ---
 
-## 🎯 Problema que este Projeto Resolve
+## Problema que este Projeto Resolve
 
 Este projeto vai além de um CRUD básico — ele **simula desafios reais de produção**:
 
-### Cenário de Negócio
-Uma biblioteca precisa:
-- ✅ Gerenciar empréstimos com regras (limite de livros por usuário)
-- ✅ Autenticar usuários de forma segura (JWT + Refresh Token)
-- ✅ Garantir performance em consultas frequentes (Cache Redis)
-- ✅ Monitorar saúde e métricas da aplicação (Observabilidade)
-- ✅ Garantir qualidade de código (80%+ cobertura obrigatória)
-- ✅ Evoluir schema sem quebrar produção (Flyway migrations)
+### Cenário de Negócio  
+Uma biblioteca precisa:  
+- Gerenciar empréstimos com regras (limite de livros por usuário)  
+- Autenticar usuários de forma segura (JWT + Refresh Token)  
+- Garantir performance em consultas frequentes (Cache Redis)  
+- Monitorar saúde e métricas da aplicação (Observabilidade)  
+- Garantir qualidade de código (80%+ cobertura obrigatória)  
+- Evoluir schema sem quebrar produção (Flyway migrations)  
 
-### Diferenciais Técnicos
-Não é apenas "funciona" — é **production-ready**:
-- 🔐 Segurança: JWT com token rotation (previne replay attacks)
-- ⚡ Performance: Cache distribuído com Redis
-- 📊 Observabilidade: Prometheus + Grafana (dashboards prontos)
-- 🧪 Qualidade: 80%+ cobertura com threshold obrigatório
-- 🚀 CI/CD: Quality gate automático (SonarCloud)
-- 🐳 DevOps: Docker Compose com 6 serviços orquestrados
+### Diferenciais Técnicos  
+Não é apenas "funciona" — é **production-ready**:  
+- Segurança: JWT com token rotation (previne replay attacks)  
+- Performance: Cache distribuído com Redis  
+- Observabilidade: Prometheus + Grafana (dashboards prontos)  
+- Qualidade: 80%+ cobertura com threshold obrigatório  
+- CI/CD: Quality gate automático (SonarCloud)  
+- DevOps: Docker Compose com 6 serviços orquestrados  
 
 ---
 
-## 🛠 Stack Tecnológica
+## Stack Tecnológica
 
 ### Core
 - **Java 25 LTS**
@@ -241,7 +242,7 @@ Não é apenas "funciona" — é **production-ready**:
 
 ---
 
-## 📐 Arquitetura
+## Arquitetura
 
 ### Camadas
 
@@ -298,51 +299,51 @@ Request → Controller → Service → [Cache Hit? → Return]
                       [Cache Store] ← Response
 ```
 
-**Responsabilidades claramente delimitadas:**
-- **Controller:** Entrada HTTP, validação, serialização
-- **Service:** Regra de negócio, transações
-- **Repository:** Acesso a dados, queries
+**Responsabilidades claramente delimitadas:**  
+- **Controller:** Entrada HTTP, validação, serialização  
+- **Service:** Regra de negócio, transações  
+- **Repository:** Acesso a dados, queries  
 
 ---
 
-## 🏗 Decisões Arquiteturais
+## Decisões Arquiteturais
 
-### ✔ Separação Controller / Service / Repository
+### Separação Controller / Service / Repository
 **Por quê:** Evita vazamento de regra de negócio para camada HTTP.
 
 **Benefício:** Regras podem ser reutilizadas por diferentes controllers (REST, GraphQL, gRPC).
 
 ---
 
-### ✔ DTOs + MapStruct
+### DTOs + MapStruct
 **Por quê:** Isolamento de domínio e controle explícito de exposição.
 
 **Benefício:** Entidades JPA nunca são expostas diretamente na API, prevenindo lazy loading exceptions e vazamento de dados sensíveis.
 
 ---
 
-### ✔ Cache no nível de serviço
+### Cache no nível de serviço
 **Por quê:** Independente da camada web.
 
 **Benefício:** Cache funciona independente se chamado por REST, mensageria ou scheduled job.
 
 ---
 
-### ✔ Testcontainers
+### Testcontainers
 **Por quê:** Banco real nos testes de integração.
 
 **Benefício:** Testes simulam produção (PostgreSQL real), não comportamento idealizado (H2 in-memory).
 
 ---
 
-### ✔ Threshold de cobertura obrigatório
+### Threshold de cobertura obrigatório
 **Por quê:** Pipeline falha abaixo do mínimo definido (80%).
 
 **Benefício:** Garante qualidade mínima em cada PR, evitando degradação gradual.
 
 ---
 
-### ✔ Feature-based packages
+### Feature-based packages
 **Por quê:** Preparação para microservices.
 
 **Estrutura:**
@@ -363,38 +364,38 @@ com.example.library/
 
 ---
 
-## 📊 Observabilidade
+## Observabilidade
 
 **Fluxo completo:**
 ```
 Application → Actuator → Micrometer → Prometheus → Grafana
 ```
 
-**Métricas expostas:**
-- ✅ JVM (memória, threads, GC)
-- ✅ HTTP (requests, latência, status codes)
-- ✅ Database (pool de conexões, queries)
-- ✅ Cache (hits, misses, evictions)
-- ✅ Custom (livros criados, empréstimos ativos)
+**Métricas expostas:**  
+- JVM (memória, threads, GC)  
+- HTTP (requests, latência, status codes)  
+- Database (pool de conexões, queries)  
+- Cache (hits, misses, evictions)  
+- Custom (livros criados, empréstimos ativos)  
 
-**Métricas customizadas de negócio:**
-- `books_created_total` — Counter de livros criados
-- `active_loans` — Gauge de empréstimos ativos
-- `loan_duration_seconds` — Histogram de tempo de empréstimo
+**Métricas customizadas de negócio:**  
+- `books_created_total` — Counter de livros criados  
+- `active_loans` — Gauge de empréstimos ativos  
+- `loan_duration_seconds` — Histogram de tempo de empréstimo  
 
-**Dashboards Grafana:**
-- Overview (CPU, memória, requests)
-- Business Metrics (livros, empréstimos, usuários)
-- Database Performance (queries, pool)
+**Dashboards Grafana:**  
+- Overview (CPU, memória, requests)  
+- Business Metrics (livros, empréstimos, usuários)  
+- Database Performance (queries, pool)  
 
-**Acesso:**
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000 (admin/admin)
-- Métricas raw: http://localhost:8080/actuator/prometheus
+**Acesso:**  
+- Prometheus: http://localhost:9090  
+- Grafana: http://localhost:3000 (admin/admin)  
+- Métricas raw: http://localhost:8080/actuator/prometheus  
 
 ---
 
-## 🧪 Estratégia de Testes
+## Estratégia de Testes
 
 **Pirâmide de Testes:**
 ```
@@ -408,20 +409,20 @@ Application → Actuator → Micrometer → Prometheus → Grafana
 
 **Tipos de teste implementados:**
 
-### Unit Tests
-- Isolamento de regra de negócio
-- Mockito para dependências
-- Foco em Services
+### Unit Tests  
+- Isolamento de regra de negócio  
+- Mockito para dependências  
+- Foco em Services  
 
-### Repository Tests
-- `@DataJpaTest` (context slice)
-- Banco H2 in-memory (rápido)
-- Valida queries customizadas
+### Repository Tests  
+- `@DataJpaTest` (context slice)  
+- Banco H2 in-memory (rápido)  
+- Valida queries customizadas  
 
-### Integration Tests
-- `@SpringBootTest` (context completo)
-- **Testcontainers** com PostgreSQL real
-- Valida fluxo end-to-end
+### Integration Tests  
+- `@SpringBootTest` (context completo)  
+- **Testcontainers** com PostgreSQL real  
+- Valida fluxo end-to-end  
 
 **Cobertura atual:** 80%+  
 **Threshold obrigatório:** 80% (pipeline falha se menor)
@@ -435,7 +436,7 @@ Application → Actuator → Micrometer → Prometheus → Grafana
 
 ---
 
-## 📦 Endpoints Principais
+## Endpoints Principais
 
 ### Autenticação
 - `POST /auth/login` — Login (retorna JWT)
@@ -465,32 +466,31 @@ Application → Actuator → Micrometer → Prometheus → Grafana
 
 ---
 
-## 📈 Métricas do Projeto
+## Métricas do Projeto
 
-- **~8.000** linhas de código
 - **125+** testes (unit + integration)
 - **80%+** cobertura (JaCoCo)
 - **25+** endpoints REST versionados (/api/v1)
 - **6** serviços Docker orquestrados
 - **4** migrations Flyway
 
-## 🔮 Próximos Passos
+## Próximos Passos
 
 Roadmap de evolução:
 
-- [ ] **AWS S3** — Upload de imagens de capas
-- [ ] **Rate limiting** — Bucket4j ou Resilience4j
-- [ ] **OpenTelemetry** — Tracing distribuído
-- [ ] **Deploy em cloud** — AWS ECS ou Render
-- [ ] **HATEOAS** — Hypermedia links
-- [ ] **WebSockets** — Notificações real-time
-- [ ] **Microservices** — Quebrar em serviços independentes
+- **AWS S3** — Upload de imagens de capas
+- **Rate limiting** — Bucket4j ou Resilience4j
+- **OpenTelemetry** — Tracing distribuído
+- **Deploy em cloud** — AWS ECS ou Render
+- **HATEOAS** — Hypermedia links
+- **WebSockets** — Notificações real-time
+- **Microservices** — Quebrar em serviços independentes
 
 **Sugestões?** Abra uma issue com tag `enhancement`!
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 ### Swagger UI
 ![Swagger UI](docs/images/swagger-ui.png)
@@ -503,7 +503,7 @@ Roadmap de evolução:
 
 ---
 
-## 🤝 Como Contribuir
+## Como Contribuir
 
 Contribuições são muito bem-vindas! Este projeto está aberto para:
 
@@ -546,17 +546,17 @@ Issues marcadas com `good-first-issue`:
 ```
 
 ### Code Review
-- ✅ PRs são revisados em até 48h
-- ✅ Feedback construtivo garantido
-- ✅ Ajuda com dúvidas técnicas
+- PRs são revisados em até 48h
+- Feedback construtivo garantido
+- Ajuda com dúvidas técnicas
 
 ### O Que Esperamos
-- ✅ Código limpo e testado
-- ✅ Commits semânticos (Conventional Commits)
-- ✅ Documentação atualizada
-- ✅ 80%+ de cobertura mantida
+- Código limpo e testado
+- Commits semânticos (Conventional Commits)
+- Documentação atualizada
+- 80%+ de cobertura mantida
 
-**Primeira vez contribuindo em open source?** Sem problema! Marque a issue como `help-wanted` que eu ajudo! 🚀
+**Primeira vez contribuindo em open source?** Sem problema! Marque a issue como `help-wanted` que eu ajudo!
 
 ---
 
@@ -565,13 +565,13 @@ Issues marcadas com `good-first-issue`:
 **Eric Hiroshi**  
 Backend Engineer — Java / Spring Boot
 
-- 💼 LinkedIn: [Eric Hiroshi](https://www.linkedin.com/in/eric-hiroshi/)
-- 📧 Email: [erichiroshi@hotmail.com]
-- 🔗 GitHub: [@erichiroshi](https://github.com/erichiroshi)
+- LinkedIn: [Eric Hiroshi](https://www.linkedin.com/in/eric-hiroshi/)
+- Email: [erichiroshi@hotmail.com]
+- GitHub: [@erichiroshi](https://github.com/erichiroshi)
 
 ---
 
-## 📄 Licença
+## Licença
 
 Este projeto está sob a licença [MIT](LICENSE).
 
@@ -587,15 +587,11 @@ A versão em PDF da documentação técnica é gerada automaticamente via GitHub
   <em>"Código limpo é aquele que expressa a intenção com simplicidade e precisão."</em>
 </p>
 
-<p align="center">
-  <strong>Desenvolvido com ☕ e 💻</strong>
-</p>
-
 ---
 
-## 🌟 Star o Projeto
+## Star o Projeto
 
-Se este projeto te ajudou de alguma forma, considere dar uma ⭐ no repositório!
+Se este projeto te ajudou de alguma forma, considere dar uma estrela no repositório!
 
 ---
 

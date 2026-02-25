@@ -12,13 +12,13 @@
 
 Backend production-ready projetado com foco em previsibilidade, observabilidade e isolamento de responsabilidades.
 
-🔐 Autenticação JWT com Refresh Token Rotation
-🧠 Arquitetura em camadas bem definida
-🗄 PostgreSQL + Flyway (versionamento automático)
-⚡ Cache distribuído com Redis
-📊 Observabilidade completa (Micrometer + Prometheus + Grafana)
-🧪 Testes de integração com Testcontainers (banco real)
-🚀 CI/CD com quality gate obrigatório (80%+ cobertura) 
+🔐 Autenticação JWT com Refresh Token Rotation  
+🧠 Arquitetura em camadas bem definida  
+🗄 PostgreSQL + Flyway (versionamento automático)  
+⚡ Cache distribuído com Redis  
+📊 Observabilidade completa (Micrometer + Prometheus + Grafana)  
+🧪 Testes de integração com Testcontainers (banco real)  
+🚀 CI/CD com quality gate obrigatório (80%+ cobertura)  
 
 ---
 

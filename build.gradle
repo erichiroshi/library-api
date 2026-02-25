@@ -59,7 +59,7 @@ ext {
     lombokMapstructBindingVersion = "0.2.0"
     springdocVersion = "3.0.1"
     jjwtVersion = "0.13.0"
-   	testcontainersVersion = "1.19.7"
+   	testcontainersVersion = "2.0.3"
 }
 
 dependencies {
@@ -112,9 +112,9 @@ dependencies {
 	
 	// Testcontainers
 	testImplementation platform("org.testcontainers:testcontainers-bom:${testcontainersVersion}")
-	testImplementation 'org.testcontainers:junit-jupiter'
-    testImplementation 'org.testcontainers:postgresql'
-	testImplementation 'org.testcontainers:jdbc'
+	testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+	testImplementation 'org.testcontainers:testcontainers-jdbc'
     
     // Prometheus
     implementation 'io.micrometer:micrometer-registry-prometheus'
