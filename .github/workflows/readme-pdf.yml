@@ -32,7 +32,7 @@ jobs:
             -V linestretch=1.05
 
       - name: Upload README PDF
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: library-readme-pdf
           path: library.pdf
