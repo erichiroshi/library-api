@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -85,6 +87,12 @@ public class BookController {
 	public ResponseEntity<Void> deleteById(@PathVariable Long id) {
 		bookService.deleteById(id);
 		return ResponseEntity.noContent().build();
+	}
+	
+	@PostMapping("/{bookId}/picture")
+    public ResponseEntity<Void> uploadPicture(@PathVariable Long bookId, @RequestPart("file") MultipartFile file) {
+		URI uri = bookService.uploadFile(bookId, file);
+		return ResponseEntity.created(uri).build();
 	}
 
 }

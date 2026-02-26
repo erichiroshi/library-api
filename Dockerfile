@@ -20,7 +20,7 @@ RUN gradle clean bootJar --no-daemon
 # =========================================================
 # =============== RUNTIME STAGE ===========================
 # =========================================================
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:25-jre-jammy
 
 # Metadados da imagem
 LABEL org.opencontainers.image.title="Library API"

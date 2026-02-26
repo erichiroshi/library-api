@@ -16,10 +16,16 @@ public record BookResponseDTO(
 		
 	    @Schema(description = "ISBN do livro", example = "9780132350884")
 		String isbn,
+		
 		Integer publicationYear, 
+		
 		Integer availableCopies,
+		
 		Set<Long> authorIds,
-		Long categoryId
+		
+		Long categoryId,
+		
+		String coverImageUrl
 		
 ) implements Serializable
 {}

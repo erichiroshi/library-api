@@ -33,5 +33,15 @@
     "name": "aws.secret-access-key",
     "type": "java.lang.String",
     "description": "A description for 'aws.secret-access-key'"
+  },
+  {
+    "name": "img.prefix.book",
+    "type": "java.lang.String",
+    "description": "A description for 'img.prefix.book'"
+  },
+  {
+    "name": "img.maxWidth",
+    "type": "java.lang.String",
+    "description": "A description for 'img.maxWidth'"
   }
 ]}

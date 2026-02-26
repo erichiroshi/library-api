@@ -6,7 +6,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -33,6 +33,8 @@ spring:
           max-active: 8
           max-idle: 8
           min-idle: 0
+      repositories:
+       enabled: false
 
 # ═══════════════════════════════════════════════════════════════════
 # SCHEDULED TASKS
@@ -87,11 +89,3 @@ jwt:
   # Produção: 7 dias
   # Desenvolvimento: 14 dias (conveniência)
   refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:14}
-
-  # AWS - BUCKET
-aws:
-  access-key-id: ${AWS_KEY}
-  secret-access-key: ${AWS_SECRET}
-s3:
-  bucket: ${BUCKET_NAME:library-api-s3}
-  region: ${BUCKET_REGION:sa-east-1}

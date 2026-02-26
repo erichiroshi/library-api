@@ -14,4 +14,21 @@ spring:
     default-property-inclusion: non_null
   
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
+    active: ${SPRING_PROFILES_ACTIVE:prod}
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+img:
+  prefix:
+    book: book-
+  maxWidth: 400
+
+aws:
+  access-key-id: ${AWS_KEY}
+  secret-access-key: ${AWS_SECRET}
+s3:
+  bucket: ${BUCKET_NAME:library-api-s3}
+  region: ${BUCKET_REGION:sa-east-1}

@@ -99,6 +99,10 @@ services:
         JWT_SECRET_KEY: ${JWT_SECRET_KEY}
         REDIS_HOST: ${REDIS_HOST}
         REDIS_PORT: ${REDIS_PORT}
+        AWS_KEY: ${AWS_KEY}
+        AWS_SECRET: ${AWS_SECRET}
+        BUCKET_NAME: ${BUCKET_NAME}
+        BUCKET_REGION: ${BUCKET_REGION}
       ports:
         - "8080:8080"
       depends_on:

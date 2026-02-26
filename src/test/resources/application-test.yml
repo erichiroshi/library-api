@@ -1,0 +1,16 @@
+spring:
+  autoconfigure:
+    exclude: com.example.library.aws.S3Config
+
+aws:
+  access-key-id: fake-key-for-tests
+  secret-access-key: fake-secret-for-tests
+
+s3:
+  bucket: test-bucket
+  region: us-east-1
+
+img:
+  prefix:
+    book: book-
+  maxWidth: 400

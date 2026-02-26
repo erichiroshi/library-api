@@ -22,6 +22,7 @@ public interface BookMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "authors", ignore = true)
+    @Mapping(target = "coverImageUrl", ignore = true)
 	Book toEntity(BookCreateDTO dto);
     
     default Set<Long> mapAuthors(Set<Author> authors) {
