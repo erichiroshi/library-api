@@ -39,7 +39,7 @@ public class S3Service {
 		    );
 	
 	private static final long MIN_FILE_SIZE = 1024; // 1KB
-	private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+	private static final long MAX_FILE_SIZE = (long)10 * 1024 * 1024; // 10MB
 	
 	@Value("${img.maxWidth}")
 	private Integer maxWidth;
