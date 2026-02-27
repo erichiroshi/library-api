@@ -21,18 +21,21 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # Apenas TAG da imagem existente (não rebuild!)
       - name: Tag and push versioned image
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          VERSION: ${{ steps.version.outputs.VERSION }}
         run: |
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/library-api:latest
-          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/library-api:latest \
-                     ${{ secrets.DOCKERHUB_USERNAME }}/library-api:${{ steps.version.outputs.VERSION }}
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/library-api:${{ steps.version.outputs.VERSION }}
+          docker pull $DOCKERHUB_USERNAME/library-api:latest
+          docker tag $DOCKERHUB_USERNAME/library-api:latest \
+                     $DOCKERHUB_USERNAME/library-api:$VERSION
+          docker push $DOCKERHUB_USERNAME/library-api:$VERSION
 
       # Gera release notes automaticamente
       - name: Create GitHub Release
