@@ -159,6 +159,17 @@ jacoco {
     toolVersion = "0.8.14"
 }
 
+// Centralizar exclusões
+ext {
+    coverageExclusions = [
+        '**/dto/**',
+        '**/config/**',
+        '**/mapper/**',
+        '**/*MapperImpl.class',
+        '**/*Application.class'
+    ]
+}
+
 tasks.named("jacocoTestReport") {
     dependsOn(tasks.named("test"))
     dependsOn(tasks.named("integrationTest"))
@@ -179,20 +190,7 @@ tasks.named("jacocoTestReport") {
     classDirectories.setFrom(
         files(
             sourceSets.main.output.asFileTree.matching {
-                exclude(
-                    // DTOs — sem lógica testável
-                    '**/dto/**',
-
-                    // Configurações — testadas pelos testes de contexto
-                    '**/config/**',
-
-                    // MapStruct — gerado automaticamente
-                    '**/mapper/**',
-                    '**/*MapperImpl.class',
-
-                    // Bootstrap
-                    '**/*Application.class',
-                )
+                exclude(coverageExclusions)
             }
         )
     )
@@ -261,13 +259,8 @@ sonar {
     property "sonar.host.url", "https://sonarcloud.io"
     property "sonar.java.source", "25"
     property "sonar.java.enablePreview", "true"
-    property "sonar.exclusions", """
-                **/dto/**,
-                **/config/**,
-                **/mapper/**,
-                **/*MapperImpl.java,
-                **/*Application.java,
-                """
+    property "sonar.exclusions", coverageExclusions.join(',')
+    
     property "sonar.coverage.jacoco.xmlReportPaths",
              "build/reports/jacoco/test/jacocoTestReport.xml"
   }

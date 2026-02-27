@@ -2,6 +2,7 @@ package com.example.library.aws.utils;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,15 +18,23 @@ public class ImageProcessingService {
     public MultipartFile compressImage(MultipartFile file, int maxWidth) throws IOException {
         BufferedImage original = ImageIO.read(file.getInputStream());
         
+        if (original == null) {
+            throw new IOException("Invalid or corrupted image file");
+        }
+        
         if (original.getWidth() <= maxWidth) {
-            return file;  // Não aumenta imagens pequenas
+            return file;  // // Retorna original sem processar
         }
         
         // Calcular nova altura mantendo aspect ratio
         int newHeight = (int) ((original.getHeight() * maxWidth) / (double) original.getWidth());
         
-        BufferedImage resized = new BufferedImage(maxWidth, newHeight, BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = resized.createGraphics();
+        int imageType = original.getTransparency() == Transparency.OPAQUE 
+					        	    ? BufferedImage.TYPE_INT_RGB 
+					        	    : BufferedImage.TYPE_INT_ARGB;  // ← Preserva transparência
+
+    	BufferedImage resized = new BufferedImage(maxWidth, newHeight, imageType);
+    	Graphics2D graphics = resized.createGraphics();
         graphics.drawImage(original.getScaledInstance(maxWidth, newHeight, Image.SCALE_SMOOTH), 0, 0, null);
         graphics.dispose();
         

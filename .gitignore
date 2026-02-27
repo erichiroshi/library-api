@@ -1,10 +1,29 @@
 HELP.md
-.gradle
+/monitoring/grafana/data/
+
+# Build
 build/
-!gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-/monitoring/grafana/data/
+target/
+*.class
+
+# Gradle
+.gradle/
+gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+#.env #arquivo liberado - projeto de estudos
+*.key
+*.pem
+
+# Logs
+*.log
 
 ### STS ###
 .apt_generated
@@ -17,7 +36,6 @@ build/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
-#.env #arquivo liberado - projeto de estudos
 
 ### IntelliJ IDEA ###
 .idea

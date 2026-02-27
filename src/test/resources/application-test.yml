@@ -1,6 +1,6 @@
 spring:
   autoconfigure:
-    exclude: com.example.library.aws.S3Config
+    exclude: com.example.library.aws.S3Config  # ← Desabilita S3Config em testes
 
 aws:
   access-key-id: fake-key-for-tests

@@ -19,8 +19,8 @@ public class InvalidOperationException extends ApiException {
 
 	public InvalidOperationException(Set<Long> ids) {
 
-		HttpStatus status = HttpStatus.NOT_FOUND;
-		String title = "Author Not Found";
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		String title = "Invalid Operation";
 		String detail = "Some authors were not found. ID's: " + ids;
 		URI type = URI.create("https://api.library/errors/author-not-found");
 
