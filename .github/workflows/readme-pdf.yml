@@ -5,10 +5,13 @@ on:
     branches: [ "main", "develop" ]
     paths:
       - readme_pdf.md
+    tags:
+      - 'v*'
 
 jobs:
   docs:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v6
@@ -36,3 +39,4 @@ jobs:
         with:
           name: library-readme-pdf
           path: library.pdf
+          retention-days: 30
