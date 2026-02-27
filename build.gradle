@@ -8,8 +8,8 @@ plugins {
 }
 
 group = 'com.example'
-version = '0.0.1-SNAPSHOT'
-description = 'Library Service'
+version = 'v1.1.1'
+description = 'Library API - Service'
 
 java {
 	toolchain {

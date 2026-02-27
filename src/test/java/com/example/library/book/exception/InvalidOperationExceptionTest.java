@@ -49,9 +49,10 @@ class InvalidOperationExceptionTest {
 
         // Assert
         String detail = exception.getDetail();
-        assertThat(detail).contains("10");
-        assertThat(detail).contains("20");
-        assertThat(detail).contains("30");
-        assertThat(detail).contains("40");
+        assertThat(detail)
+        		.contains("10")
+        		.contains("20")
+        		.contains("30")
+        		.contains("40");
     }
 }
