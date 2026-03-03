@@ -21,10 +21,10 @@ import com.example.library.category.CategoryRepository;
 import com.example.library.category.CategoryService;
 import com.example.library.category.dto.CategoryCreateDTO;
 import com.example.library.category.dto.CategoryResponseDTO;
-import com.example.library.category.dto.PageResponseDTO;
 import com.example.library.category.exception.CategoryAlreadyExistsException;
 import com.example.library.category.exception.CategoryNotFoundException;
 import com.example.library.category.mapper.CategoryMapper;
+import com.example.library.common.dto.PageResponseDTO;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

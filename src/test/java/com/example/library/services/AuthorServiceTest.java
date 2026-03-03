@@ -21,9 +21,9 @@ import com.example.library.author.AuthorRepository;
 import com.example.library.author.AuthorService;
 import com.example.library.author.dto.AuthorCreateDTO;
 import com.example.library.author.dto.AuthorResponseDTO;
-import com.example.library.author.dto.PageResponseDTO;
 import com.example.library.author.exception.AuthorNotFoundException;
 import com.example.library.author.mapper.AuthorMapper;
+import com.example.library.common.dto.PageResponseDTO;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

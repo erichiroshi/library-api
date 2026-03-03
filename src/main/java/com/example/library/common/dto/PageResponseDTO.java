@@ -1,5 +1,6 @@
-package com.example.library.author.dto;
+package com.example.library.common.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
 public record PageResponseDTO<T>(
@@ -8,5 +9,4 @@ public record PageResponseDTO<T>(
         int size,
         long totalElements,
         int totalPages
-) {
-}
+) implements Serializable {}

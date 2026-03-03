@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.example.library.author.dto.AuthorCreateDTO;
 import com.example.library.author.dto.AuthorResponseDTO;
-import com.example.library.author.dto.PageResponseDTO;
+import com.example.library.common.dto.PageResponseDTO;
 
 import jakarta.validation.Valid;
 
@@ -39,10 +39,8 @@ public class AuthorController {
 			description = "Cria um novo autor com os dados fornecidos")
 	@PostMapping
 	public ResponseEntity<AuthorResponseDTO> create(@RequestBody @Valid AuthorCreateDTO dto) {
-
 		AuthorResponseDTO response = service.create(dto);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.id()).toUri();
-
 		return ResponseEntity.created(uri).body(response);
 	}
 

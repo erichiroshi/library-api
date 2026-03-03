@@ -10,10 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.library.category.dto.CategoryCreateDTO;
 import com.example.library.category.dto.CategoryResponseDTO;
-import com.example.library.category.dto.PageResponseDTO;
 import com.example.library.category.exception.CategoryAlreadyExistsException;
 import com.example.library.category.exception.CategoryNotFoundException;
 import com.example.library.category.mapper.CategoryMapper;
+import com.example.library.common.dto.PageResponseDTO;
 
 @Service
 public class CategoryService {
@@ -28,7 +28,6 @@ public class CategoryService {
 
 	@Transactional
 	public CategoryResponseDTO create(CategoryCreateDTO dto) {
-
 		Optional<Category> entity = repository.findByNameIgnoreCase(dto.name());
 
 		if (entity.isPresent()) {
@@ -36,7 +35,6 @@ public class CategoryService {
 		}
 
 		Category category = mapper.toEntity(dto);
-
 		category = repository.save(category);
 		
 		return mapper.toDTO(category);
@@ -44,21 +42,17 @@ public class CategoryService {
 
 	@Transactional(readOnly = true)
 	public CategoryResponseDTO findById(Long id) {
-		Category category = find(id);
-		return mapper.toDTO(category);
+		return mapper.toDTO(find(id));
 	}
 
 	@Transactional(readOnly = true)
 	public PageResponseDTO<CategoryResponseDTO> findAll(Pageable pageable) {
-
 	    Page<Category> page = repository.findAll(pageable);
 	    
-	    List<CategoryResponseDTO> content =
-	            page.getContent()
-	                .stream()
-	                .map(mapper::toDTO)
-	                .toList();
-
+	    List<CategoryResponseDTO> content = page.getContent()
+	    		.stream()
+	            .map(mapper::toDTO)
+	            .toList();
 
 	    return new PageResponseDTO<>(
 	            content,

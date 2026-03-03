@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.example.library.book.dto.BookCreateDTO;
 import com.example.library.book.dto.BookResponseDTO;
-import com.example.library.book.dto.PageResponseDTO;
+import com.example.library.common.dto.PageResponseDTO;
 
 import jakarta.validation.Valid;
 

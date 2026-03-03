@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.library.author.dto.AuthorCreateDTO;
 import com.example.library.author.dto.AuthorResponseDTO;
-import com.example.library.author.dto.PageResponseDTO;
 import com.example.library.author.exception.AuthorNotFoundException;
 import com.example.library.author.mapper.AuthorMapper;
+import com.example.library.common.dto.PageResponseDTO;
 
 @Service
 public class AuthorService {
@@ -33,9 +33,7 @@ public class AuthorService {
 
 	@Transactional(readOnly = true)
 	public AuthorResponseDTO findById(Long id) {
-		Author author = find(id);
-		return mapper.toDTO(author);
-
+		return mapper.toDTO(find(id));
 	}
 
 	@Transactional(readOnly = true)

@@ -20,7 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.example.library.category.dto.CategoryCreateDTO;
 import com.example.library.category.dto.CategoryResponseDTO;
-import com.example.library.category.dto.PageResponseDTO;
+import com.example.library.common.dto.PageResponseDTO;
 
 import jakarta.validation.Valid;
 
@@ -39,10 +39,8 @@ public class CategoryController {
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<CategoryResponseDTO> create(@RequestBody @Valid CategoryCreateDTO dto) {
-    	
 		CategoryResponseDTO response = service.create(dto);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.id()).toUri();
-		
 		return ResponseEntity.created(uri).body(response);
 	}
 
