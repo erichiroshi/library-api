@@ -18,25 +18,25 @@ Upload de imagens de capa com AWS S3
 
 ## Índice
 
-- [Visão Geral](#-visão-geral)
-- [Requisitos](#-requisitos)
-- [Quick Start](#-quick-start)
-  - [Modo Desenvolvimento](#-modo-desenvolvimento-recomendado-para-avaliação)
-  - [Modo Produção](#-modo-produção-simulado)
-- [Variáveis de Ambiente](#-variáveis-de-ambiente)
-- [Problema que Resolve](#-problema-que-este-projeto-resolve)
-- [Stack Tecnológica](#-stack-tecnológica)
-- [Arquitetura](#-arquitetura)
-- [Decisões Arquiteturais](#-decisões-arquiteturais)
-- [Observabilidade](#-observabilidade)
-- [Estratégia de Testes](#-estratégia-de-testes)
-- [Endpoints Principais](#-endpoints-principais)
-- [Upload de Imagens (AWS S3)](#-upload-de-imagens-aws-s3)
-- [Agendamentos (Scheduled Jobs)](#-agendamentos-scheduled-jobs)
-- [Métricas do Projeto](#-métricas-do-projeto)
-- [Próximos Passos](#-próximos-passos)
-- [Screenshots](#-screenshots)
-- [Contribuições](#-como-contribuir)
+- [Visão Geral](#visão-geral)
+- [Requisitos](#requisitos)
+- [Quick Start](#quick-start)
+  - [Modo Desenvolvimento](#modo-desenvolvimento-recomendado-para-avaliação)
+  - [Modo Produção](#modo-produção-simulado)
+- [Variáveis de Ambiente](#variáveis-de-ambiente)
+- [Problema que Resolve](#problema-que-este-projeto-resolve)
+- [Stack Tecnológica](#stack-tecnológica)
+- [Arquitetura](#arquitetura)
+- [Decisões Arquiteturais](#decisões-arquiteturais)
+- [Observabilidade](#observabilidade)
+- [Estratégia de Testes](#estratégia-de-testes)
+- [Endpoints Principais](#endpoints-principais)
+- [Upload de Imagens (AWS S3)](#upload-de-imagens-aws-s3)
+- [Agendamentos (Scheduled Jobs)](#agendamentos-scheduled-jobs)
+- [Métricas do Projeto](#métricas-do-projeto)
+- [Próximos Passos](#próximos-passos)
+- [Screenshots](#screenshots)
+- [Contribuições](#como-contribuir)
 - [Autor](#autor)
 
 ---
@@ -257,6 +257,11 @@ Uma biblioteca precisa:
 - **Micrometer** (abstração de métricas)
 - **Prometheus** (coleta de métricas, scrape a cada 10s)
 - **Grafana** (dashboards provisionados automaticamente)
+- **OpenTelemetry + Zipkin** (tracing distribuído com traceId nos logs)
+
+### Resiliência
+- **Resilience4j** (Circuit Breaker + Retry para integrações externas)
+- **ShedLock** (lock distribuído para scheduled jobs)
 
 ### Testes
 - **Testcontainers** (PostgreSQL real em testes de integração)
@@ -410,6 +415,16 @@ Request → Controller → Service → [Cache Hit? → Return]
 
 **Benefício:** Código relacionado fica junto; cada pacote é praticamente auto-contido.
 
+### ✔ Spring Events para desacoplamento de domínios
+**Por quê:** Preparação para separação futura em microservices sem introduzir Kafka prematuramente.
+
+**Benefício:** Domínios se comunicam via eventos internos (`ApplicationEventPublisher`) em vez de injeção direta de repositórios entre pacotes. Troca futura por Kafka/RabbitMQ requer mudança mínima.
+
+### ✔ Resilience4j em integrações externas
+**Por quê:** Proteger o monolito contra falhas de serviços externos (S3) e preparar os pontos de integração para extração futura.
+
+**Benefício:** Circuit Breaker evita cascata de falhas; Retry com backoff trata falhas transitórias. Padrão já estabelecido para quando LoanService precisar chamar BookService via HTTP.
+
 ---
 
 ## Observabilidade
@@ -493,46 +508,46 @@ Relatório HTML: `build/reports/jacoco/test/html/index.html`
 ### Autenticação
 | Método | Endpoint | Descrição | Auth |
 |--------|----------|-----------|------|
-| POST | `/auth/login` | Login — retorna access + refresh token | ❌ |
-| POST | `/auth/refresh` | Renova access token (token rotation) | ❌ |
-| POST | `/auth/logout` | Invalida o refresh token | ❌ |
+| POST | `/auth/login` | Login — retorna access + refresh token | X |
+| POST | `/auth/refresh` | Renova access token (token rotation) | X |
+| POST | `/auth/logout` | Invalida o refresh token | X |
 
 ### Livros
 | Método | Endpoint | Descrição | Auth |
 |--------|----------|-----------|------|
-| GET | `/api/v1/books` | Lista livros paginado (com cache Redis) | ✅ |
-| GET | `/api/v1/books/{id}` | Busca por ID (com cache Redis) | ✅ |
-| POST | `/api/v1/books` | Cria livro | ✅ |
-| DELETE | `/api/v1/books/{id}` | Remove livro | 🔐 ADMIN |
-| POST | `/api/v1/books/{id}/picture` | Upload de imagem de capa (S3) | ✅ |
+| GET | `/api/v1/books` | Lista livros paginado (com cache Redis) | ✔ |
+| GET | `/api/v1/books/{id}` | Busca por ID (com cache Redis) | ✔ |
+| POST | `/api/v1/books` | Cria livro | ✔ |
+| DELETE | `/api/v1/books/{id}` | Remove livro | ADMIN |
+| POST | `/api/v1/books/{id}/picture` | Upload de imagem de capa (S3) | ✔ |
 
 ### Autores
 | Método | Endpoint | Descrição | Auth |
 |--------|----------|-----------|------|
-| GET | `/api/v1/authors` | Lista autores paginado | ✅ |
-| GET | `/api/v1/authors/{id}` | Busca por ID | ✅ |
-| POST | `/api/v1/authors` | Cria autor | ✅ |
-| DELETE | `/api/v1/authors/{id}` | Remove autor | 🔐 ADMIN |
+| GET | `/api/v1/authors` | Lista autores paginado | ✔ |
+| GET | `/api/v1/authors/{id}` | Busca por ID | ✔ |
+| POST | `/api/v1/authors` | Cria autor | ✔ |
+| DELETE | `/api/v1/authors/{id}` | Remove autor | ADMIN |
 
 ### Categorias
 | Método | Endpoint | Descrição | Auth |
 |--------|----------|-----------|------|
-| GET | `/api/v1/categories` | Lista categorias paginado | ✅ |
-| GET | `/api/v1/categories/{id}` | Busca por ID | ✅ |
-| POST | `/api/v1/categories` | Cria categoria | 🔐 ADMIN |
-| DELETE | `/api/v1/categories/{id}` | Remove categoria | 🔐 ADMIN |
+| GET | `/api/v1/categories` | Lista categorias paginado | ✔ |
+| GET | `/api/v1/categories/{id}` | Busca por ID | ✔ |
+| POST | `/api/v1/categories` | Cria categoria | ADMIN |
+| DELETE | `/api/v1/categories/{id}` | Remove categoria | ADMIN |
 
 ### Empréstimos
 | Método | Endpoint | Descrição | Auth |
 |--------|----------|-----------|------|
-| POST | `/api/v1/loans` | Cria empréstimo | ✅ |
-| GET | `/api/v1/loans/{id}` | Busca por ID (apenas dono ou ADMIN) | ✅ |
-| GET | `/api/v1/loans/me` | Lista meus empréstimos | ✅ |
-| GET | `/api/v1/loans` | Lista todos os empréstimos | 🔐 ADMIN |
-| GET | `/api/v1/loans/user/{userId}` | Lista empréstimos por usuário | 🔐 ADMIN |
-| GET | `/api/v1/loans/overdue` | Lista empréstimos vencidos | 🔐 ADMIN |
-| PATCH | `/api/v1/loans/{id}/return` | Registra devolução | ✅ |
-| PATCH | `/api/v1/loans/{id}/cancel` | Cancela empréstimo | ✅ |
+| POST | `/api/v1/loans` | Cria empréstimo | ✔ |
+| GET | `/api/v1/loans/{id}` | Busca por ID (apenas dono ou ADMIN) | ✔ |
+| GET | `/api/v1/loans/me` | Lista meus empréstimos | ✔ |
+| GET | `/api/v1/loans` | Lista todos os empréstimos | ADMIN |
+| GET | `/api/v1/loans/user/{userId}` | Lista empréstimos por usuário | ADMIN |
+| GET | `/api/v1/loans/overdue` | Lista empréstimos vencidos | ADMIN |
+| PATCH | `/api/v1/loans/{id}/return` | Registra devolução | ✔ |
+| PATCH | `/api/v1/loans/{id}/cancel` | Cancela empréstimo | ✔ |
 
 **Documentação interativa (profile dev):** http://localhost:8080/swagger-ui/index.html
 
@@ -579,6 +594,8 @@ Limpa automaticamente refresh tokens expirados do banco de dados.
 
 - **Frequência:** Todo dia às 02:00 AM (`cron = "0 0 2 * * *"`)
 - **O que faz:** `DELETE FROM tb_refresh_tokens WHERE expiry_date < NOW()`
+- **Lock distribuído:** ShedLock garante execução em apenas uma instância (`lockAtLeastFor = "30m"`, `lockAtMostFor = "1h"`)
+
 - **Por quê:** Tokens expirados são deletados ao serem usados (via `validate()`), mas tokens nunca reutilizados acumulam no banco.
 
 ### LoanService.markOverdue()
@@ -603,8 +620,8 @@ Marca como `OVERDUE` empréstimos com `status = WAITING_RETURN` e `dueDate < hoj
 
 ## Próximos Passos
 
-- [ ] **Rate limiting** — Bucket4j ou Resilience4j
-- [ ] **OpenTelemetry** — Tracing distribuído
+- [x] **Rate limiting** — Bucket4j ou Resilience4j
+- [x] **OpenTelemetry** — Tracing distribuído
 - [ ] **Deploy em cloud** — AWS ECS ou Render
 - [ ] **HATEOAS** — Hypermedia links
 - [ ] **WebSockets** — Notificações real-time de devolução
