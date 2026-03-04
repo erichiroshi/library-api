@@ -2,9 +2,12 @@ package com.example.library.loan;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,9 @@ import com.example.library.book.BookRepository;
 import com.example.library.book.exception.BookNotFoundException;
 import com.example.library.loan.dto.LoanCreateDTO;
 import com.example.library.loan.dto.LoanResponseDTO;
+import com.example.library.loan.event.LoanCanceledEvent;
+import com.example.library.loan.event.LoanCreatedEvent;
+import com.example.library.loan.event.LoanReturnedEvent;
 import com.example.library.loan.exception.BookNotAvailableException;
 import com.example.library.loan.exception.LoanAlreadyReturnedException;
 import com.example.library.loan.exception.LoanNotFoundException;
@@ -33,9 +39,10 @@ public class LoanService {
     private static final Logger log = LoggerFactory.getLogger(LoanService.class);
 	
 	private final LoanRepository loanRepository;
-	private final BookRepository bookRepository;
+    private final BookRepository bookRepository;    // usado apenas para verificação e decrement atômico na criação
 	private final UserRepository userRepository;
 	private final LoanMapper mapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     // ─────────────────────────────────────────────
     // CRIAR EMPRÉSTIMO
@@ -46,8 +53,10 @@ public class LoanService {
 		
 		User user = getAuthenticatedUser();
         
+        // Valida existência de todos os livros antes de iniciar
 		for (Long bookId : dto.booksId()) {
-			bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+			bookRepository.findById(bookId)
+				.orElseThrow(() -> new BookNotFoundException(bookId));
 		}
 
         log.info("Creating loan for user={} books={}", user.getEmail(), dto.booksId());
@@ -75,11 +84,17 @@ public class LoanService {
 			item.setQuantity(1);
 
 			loan.getItems().add(item);
-			
             log.debug("Book added to loan: bookId={} title={}", bookId, book.getTitle());
 		}
 
         Loan saved = loanRepository.save(loan);
+        
+        // Publica evento — outros domínios podem reagir sem acoplamento direto
+        eventPublisher.publishEvent(new LoanCreatedEvent(
+                saved.getId(),
+                user.getId(),
+                dto.booksId()
+        ));
 
         log.info("Loan created: loanId={} user={} books={}",
                 saved.getId(), user.getEmail(), dto.booksId().size());
@@ -111,12 +126,15 @@ public class LoanService {
 		loan.setReturnDate(LocalDate.now());
 		loan.setStatus(LoanStatus.RETURNED);
 
-        // Devolve as cópias — dirty checking cuida do save dentro do @Transactional
-		loan.getItems().forEach(item -> {
-			Book book = item.getBook();
-			book.setAvailableCopies(book.getAvailableCopies() + item.getQuantity());
-            log.debug("Copies restored: bookId={} title={}", book.getId(), book.getTitle());
-		});
+	    // Monta o mapa bookId → quantidade antes de publicar o evento
+        Map<Long, Integer> bookQuantities = buildBookQuantities(loan);
+
+        // Publica evento — BookEventListener restaura as cópias
+        eventPublisher.publishEvent(new LoanReturnedEvent(
+                loan.getId(),
+                user.getId(),
+                bookQuantities
+        ));
 
         log.info("Loan returned: loanId={} user={}", loanId, user.getEmail());
 
@@ -141,11 +159,14 @@ public class LoanService {
 
         loan.setStatus(LoanStatus.CANCELED);
 
-        // Devolve as cópias ao cancelar
-        loan.getItems().forEach(item -> {
-            Book book = item.getBook();
-            book.setAvailableCopies(book.getAvailableCopies() + item.getQuantity());
-        });
+        Map<Long, Integer> bookQuantities = buildBookQuantities(loan);
+
+        // Publica evento — BookEventListener restaura as cópias
+        eventPublisher.publishEvent(new LoanCanceledEvent(
+                loan.getId(),
+                user.getId(),
+                bookQuantities
+        ));
 
         log.info("Loan canceled: loanId={} user={}", loanId, user.getEmail());
 
@@ -217,6 +238,18 @@ public class LoanService {
     // ─────────────────────────────────────────────
     // HELPERS PRIVADOS
     // ─────────────────────────────────────────────
+    
+    /**
+     * Monta mapa bookId → quantidade a partir dos itens do empréstimo.
+     * Usado para popular os eventos de devolução e cancelamento.
+     */
+    private Map<Long, Integer> buildBookQuantities(Loan loan) {
+        return loan.getItems().stream()
+                .collect(Collectors.toMap(
+                        item -> item.getBook().getId(),
+                        LoanItem::getQuantity
+                ));
+    }
     
     /**
      * Busca um empréstimo pelo ID com itens e usuário já carregados via JOIN FETCH.
