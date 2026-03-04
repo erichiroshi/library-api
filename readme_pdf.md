@@ -1,3 +1,6 @@
+> Este documento é a versão técnica da documentação do projeto,
+> utilizada para geração do PDF via CI.
+
 # Library API — Spring Boot 4 + JWT + Docker + Observability
 
 Backend production-ready projetado com foco em previsibilidade, observabilidade e isolamento de responsabilidades.

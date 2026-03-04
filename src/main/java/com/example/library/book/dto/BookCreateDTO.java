@@ -2,6 +2,7 @@ package com.example.library.book.dto;
 
 import java.util.Set;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +11,7 @@ import lombok.Builder;
 
 @Builder
 public record BookCreateDTO(
+		
 		Long id,
 	    
 		@NotBlank
@@ -20,6 +22,9 @@ public record BookCreateDTO(
 		
 	    @NotNull
 		Integer publicationYear, 
+		
+		@NotNull
+        @Min(value = 0, message = "Available copies must be zero or greater")
 		Integer availableCopies,
 		
 		@NotNull
