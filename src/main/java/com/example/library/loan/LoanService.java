@@ -24,6 +24,9 @@ import com.example.library.user.User;
 import com.example.library.user.UserRepository;
 import com.example.library.user.exception.UserNotFoundException;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Service
 public class LoanService {
 
@@ -33,13 +36,6 @@ public class LoanService {
 	private final BookRepository bookRepository;
 	private final UserRepository userRepository;
 	private final LoanMapper mapper;
-
-	public LoanService(LoanRepository loanRepository, BookRepository bookRepository, UserRepository userRepository, LoanMapper mapper) {
-		this.loanRepository = loanRepository;
-		this.bookRepository = bookRepository;
-		this.userRepository = userRepository;
-		this.mapper = mapper;
-	}
 
     // ─────────────────────────────────────────────
     // CRIAR EMPRÉSTIMO
@@ -63,7 +59,6 @@ public class LoanService {
 		loan.setStatus(LoanStatus.WAITING_RETURN);
 
 		for (Long bookId : dto.booksId()) {
-
 			Book book = bookRepository.findById(bookId)
 					.orElseThrow(() -> new BookNotFoundException(bookId));
 
@@ -89,7 +84,8 @@ public class LoanService {
         log.info("Loan created: loanId={} user={} books={}",
                 saved.getId(), user.getEmail(), dto.booksId().size());
         
-		return mapper.toDTO(loan);
+        // Recarrega com JOIN FETCH para garantir que o mapper acessa itens dentro da transação
+        return mapper.toDTO(findWithItemsOrThrow(saved.getId()));
 	}
 
 	// ─────────────────────────────────────────────
@@ -100,7 +96,7 @@ public class LoanService {
 	public LoanResponseDTO returnLoan(Long loanId) {
 
         User user = getAuthenticatedUser();
-		Loan loan = find(loanId);
+		Loan loan = findWithItemsOrThrow(loanId);
 		
         validateOwnershipOrAdmin(loan, user);
 
@@ -135,7 +131,7 @@ public class LoanService {
     public LoanResponseDTO cancelLoan(Long loanId) {
 
         User user = getAuthenticatedUser();
-        Loan loan = find(loanId);
+        Loan loan = findWithItemsOrThrow(loanId);
 
         validateOwnershipOrAdmin(loan, user);
 
@@ -177,20 +173,16 @@ public class LoanService {
     @Transactional(readOnly = true)
 	public LoanResponseDTO findById(Long loanId) {
     	User user = getAuthenticatedUser();
-        Loan loan = find(loanId);
-
+        Loan loan = findWithItemsOrThrow(loanId);
         validateOwnershipOrAdmin(loan, user);
 		return mapper.toDTO(loan);
 	}
     
     @Transactional(readOnly = true)
     public List<LoanResponseDTO> findMyLoans() {
-    	
         User user = getAuthenticatedUser();
-        
         log.debug("Fetching loans for user={}", user.getEmail());
-        
-        return loanRepository.findByUserId(user.getId())
+        return loanRepository.findByUserIdWithItems(user.getId())
                 .stream()
                 .map(mapper::toDTO)
                 .toList();
@@ -198,11 +190,9 @@ public class LoanService {
     
     @Transactional(readOnly = true)
     public List<LoanResponseDTO> findByUser(Long userId) {
-    	
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        
-        return loanRepository.findByUserId(userId)
+        return loanRepository.findByUserIdWithItems(userId)
                 .stream()
                 .map(mapper::toDTO)
                 .toList();
@@ -218,7 +208,7 @@ public class LoanService {
     
     @Transactional(readOnly = true)
     public List<LoanResponseDTO> findAll() {
-        return loanRepository.findAll()
+        return loanRepository.findAllWithItems()
                 .stream()
                 .map(mapper::toDTO)
                 .toList();
@@ -228,10 +218,14 @@ public class LoanService {
     // HELPERS PRIVADOS
     // ─────────────────────────────────────────────
     
-	private Loan find(Long loanId) {
-		return loanRepository.findById(loanId)
-				.orElseThrow(() -> new LoanNotFoundException(loanId));
-	}
+    /**
+     * Busca um empréstimo pelo ID com itens e usuário já carregados via JOIN FETCH.
+     * Garante que o mapper acessa as coleções LAZY dentro da transação ativa.
+     */
+    private Loan findWithItemsOrThrow(Long loanId) {
+        return loanRepository.findByIdWithItemsAndUser(loanId)
+                .orElseThrow(() -> new LoanNotFoundException(loanId));
+    }
 	
 	/**
      * Recupera o usuário autenticado direto do SecurityContext.
@@ -245,6 +239,7 @@ public class LoanService {
     
     /**
      * Garante que apenas o dono do empréstimo ou um ADMIN pode operá-lo.
+     * Retorna 404 intencionalmente para não vazar que o empréstimo existe.
      */
     private void validateOwnershipOrAdmin(Loan loan, User user) {
         boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
@@ -252,7 +247,7 @@ public class LoanService {
 
         if (!isOwner && !isAdmin) {
             log.warn("Unauthorized loan access attempt: loanId={} userId={}", loan.getId(), user.getId());
-            throw new LoanUnauthorizedException(loan.getId()); // 404 intencional — não vazar que o loan existe
+            throw new LoanUnauthorizedException(loan.getId());
         }
     }
 }

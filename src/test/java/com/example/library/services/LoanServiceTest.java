@@ -144,6 +144,16 @@ class LoanServiceTest {
                 loan.setId(1L);
                 return loan;
             });
+            when(loanRepository.findByIdWithItemsAndUser(1L)).thenAnswer(_ -> {
+                // retorna o mesmo loan que foi salvo, já com id setado
+                Loan loan = new Loan();
+                loan.setId(1L);
+                loan.setUser(authenticatedUser);
+                loan.setLoanDate(LocalDate.now());
+                loan.setDueDate(LocalDate.now().plusDays(7));
+                loan.setStatus(LoanStatus.WAITING_RETURN);
+                return Optional.of(loan);
+            });
             when(mapper.toDTO(any(Loan.class))).thenReturn(expectedResponse);
 
             // Act
@@ -224,8 +234,25 @@ class LoanServiceTest {
             when(bookRepository.findById(2L)).thenReturn(Optional.of(book2));
             when(bookRepository.decrementCopies(1L)).thenReturn(1);
             when(bookRepository.decrementCopies(2L)).thenReturn(1);
-            when(loanRepository.save(any(Loan.class))).thenAnswer(i -> i.getArgument(0));
-
+            when(loanRepository.save(any(Loan.class))).thenAnswer(i -> {
+                Loan loan = i.getArgument(0);
+                loan.setId(1L); // ← garante que o id esteja setado para o findByIdWithItemsAndUser
+                return loan;
+            });
+            when(loanRepository.findByIdWithItemsAndUser(1L)).thenAnswer(_ -> {
+                Loan loan = new Loan();
+                loan.setId(1L);
+                loan.setUser(authenticatedUser);
+                loan.setLoanDate(LocalDate.now());
+                loan.setDueDate(LocalDate.now().plusDays(7));
+                loan.setStatus(LoanStatus.WAITING_RETURN);
+                return Optional.of(loan);
+            });
+            when(mapper.toDTO(any(Loan.class))).thenReturn(
+                    new LoanResponseDTO(1L, LocalDate.now(), LocalDate.now().plusDays(7),
+                        null, LoanStatus.WAITING_RETURN, "John Doe", Set.of())
+                );
+            
             // Act
             loanService.create(dto);
 
@@ -253,7 +280,7 @@ class LoanServiceTest {
             // Arrange
             Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-            when(loanRepository.findById(1L)).thenReturn(Optional.of(activeLoan));
+            when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act
             loanService.returnLoan(1L);
@@ -270,7 +297,7 @@ class LoanServiceTest {
             // Arrange
             Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-            when(loanRepository.findById(999L)).thenReturn(Optional.empty());
+            when(loanRepository.findByIdWithItemsAndUser(999L)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThatThrownBy(() -> loanService.returnLoan(999L))
@@ -286,7 +313,7 @@ class LoanServiceTest {
 
             Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-            when(loanRepository.findById(1L)).thenReturn(Optional.of(activeLoan));
+            when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act & Assert
             assertThatThrownBy(() -> loanService.returnLoan(1L))
@@ -304,7 +331,7 @@ class LoanServiceTest {
 
             Authentication auth = new UsernamePasswordAuthenticationToken(otherUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-            when(loanRepository.findById(1L)).thenReturn(Optional.of(activeLoan));
+            when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act & Assert
             assertThatThrownBy(() -> loanService.returnLoan(1L))
@@ -317,7 +344,7 @@ class LoanServiceTest {
             // Arrange
             Authentication auth = new UsernamePasswordAuthenticationToken(adminUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-            when(loanRepository.findById(1L)).thenReturn(Optional.of(activeLoan));
+            when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act & Assert
             assertThatCode(() -> loanService.returnLoan(1L))
@@ -341,7 +368,7 @@ class LoanServiceTest {
             // Arrange
             Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-            when(loanRepository.findById(1L)).thenReturn(Optional.of(activeLoan));
+            when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act
             loanService.cancelLoan(1L);
@@ -358,7 +385,7 @@ class LoanServiceTest {
 
             Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-            when(loanRepository.findById(1L)).thenReturn(Optional.of(activeLoan));
+            when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act & Assert
             assertThatThrownBy(() -> loanService.cancelLoan(1L))
@@ -380,7 +407,7 @@ class LoanServiceTest {
             // Arrange
             Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-            when(loanRepository.findById(1L)).thenReturn(Optional.of(activeLoan));
+            when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act & Assert
             assertThatCode(() -> loanService.findById(1L))
@@ -395,7 +422,7 @@ class LoanServiceTest {
             // Arrange
             Authentication auth = new UsernamePasswordAuthenticationToken(adminUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-            when(loanRepository.findById(1L)).thenReturn(Optional.of(activeLoan));
+            when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act & Assert
             assertThatCode(() -> loanService.findById(1L))
@@ -413,13 +440,13 @@ class LoanServiceTest {
             // Arrange
             Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-            when(loanRepository.findByUserId(1L)).thenReturn(List.of(activeLoan));
+            when(loanRepository.findByUserIdWithItems(1L)).thenReturn(List.of(activeLoan));
 
             // Act
             loanService.findMyLoans();
 
             // Assert
-            verify(loanRepository).findByUserId(1L);
+            verify(loanRepository).findByUserIdWithItems(1L);
             verify(mapper).toDTO(activeLoan);
         }
     }
@@ -433,13 +460,13 @@ class LoanServiceTest {
         void shouldReturnUserLoans() {
             // Arrange
             when(userRepository.findById(1L)).thenReturn(Optional.of(authenticatedUser));
-            when(loanRepository.findByUserId(1L)).thenReturn(List.of(activeLoan));
+            when(loanRepository.findByUserIdWithItems(1L)).thenReturn(List.of(activeLoan));
 
             // Act
             loanService.findByUser(1L);
 
             // Assert
-            verify(loanRepository).findByUserId(1L);
+            verify(loanRepository).findByUserIdWithItems(1L);
         }
 
         @Test
