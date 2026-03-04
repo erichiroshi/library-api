@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -51,6 +54,8 @@ public class S3Service {
 	@Value("${s3.bucket}")
 	private String bucketName;
 
+	@CircuitBreaker(name = "s3", fallbackMethod = "uploadFallback")
+	@Retry(name = "s3")
 	public URI uploadFile(MultipartFile file, String folder, String fileName) {
 		
 		validateFileSize(file);
@@ -94,7 +99,12 @@ public class S3Service {
 		} catch (Exception _) {
 			throw new URIException();
 		}
+	}
 
+	@SuppressWarnings("unused")
+	private URI uploadFallback(MultipartFile file, String folder, String fileName, Exception ex) {
+	    log.error("S3 circuit breaker open or retry exhausted | reason={}", ex.getMessage());
+	    throw new AmazonClientException();
 	}
 	
 	private void validateContentType(MultipartFile file) {

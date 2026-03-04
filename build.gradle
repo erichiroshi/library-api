@@ -64,6 +64,8 @@ ext {
    	shedlockVersion = "6.9.1"
    	otelVersion = "1.7.0-M3"
    	openTelemetryVersion = "2.25.0"
+   	aopVersion = "4.0.0-M2"
+   	resilience4jVersion = "2.3.0"
 }
 
 dependencies {
@@ -135,6 +137,10 @@ dependencies {
     
     // Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-zipkin
 	implementation 'org.springframework.boot:spring-boot-starter-zipkin'
+	
+	// Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop
+    implementation "org.springframework.boot:spring-boot-starter-aop:${aopVersion}"
+	implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jVersion}"
 }
 
 // ─────────────────────────────────────────────

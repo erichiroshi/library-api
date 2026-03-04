@@ -32,3 +32,17 @@ aws:
 s3:
   bucket: ${BUCKET_NAME:library-api-s3}
   region: ${BUCKET_REGION:sa-east-1}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      s3:
+        sliding-window-size: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+
+  retry:
+    instances:
+      s3:
+        max-attempts: 3
+        wait-duration: 500ms
