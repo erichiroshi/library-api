@@ -47,11 +47,19 @@ spring:
   task:
     scheduling:
       pool:
-        # Número de threads para tarefas agendadas
         size: 2 
 
-# Actuator
+# TRACING — Micrometer + OpenTelemetry
 management:
+  tracing:
+   sampling:
+     probability: ${TRACING_SAMPLING_PROBABILITY:0.1}  # 10% em prod — ajustável via env
+   propagation:
+     type: w3c
+   export:
+      zipkin:
+        endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}
+
   endpoints:
     web:
       exposure:

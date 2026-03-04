@@ -55,12 +55,24 @@ spring:
 #     # - A cada 6 horas: 0 0 */6 * * *
 #     # - Toda segunda às 3h AM: 0 0 3 * * MON		
 
-# Actuator
+# ═══════════════════════════════════════════════════════════════════
+# TRACING — Micrometer + OpenTelemetry
+# ═══════════════════════════════════════════════════════════════════
+
 management:
+  tracing:
+    sampling:
+       probability: 1.0   # 100% das requisições rastreadas em dev
+    propagation:
+       type: w3c           # W3C Trace Context — padrão interoperável
+    export:
+      zipkin:
+        endpoint: http://localhost:9411/api/v2/spans   # Zipkin local (docker-compose.dev.yml)
+
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,metrics,prometheus,traces
   endpoint:
     health:
       show-details: always
