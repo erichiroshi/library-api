@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.example.library.refresh_token.RefreshToken;
@@ -23,10 +23,10 @@ import com.example.library.user.UserRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
+@Transactional
 @ActiveProfiles("it")
-@DisplayName("RefreshTokenRepository - Integration Tests")
+@DisplayName("RefreshTokenRepositoryIT - Integration Tests")
 class RefreshTokenRepositoryIT {
 
     @Autowired
@@ -40,9 +40,6 @@ class RefreshTokenRepositoryIT {
 
     @BeforeEach
     void setUp() {
-        refreshTokenRepository.deleteAll();
-        userRepository.deleteAll();
-
         testUser = new User();
         testUser.setName("John Doe");
         testUser.setEmail("john@example.com");

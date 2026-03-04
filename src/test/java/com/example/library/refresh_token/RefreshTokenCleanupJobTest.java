@@ -2,7 +2,6 @@ package com.example.library.refresh_token;
 
 import java.time.Instant;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,17 +21,11 @@ import static org.mockito.Mockito.when;
 @DisplayName("RefreshTokenCleanupJob - Unit Tests")
 class RefreshTokenCleanupJobTest {
 
-    @Mock
+	@Mock
     private RefreshTokenRepository repository;
 
-    @InjectMocks
-    private RefreshTokenCleanupJob cleanupJob;
-
-    @BeforeEach
-    void setUp() {
-        // Reset mocks before each test
-        reset(repository);
-    }
+	@InjectMocks
+    private RefreshTokenCleanupService cleanupService;
 
     @Test
     @DisplayName("Deve deletar tokens expirados quando existem")
@@ -42,7 +34,7 @@ class RefreshTokenCleanupJobTest {
         when(repository.deleteByExpiryDateBefore(any(Instant.class))).thenReturn(5);
 
         // Act
-        cleanupJob.cleanupExpiredTokens();
+        cleanupService.deleteExpiredTokens();
 
         // Assert
         verify(repository).deleteByExpiryDateBefore(any(Instant.class));
@@ -57,7 +49,7 @@ class RefreshTokenCleanupJobTest {
 
         // Act
         Instant beforeCall = Instant.now();
-        cleanupJob.cleanupExpiredTokens();
+        cleanupService.deleteExpiredTokens();
         Instant afterCall = Instant.now();
 
         // Assert
@@ -85,7 +77,7 @@ class RefreshTokenCleanupJobTest {
         when(repository.deleteByExpiryDateBefore(any(Instant.class))).thenReturn(0);
 
         // Act
-        cleanupJob.cleanupExpiredTokens();
+        cleanupService.deleteExpiredTokens();
 
         // Assert
         verify(repository).deleteByExpiryDateBefore(any(Instant.class));
@@ -99,7 +91,7 @@ class RefreshTokenCleanupJobTest {
         when(repository.deleteByExpiryDateBefore(any(Instant.class))).thenReturn(10);
 
         // Act
-        cleanupJob.cleanupExpiredTokens();
+        cleanupService.deleteExpiredTokens();
 
         // Assert
         verify(repository).deleteByExpiryDateBefore(any(Instant.class));
@@ -114,7 +106,7 @@ class RefreshTokenCleanupJobTest {
             .thenThrow(new RuntimeException("Database error"));
 
         // Act & Assert - não deve lançar exceção (try-catch no job)
-        cleanupJob.cleanupExpiredTokens();
+        cleanupService.deleteExpiredTokens();
 
         // Exceção foi capturada e logada, não propagada
         verify(repository).deleteByExpiryDateBefore(any(Instant.class));
@@ -127,7 +119,7 @@ class RefreshTokenCleanupJobTest {
         when(repository.deleteByExpiryDateBefore(any(Instant.class))).thenReturn(10000);
 
         // Act
-        cleanupJob.cleanupExpiredTokens();
+        cleanupService.deleteExpiredTokens();
 
         // Assert
         verify(repository).deleteByExpiryDateBefore(any(Instant.class));
@@ -140,7 +132,7 @@ class RefreshTokenCleanupJobTest {
         when(repository.deleteByExpiryDateBefore(any(Instant.class))).thenReturn(3);
 
         // Act
-        cleanupJob.cleanupExpiredTokens();
+        cleanupService.deleteExpiredTokens();
 
         // Assert
         verify(repository, times(1)).deleteByExpiryDateBefore(any(Instant.class));

@@ -1,53 +1,38 @@
 package com.example.library.refresh_token;
 
-import java.time.Instant;
-
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 
 /**
  * Job agendado para limpar refresh tokens expirados do banco de dados.
- * 
- * Tokens expirados são deletados quando alguém tenta usá-los (via validate()),
- * mas tokens que nunca são usados ficam acumulando no banco.
- * 
- * Este job roda diariamente às 2h da manhã para fazer limpeza preventiva.
+ *
+ * Separação intencional entre lock e transação:
+ * - @SchedulerLock NÃO pode estar num método @Transactional
+ *   porque o lock precisa ser adquirido e liberado FORA da transação.
+ *   Se estivessem juntos, o lock só seria liberado no commit,
+ *   anulando a proteção distribuída do ShedLock.
+ * - A transação fica em RefreshTokenCleanupService, que é chamado
+ *   após o lock ser adquirido.
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class RefreshTokenCleanupJob {
 
-    private final RefreshTokenRepository repository;
+    private final RefreshTokenCleanupService cleanupService;
 
-    /**
-     * Remove todos os refresh tokens expirados do banco.
-     * 
-     * Cron: "0 0 2 * * *" = todos dia às 02:00 AM
-     * Formato: segundo minuto hora dia mês dia-da-semana
-     * 
-     * Configurável via property:
-     * @Scheduled(cron = "${refresh-token.cleanup.cron:0 0 2 * * *}")
-     */
     @Scheduled(cron = "0 0 2 * * *")
-    @Transactional
+    @SchedulerLock(
+            name = "refreshTokenCleanupJob",
+            lockAtLeastFor = "30m",
+            lockAtMostFor = "1h"
+    )
     public void cleanupExpiredTokens() {
         log.info("Starting cleanup of expired refresh tokens...");
-        
-        try {
-            int deletedCount = repository.deleteByExpiryDateBefore(Instant.now());
-            
-            if (deletedCount > 0) {
-                log.info("Deleted {} expired refresh tokens", deletedCount);
-            } else {
-                log.debug("No expired refresh tokens found");
-            }
-        } catch (Exception e) {
-            log.error("Error cleaning up expired refresh tokens", e);
-        }
+        cleanupService.deleteExpiredTokens();
     }
 }

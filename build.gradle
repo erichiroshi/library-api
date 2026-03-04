@@ -61,6 +61,7 @@ ext {
     jjwtVersion = "0.13.0"
    	testcontainersVersion = "2.0.3"
    	awsS3Version = "2.42.2"
+   	shedlockVersion = "6.9.1"
 }
 
 dependencies {
@@ -123,6 +124,9 @@ dependencies {
     // AWS SDK (para integração com S3)
 	implementation "software.amazon.awssdk:s3:${awsS3Version}"
 
+	// ShedLock — distributed lock para scheduled jobs
+    implementation "net.javacrumbs.shedlock:shedlock-spring:${shedlockVersion}"
+    implementation "net.javacrumbs.shedlock:shedlock-provider-jdbc-template:${shedlockVersion}"
 }
 
 // ─────────────────────────────────────────────

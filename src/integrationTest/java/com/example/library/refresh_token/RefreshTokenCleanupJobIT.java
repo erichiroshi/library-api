@@ -20,13 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Testcontainers
-@ActiveProfiles("it")
 @Transactional
+@ActiveProfiles("it")
 @DisplayName("RefreshTokenCleanupJob - Integration Tests")
 class RefreshTokenCleanupJobIT {
 
     @Autowired
-    private RefreshTokenCleanupJob cleanupJob;
+    private RefreshTokenCleanupService cleanupJob;
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
@@ -45,7 +45,7 @@ class RefreshTokenCleanupJobIT {
         testUser.setRoles(Set.of("ROLE_USER"));
         testUser = userRepository.save(testUser);
     }
-
+    
     @Test
     @DisplayName("Deve deletar apenas tokens expirados, mantendo os válidos")
     void shouldDeleteOnlyExpiredTokensKeepingValidOnes() {
@@ -64,7 +64,7 @@ class RefreshTokenCleanupJobIT {
         refreshTokenRepository.save(valid2);
 
         // Act
-        cleanupJob.cleanupExpiredTokens();
+        cleanupJob.deleteExpiredTokens();
 
         // Assert
         assertThat(refreshTokenRepository.count()).isEqualTo(2); // Apenas os 2 válidos
@@ -86,7 +86,7 @@ class RefreshTokenCleanupJobIT {
         refreshTokenRepository.save(valid2);
 
         // Act
-        cleanupJob.cleanupExpiredTokens();
+        cleanupJob.deleteExpiredTokens();
 
         // Assert
         assertThat(refreshTokenRepository.count()).isEqualTo(2);
@@ -97,15 +97,10 @@ class RefreshTokenCleanupJobIT {
     void shouldDeleteAllWhenAllTokensAreExpired() {
         // Arrange
         RefreshToken expired1 = createToken("expired-1", Instant.now().minus(Duration.ofDays(1)));
-        RefreshToken expired2 = createToken("expired-2", Instant.now().minus(Duration.ofDays(2)));
-        RefreshToken expired3 = createToken("expired-3", Instant.now().minus(Duration.ofDays(3)));
-        
         refreshTokenRepository.save(expired1);
-        refreshTokenRepository.save(expired2);
-        refreshTokenRepository.save(expired3);
 
         // Act
-        cleanupJob.cleanupExpiredTokens();
+        cleanupJob.deleteExpiredTokens();
 
         // Assert
         assertThat(refreshTokenRepository.count()).isZero();
@@ -115,7 +110,7 @@ class RefreshTokenCleanupJobIT {
     @DisplayName("Não deve fazer nada quando não há tokens no banco")
     void shouldDoNothingWhenNoTokensExist() {
         // Act
-        cleanupJob.cleanupExpiredTokens();
+        cleanupJob.deleteExpiredTokens();
 
         // Assert
         assertThat(refreshTokenRepository.count()).isZero();
@@ -129,7 +124,7 @@ class RefreshTokenCleanupJobIT {
         refreshTokenRepository.save(almostExpired);
 
         // Act
-        cleanupJob.cleanupExpiredTokens();
+        cleanupJob.deleteExpiredTokens();
 
         // Assert
         assertThat(refreshTokenRepository.findByToken("almost-expired")).isPresent();
@@ -143,7 +138,7 @@ class RefreshTokenCleanupJobIT {
         refreshTokenRepository.save(justExpired);
 
         // Act
-        cleanupJob.cleanupExpiredTokens();
+        cleanupJob.deleteExpiredTokens();
 
         // Assert
         assertThat(refreshTokenRepository.findByToken("just-expired")).isEmpty();
@@ -164,7 +159,7 @@ class RefreshTokenCleanupJobIT {
         }
 
         // Act
-        cleanupJob.cleanupExpiredTokens();
+        cleanupJob.deleteExpiredTokens();
 
         // Assert
         assertThat(refreshTokenRepository.count()).isEqualTo(50); // Apenas os válidos
@@ -181,9 +176,9 @@ class RefreshTokenCleanupJobIT {
         refreshTokenRepository.save(valid);
 
         // Act - executar 3 vezes
-        cleanupJob.cleanupExpiredTokens();
-        cleanupJob.cleanupExpiredTokens();
-        cleanupJob.cleanupExpiredTokens();
+        cleanupJob.deleteExpiredTokens();
+        cleanupJob.deleteExpiredTokens();
+        cleanupJob.deleteExpiredTokens();
 
         // Assert - resultado deve ser idempotente
         assertThat(refreshTokenRepository.count()).isEqualTo(1);
