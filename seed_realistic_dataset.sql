@@ -1,3 +1,12 @@
+-- ============================================================
+-- PROD/STAGING SEED — execução manual via psql
+-- Uso:
+--   docker exec -i <container> psql -U postgres -d library < seed_realistic_dataset.sql
+--
+-- ⚠️  Manter sincronizado com V1000__dev_seed_data.sql
+--     (seed automático do perfil dev via Flyway)
+-- ============================================================
+
 -- ============================
 -- Categorias
 -- ============================

@@ -1,3 +1,11 @@
+-- ============================================================
+-- DEV SEED — Flyway managed (perfil dev)
+-- Executado automaticamente ao subir o ambiente de desenvolvimento.
+--
+-- ⚠️  Manter sincronizado com seed_realistic_dataset.sql
+--     (seed manual para prod/homologação)
+-- ============================================================
+
 -- ============================
 -- Categorias
 -- ============================
