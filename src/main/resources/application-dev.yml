@@ -5,8 +5,6 @@ spring:
     password: ${DB_PASSWORD:postgres}
 
   jpa:
-    hibernate:
-      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -14,48 +12,17 @@ spring:
 
 # Flyway
   flyway:
-    enabled: true
-    baseline-on-migrate: true
-    default-schema: public        # ← Flyway sempre usa public
-    schemas: public               # ← Flyway só gerencia public
     locations: 
       - classpath:db/migration/common
       - classpath:db/migration/dev
 
 # Redis
-  cache:
-    type: redis
   data:
     redis:
       host: ${REDIS_HOST:localhost}
-      port: 6379
-      timeout: 60000
       lettuce:
         pool:
-          max-active: 8
-          max-idle: 8
           min-idle: 0
-      repositories:
-       enabled: false
-
-# ═══════════════════════════════════════════════════════════════════
-# SCHEDULED TASKS
-# ═══════════════════════════════════════════════════════════════════
-  task:
-    scheduling:
-      pool:
-        # Número de threads para tarefas agendadas
-        size: 2
-
-# Configuração do cleanup job (opcional - customizar cron)
-# refresh-token:
-#   cleanup:
-#     # Cron: todo dia às 2h AM
-#     cron: 0 0 2 * * *
-#     # Alternativas:
-#     # - A cada hora: 0 0 * * * *
-#     # - A cada 6 horas: 0 0 */6 * * *
-#     # - Toda segunda às 3h AM: 0 0 3 * * MON		
 
 # ═══════════════════════════════════════════════════════════════════
 # TRACING — Micrometer + OpenTelemetry
@@ -65,12 +32,9 @@ management:
   tracing:
     sampling:
        probability: 1.0   # 100% das requisições rastreadas em dev
-    propagation:
-       type: w3c           # W3C Trace Context — padrão interoperável
     export:
       zipkin:
         endpoint: http://localhost:9411/api/v2/spans   # Zipkin local (docker-compose.dev.yml)
-
   endpoints:
     web:
       exposure:

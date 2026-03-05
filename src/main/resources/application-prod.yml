@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${DB_URL}	#usar postgres no docker, localhost localmente
+    url: ${DB_URL}	#usar postgres no docker, localhost local
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
@@ -15,53 +15,31 @@ spring:
 
 # JPA/Hibernate
   jpa:
-    hibernate:
-      ddl-auto: validate
     show-sql: false
 
 # Flyway
   flyway:
-    enabled: true
-    baseline-on-migrate: true
-    default-schema: public
-    schemas: public
     locations: 
       - classpath:db/migration/common
     clean-disabled: true
 
 # Redis
-  cache:
-    type: redis
   data:
     redis:
       host: ${REDIS_HOST:redis}
       port: ${REDIS_PORT:6379}
-      timeout: 60000
       lettuce:
         pool:
-          max-active: 8
-          max-idle: 8
           min-idle: 2
-      repositories:
-        enabled: false
 
-# SCHEDULED TASKS
-  task:
-    scheduling:
-      pool:
-        size: 2 
-
-# TRACING — Micrometer + OpenTelemetry
+# TRACING — Micrometer + OpenTelemetry + Actuator
 management:
   tracing:
    sampling:
      probability: ${TRACING_SAMPLING_PROBABILITY:0.1}  # 10% em prod — ajustável via env
-   propagation:
-     type: w3c
    export:
       zipkin:
         endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}
-
   endpoints:
     web:
       exposure:
@@ -101,11 +79,6 @@ springdoc:
 
 # Configurações de segurança e JWT
 jwt:
-  # Prod: SEMPRE usar variável de ambiente
   secret-key: ${JWT_SECRET_KEY}
-
-  # Prod: access token de 15 minutos (mais seguro)
   access-token-seconds: ${JWT_ACCESS_TOKEN-SECONDS:900}
-
-  # Prod: refresh token de 7 dias
   refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:7}
