@@ -5,25 +5,25 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("ImageProcessingService - Unit Tests")
 class ImageProcessingServiceTest {
 
+	@InjectMocks
     private ImageProcessingService service;
+	
     private final int maxWidth = 400;
-
-    @BeforeEach
-    void setUp() {
-        service = new ImageProcessingService();
-    }
 
     @Test
     @DisplayName("Deve comprimir imagem PNG para JPEG com largura reduzida")

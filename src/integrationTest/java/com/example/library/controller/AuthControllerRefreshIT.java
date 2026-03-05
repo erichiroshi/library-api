@@ -31,8 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
-@ActiveProfiles("it")
 @Transactional
+@ActiveProfiles("it")
 @DisplayName("AuthController - Refresh Token Integration Tests")
 class AuthControllerRefreshIT {
 
