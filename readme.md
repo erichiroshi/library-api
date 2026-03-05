@@ -553,7 +553,7 @@ Relatório HTML: `build/reports/jacoco/test/html/index.html`
 | GET | `/api/v1/books/{id}` | Busca por ID (com cache Redis) | ✅ |
 | POST | `/api/v1/books` | Cria livro | ✅ |
 | DELETE | `/api/v1/books/{id}` | Remove livro | 🔐 ADMIN |
-| POST | `/api/v1/books/{id}/picture` | Upload de imagem de capa (S3) | ✅ |
+| POST | `/api/v1/books/{id}/cover` | Upload de imagem de capa (S3) | ✅ |
 
 ### Autores
 | Método | Endpoint | Descrição | Auth |
@@ -592,7 +592,7 @@ Relatório HTML: `build/reports/jacoco/test/html/index.html`
 ### Como funciona
 
 ```
-POST /api/v1/books/{id}/picture
+POST /api/v1/books/{id}/cover
 Content-Type: multipart/form-data
 ```
 
@@ -657,11 +657,14 @@ Marca como `OVERDUE` empréstimos com `status = WAITING_RETURN` e `dueDate < hoj
 - [x] **Rate limiting** — Bucket4j ou Resilience4j
 - [x] **OpenTelemetry** — Tracing distribuído
 - [x] **Microservices** — Bounded contexts definidos, anticorrupção e schema per service implementados
+- [x] **Revisão pré-Fase 3** — JWT filter otimizado, double fetch eliminado, workflows corrigidos, BookMediaService extraído
 - [ ] **Extração Auth-Service** — primeiro serviço independente (menor e mais isolado)
+- [ ] **Extração Catalog-Service** — books, authors, categories
+- [ ] **Extração Loan-Service** — depende dos outros, separar por último
+- [ ] **API Gateway** — roteamento entre serviços
 - [ ] **Deploy em cloud** — AWS ECS ou Render
 - [ ] **HATEOAS** — Hypermedia links
 - [ ] **WebSockets** — Notificações real-time de devolução
-- [ ] **Microservices** — Extração em serviços independentes
 - [ ] **LocalStack** — Suporte a S3 local em testes de integração
 
 ---
@@ -690,9 +693,9 @@ Issues marcadas com `good-first-issue`:
 - [MEDIUM] Adicionar paginação customizada nas loans
 
 ### Para Experientes
-- [HARD] Implementar rate limiting (Bucket4j)
-- [HARD] Adicionar tracing distribuído (OpenTelemetry)
 - [HARD] Suporte a LocalStack nos testes de integração
+- [HARD] Implementar HATEOAS
+- [HARD] Extração de microservices (Auth-Service, Catalog-Service, Loan-Service)
 
 ### Processo de Contribuição
 
