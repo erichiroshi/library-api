@@ -48,47 +48,49 @@ public class LoanService {
     // CRIAR EMPRÉSTIMO
     // ─────────────────────────────────────────────
 	
-	@Transactional
-	public LoanResponseDTO create(LoanCreateDTO dto) {
-		
-		User user = getAuthenticatedUser();
-        
-        // Valida existência de todos os livros antes de iniciar
-		for (Long bookId : dto.booksId()) {
-			bookAvailabilityPort.findById(bookId)
-				.orElseThrow(() -> new BookNotFoundException(bookId));
-		}
+    @Transactional
+    public LoanResponseDTO create(LoanCreateDTO dto) {
+
+        User user = getAuthenticatedUser();
+
+        // Carrega todos os livros de uma vez — elimina double fetch
+        Map<Long, Book> books = dto.booksId().stream()
+            .distinct()
+            .collect(Collectors.toMap(
+                id -> id,
+                id -> bookAvailabilityPort.findById(id)
+                    .orElseThrow(() -> new BookNotFoundException(id))
+            ));
 
         log.info("Creating loan for user={} books={}", user.getEmail(), dto.booksId());
-        
-		Loan loan = new Loan();
-		loan.setUser(user);
-		loan.setLoanDate(LocalDate.now());
-		loan.setDueDate(LocalDate.now().plusDays(7));
-		loan.setStatus(LoanStatus.WAITING_RETURN);
 
-		for (Long bookId : dto.booksId()) {
-			Book book = bookAvailabilityPort.findById(bookId)
-					.orElseThrow(() -> new BookNotFoundException(bookId));
+        Loan loan = new Loan();
+        loan.setUser(user);
+        loan.setLoanDate(LocalDate.now());
+        loan.setDueDate(LocalDate.now().plusDays(7));
+        loan.setStatus(LoanStatus.WAITING_RETURN);
+
+        for (Long bookId : dto.booksId()) {
+            Book book = books.get(bookId);
 
             // Update atômico — evita race condition em empréstimos concorrentes
-			int updated = bookAvailabilityPort.decrementCopies(bookId);
-			if (updated == 0) {
-				throw new BookNotAvailableException(bookId, book.getTitle());
-			}
+            int updated = bookAvailabilityPort.decrementCopies(bookId);
+            if (updated == 0) {
+                throw new BookNotAvailableException(bookId, book.getTitle());
+            }
 
-			LoanItem item = new LoanItem();
-			item.getId().setBookId(book.getId());
-			item.setLoan(loan);
-			item.setBook(book);
-			item.setQuantity(1);
+            LoanItem item = new LoanItem();
+            item.getId().setBookId(book.getId());
+            item.setLoan(loan);
+            item.setBook(book);
+            item.setQuantity(1);
 
-			loan.getItems().add(item);
+            loan.getItems().add(item);
             log.debug("Book added to loan: bookId={} title={}", bookId, book.getTitle());
-		}
+        }
 
         Loan saved = loanRepository.save(loan);
-        
+
         // Publica evento — outros domínios podem reagir sem acoplamento direto
         eventPublisher.publishEvent(new LoanCreatedEvent(
                 saved.getId(),
@@ -98,10 +100,10 @@ public class LoanService {
 
         log.info("Loan created: loanId={} user={} books={}",
                 saved.getId(), user.getEmail(), dto.booksId().size());
-        
+
         // Recarrega com JOIN FETCH para garantir que o mapper acessa itens dentro da transação
         return mapper.toDTO(findWithItemsOrThrow(saved.getId()));
-	}
+    }
 
 	// ─────────────────────────────────────────────
     // DEVOLVER EMPRÉSTIMO
