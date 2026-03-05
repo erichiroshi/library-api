@@ -18,4 +18,14 @@ public class UserNotFoundException extends ApiException {
 		super(title, type, detail, httpStatus);
 	}
 
+	public UserNotFoundException(String email) {
+
+		HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+		String title = "User Not Found";
+		String detail = "User not found. Email: " + email;
+		URI type = URI.create("https://api.library/errors/user-not-found");
+
+		super(title, type, detail, httpStatus);
+	}
+
 }

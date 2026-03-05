@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 
 import javax.crypto.SecretKey;
 
@@ -81,6 +82,18 @@ public class JwtService {
 
 	public String extractUsername(String token) {
 		return parseClaims(token).getSubject();
+	}
+	
+	public List<String> extractRoles(String token) {
+	    Claims claims = parseClaims(token);
+	    Object roles = claims.get("roles");
+	    if (roles instanceof List<?> list) {
+	        return list.stream()
+	                .filter(String.class::isInstance)
+	                .map(String.class::cast)
+	                .toList();
+	    }
+	    return List.of();
 	}
 
 	public boolean isTokenValid(String token) {

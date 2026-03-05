@@ -138,9 +138,10 @@ class LoanServiceTest {
                 null, LoanStatus.WAITING_RETURN, "John Doe", Set.of()
             );
 
-            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-
+            when(userLookupService.findByEmail(authenticatedUser.getEmail())).thenReturn(Optional.of(authenticatedUser));
+            
             when(bookAvailabilityPort.findById(1L)).thenReturn(Optional.of(availableBook));
             when(bookAvailabilityPort.decrementCopies(1L)).thenReturn(1);
             when(loanRepository.save(any(Loan.class))).thenAnswer(i -> {
@@ -188,8 +189,9 @@ class LoanServiceTest {
             // Arrange
             LoanCreateDTO dto = new LoanCreateDTO(Set.of(999L));
 
-            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
+            when(userLookupService.findByEmail(authenticatedUser.getEmail())).thenReturn(Optional.of(authenticatedUser));
             when(bookAvailabilityPort.findById(999L)).thenReturn(Optional.empty());
 
             // Act & Assert
@@ -206,8 +208,9 @@ class LoanServiceTest {
             // Arrange
             LoanCreateDTO dto = new LoanCreateDTO(Set.of(1L));
 
-            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
+            when(userLookupService.findByEmail(authenticatedUser.getEmail())).thenReturn(Optional.of(authenticatedUser));
             when(bookAvailabilityPort.findById(1L)).thenReturn(Optional.of(availableBook));
             when(bookAvailabilityPort.decrementCopies(1L)).thenReturn(0); // Sem cópias disponíveis
 
@@ -231,9 +234,10 @@ class LoanServiceTest {
 
             LoanCreateDTO dto = new LoanCreateDTO(Set.of(1L, 2L));
 
-            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-
+            when(userLookupService.findByEmail(authenticatedUser.getEmail())).thenReturn(Optional.of(authenticatedUser));
+            
             when(bookAvailabilityPort.findById(1L)).thenReturn(Optional.of(availableBook));
             when(bookAvailabilityPort.findById(2L)).thenReturn(Optional.of(book2));
             when(bookAvailabilityPort.decrementCopies(1L)).thenReturn(1);
@@ -282,8 +286,9 @@ class LoanServiceTest {
         @DisplayName("Deve devolver empréstimo com sucesso")
         void shouldReturnLoanSuccessfully() {
             // Arrange
-            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
+            when(userLookupService.findByEmail(authenticatedUser.getEmail())).thenReturn(Optional.of(authenticatedUser));
             when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act
@@ -299,8 +304,9 @@ class LoanServiceTest {
         @DisplayName("Deve lançar LoanNotFoundException quando empréstimo não existe")
         void shouldThrowLoanNotFoundException() {
             // Arrange
-            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
+            when(userLookupService.findByEmail(authenticatedUser.getEmail())).thenReturn(Optional.of(authenticatedUser));
             when(loanRepository.findByIdWithItemsAndUser(999L)).thenReturn(Optional.empty());
 
             // Act & Assert
@@ -315,8 +321,9 @@ class LoanServiceTest {
             activeLoan.setStatus(LoanStatus.RETURNED);
             activeLoan.setReturnDate(LocalDate.now().minusDays(1));
 
-            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
+            when(userLookupService.findByEmail(authenticatedUser.getEmail())).thenReturn(Optional.of(authenticatedUser));
             when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act & Assert
@@ -331,10 +338,12 @@ class LoanServiceTest {
             User otherUser = new User();
             otherUser.setId(3L);
             otherUser.setName("Other User");
+            otherUser.setEmail("other@example.com"); // ADICIONADO: email necessário pois agora é usado como principal
             otherUser.setRoles(Set.of("ROLE_USER"));
 
-            Authentication auth = new UsernamePasswordAuthenticationToken(otherUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(otherUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
+            when(userLookupService.findByEmail(otherUser.getEmail())).thenReturn(Optional.of(otherUser));
             when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act & Assert
@@ -346,8 +355,9 @@ class LoanServiceTest {
         @DisplayName("ADMIN deve conseguir devolver empréstimo de qualquer usuário")
         void adminShouldReturnAnyLoan() {
             // Arrange
-            Authentication auth = new UsernamePasswordAuthenticationToken(adminUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(adminUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
+            when(userLookupService.findByEmail(adminUser.getEmail())).thenReturn(Optional.of(adminUser));
             when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act & Assert
@@ -370,8 +380,9 @@ class LoanServiceTest {
         @DisplayName("Deve cancelar empréstimo com sucesso")
         void shouldCancelLoanSuccessfully() {
             // Arrange
-            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
+            when(userLookupService.findByEmail(authenticatedUser.getEmail())).thenReturn(Optional.of(authenticatedUser));
             when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act
@@ -387,8 +398,9 @@ class LoanServiceTest {
             // Arrange
             activeLoan.setStatus(LoanStatus.RETURNED);
 
-            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
+            when(userLookupService.findByEmail(authenticatedUser.getEmail())).thenReturn(Optional.of(authenticatedUser));
             when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act & Assert
@@ -409,8 +421,9 @@ class LoanServiceTest {
         @DisplayName("Deve buscar empréstimo do próprio usuário")
         void shouldFindOwnLoan() {
             // Arrange
-            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
+            when(userLookupService.findByEmail(authenticatedUser.getEmail())).thenReturn(Optional.of(authenticatedUser));
             when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act & Assert
@@ -424,8 +437,9 @@ class LoanServiceTest {
         @DisplayName("ADMIN deve buscar empréstimo de qualquer usuário")
         void adminShouldFindAnyLoan() {
             // Arrange
-            Authentication auth = new UsernamePasswordAuthenticationToken(adminUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(adminUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
+            when(userLookupService.findByEmail(adminUser.getEmail())).thenReturn(Optional.of(adminUser));
             when(loanRepository.findByIdWithItemsAndUser(1L)).thenReturn(Optional.of(activeLoan));
 
             // Act & Assert
@@ -442,8 +456,9 @@ class LoanServiceTest {
         @DisplayName("Deve retornar lista de empréstimos do usuário autenticado")
         void shouldReturnAuthenticatedUserLoans() {
             // Arrange
-            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
+            Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser.getEmail(), null);
             when(securityContext.getAuthentication()).thenReturn(auth);
+            when(userLookupService.findByEmail(authenticatedUser.getEmail())).thenReturn(Optional.of(authenticatedUser));
             when(loanRepository.findByUserIdWithItems(1L)).thenReturn(List.of(activeLoan));
 
             // Act

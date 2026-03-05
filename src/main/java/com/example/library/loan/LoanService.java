@@ -262,12 +262,13 @@ public class LoanService {
 	
 	/**
      * Recupera o usuário autenticado direto do SecurityContext.
-     * O principal já é um User (populado pelo JwtAuthenticationFilter),
-     * então não precisa de uma query adicional ao banco.
+     * O principal é o email (populado pelo JwtAuthenticationFilter),
      */
     private User getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return (User) auth.getPrincipal();
+        String email = (String) auth.getPrincipal();
+        return userLookupService.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
     
     /**

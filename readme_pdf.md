@@ -647,8 +647,8 @@ Marca como `OVERDUE` empréstimos com `status = WAITING_RETURN` e `dueDate < hoj
 - [x] **Rate limiting** — Bucket4j ou Resilience4j
 - [x] **OpenTelemetry** — Tracing distribuído
 - [x] **Microservices** — Bounded contexts definidos, anticorrupção e schema per service implementados
-- [ ] **Deploy em cloud** — AWS ECS ou Render
 - [ ] **Extração Auth-Service** — primeiro serviço independente (menor e mais isolado)
+- [ ] **Deploy em cloud** — AWS ECS ou Render
 - [ ] **HATEOAS** — Hypermedia links
 - [ ] **WebSockets** — Notificações real-time de devolução
 - [ ] **Microservices** — Extração em serviços independentes

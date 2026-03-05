@@ -18,4 +18,10 @@ public class UserLookupServiceImpl implements UserLookupService {
 	public Optional<User> findById(Long id) {
 		return repository.findById(id);
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<User> findByEmail(String email) {
+		return repository.findByEmail(email);
+	}
 }
