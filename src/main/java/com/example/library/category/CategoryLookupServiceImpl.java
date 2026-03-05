@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CategoryAdapter implements CategoryPort {
+public class CategoryLookupServiceImpl implements CategoryLookupService {
 
 	private final CategoryRepository repository;
 

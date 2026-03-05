@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.library.book.Book;
-import com.example.library.book.BookAvailabilityPort;
+import com.example.library.book.BookLookupService;
 import com.example.library.book.exception.BookNotFoundException;
 import com.example.library.loan.dto.LoanCreateDTO;
 import com.example.library.loan.dto.LoanResponseDTO;
@@ -39,7 +39,7 @@ public class LoanService {
     private static final Logger log = LoggerFactory.getLogger(LoanService.class);
 	
 	private final LoanRepository loanRepository;
-    private final BookAvailabilityPort bookAvailabilityPort;    // usado apenas para verificação e decrement atômico na criação
+    private final BookLookupService bookAvailabilityPort;    // usado apenas para verificação e decrement atômico na criação
 	private final UserLookupService userLookupService;          // usado para validar existência de usuários em consultas administrativas
 	private final LoanMapper mapper;
     private final ApplicationEventPublisher eventPublisher;

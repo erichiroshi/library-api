@@ -2,7 +2,7 @@ package com.example.library.book;
 
 import java.util.Optional;
 
-public interface BookAvailabilityPort {
+public interface BookLookupService {
 	Optional<Book> findById(Long id);
 
 	int decrementCopies(Long id);

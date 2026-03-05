@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class BookRepositoryAdapter implements BookAvailabilityPort {
+public class BookLookupServiceImpl implements BookLookupService {
 
     private final BookRepository repository;
 

@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class AuthorAdapter implements AuthorPort {
+public class AuthorLookupServiceImpl implements AuthorLookupService {
 
 	private final AuthorRepository repository;
 

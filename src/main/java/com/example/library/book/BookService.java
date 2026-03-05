@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import io.micrometer.core.instrument.Counter;
 
 import com.example.library.author.Author;
-import com.example.library.author.AuthorPort;
+import com.example.library.author.AuthorLookupService;
 import com.example.library.aws.S3Service;
 import com.example.library.book.dto.BookCreateDTO;
 import com.example.library.book.dto.BookResponseDTO;
@@ -29,7 +29,7 @@ import com.example.library.book.exception.BookNotFoundException;
 import com.example.library.book.exception.InvalidOperationException;
 import com.example.library.book.mapper.BookMapper;
 import com.example.library.category.Category;
-import com.example.library.category.CategoryPort;
+import com.example.library.category.CategoryLookupService;
 import com.example.library.category.exception.CategoryNotFoundException;
 import com.example.library.common.config.delay_cache_test.ArtificialDelayService;
 import com.example.library.common.dto.PageResponseDTO;
@@ -44,8 +44,8 @@ public class BookService {
     private static final String S3_FOLDER_NAME = "books/";
 
 	private final BookRepository repository;
-	private final AuthorPort authorPort;
-	private final CategoryPort categoryPort;
+	private final AuthorLookupService authorPort;
+	private final CategoryLookupService categoryPort;
 	private final BookMapper mapper;
 	private final S3Service s3Service;
 	

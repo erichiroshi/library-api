@@ -21,7 +21,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.example.library.book.Book;
-import com.example.library.book.BookAvailabilityPort;
+import com.example.library.book.BookLookupService;
 import com.example.library.book.exception.BookNotFoundException;
 import com.example.library.category.Category;
 import com.example.library.loan.Loan;
@@ -56,7 +56,7 @@ class LoanServiceTest {
     private LoanRepository loanRepository;
 
     @Mock
-    private BookAvailabilityPort bookAvailabilityPort;
+    private BookLookupService bookAvailabilityPort;
 
     @Mock
     private UserLookupService userLookupService;

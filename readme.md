@@ -251,7 +251,8 @@ Uma biblioteca precisa:
 
 ### Persistência
 - **PostgreSQL 16** (banco relacional)
-- **Flyway** (versionamento de schema — 6 migrations)
+- **Flyway** (versionamento de schema — 9 migrations)
+- **Schema per Service** (schemas `auth`, `catalog` e `lending` isolados no mesmo banco)
 
 ### Cache
 - **Redis 7** (cache distribuído com TTL de 2 minutos)
@@ -354,6 +355,14 @@ com.example.library/
 └── user/           # Entidade User + UserDetailsService
 ```
 
+### Bounded Contexts definidos
+
+| Contexto | Responsabilidade | Schema |
+|---|---|---|
+| `auth` | Autenticação, usuários, refresh tokens | `auth` |
+| `catalog` | Livros, autores, categorias | `catalog` |
+| `lending` | Empréstimos e itens de empréstimo | `lending` |
+
 ### Fluxo de Observabilidade
 
 ```
@@ -435,6 +444,20 @@ Request → Controller → Service → [Cache Hit? → Return]
 **Por quê:** Proteger o monolito contra falhas de serviços externos (S3) e preparar os pontos de integração para extração futura.
 
 **Benefício:** Circuit Breaker evita cascata de falhas; Retry com backoff trata falhas transitórias. Padrão já estabelecido para quando LoanService precisar chamar BookService via HTTP.
+
+### ✔ Interfaces de anticorrupção entre domínios
+**Por quê:** `BookService` injetava `AuthorRepository` e `CategoryRepository` diretamente. `LoanService` injetava `BookRepository` e `UserRepository`. Injeção direta de repositórios entre domínios cria acoplamento estrutural que impede extração futura em microservices.
+
+**Implementação:** Cada domínio expõe uma interface de lookup (`AuthorLookupService`, `CategoryLookupService`, `BookLookupService`, `UserLookupService`). Outros domínios dependem da interface, nunca do repositório.
+
+**Benefício:** Trocar a implementação de uma chamada local para HTTP/Feign requer mudança apenas na implementação da interface, sem tocar nos serviços consumidores.
+
+### ✔ Schema per Service no mesmo banco
+**Por quê:** Microservices exigem database per service — cada serviço deve possuir e controlar suas próprias tabelas. Separar bancos imediatamente seria prematuro; separar schemas é o passo intermediário seguro.
+
+**Implementação:** Três schemas criados via Flyway (V008/V009): `auth`, `catalog` e `lending`. Entidades anotadas com `@Table(schema = "...")`, tabelas de junção com `@JoinTable(schema = "...")` e coleções com `@CollectionTable(schema = "...")`. HikariCP configurado com `search_path` para resolução automática.
+
+**Benefício:** Fronteiras de dados explícitas sem complexidade operacional de múltiplos bancos. Migração futura para bancos separados requer apenas apontar cada serviço para seu próprio PostgreSQL.
 
 ---
 
@@ -623,8 +646,9 @@ Marca como `OVERDUE` empréstimos com `status = WAITING_RETURN` e `dueDate < hoj
 - **80%+** cobertura (JaCoCo)
 - **30+** endpoints REST versionados (`/api/v1`)
 - **6** serviços Docker orquestrados
-- **6** migrations Flyway
+- **9** migrations Flyway
 - **4** workflows GitHub Actions (CI, Docker, Release, README PDF)
+- **3** bounded contexts isolados por schema (`auth`, `catalog`, `lending`)
 
 ---
 
@@ -632,6 +656,8 @@ Marca como `OVERDUE` empréstimos com `status = WAITING_RETURN` e `dueDate < hoj
 
 - [x] **Rate limiting** — Bucket4j ou Resilience4j
 - [x] **OpenTelemetry** — Tracing distribuído
+- [x] **Microservices** — Bounded contexts definidos, anticorrupção e schema per service implementados
+- [ ] **Extração Auth-Service** — primeiro serviço independente (menor e mais isolado)
 - [ ] **Deploy em cloud** — AWS ECS ou Render
 - [ ] **HATEOAS** — Hypermedia links
 - [ ] **WebSockets** — Notificações real-time de devolução

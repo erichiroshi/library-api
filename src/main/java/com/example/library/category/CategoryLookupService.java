@@ -2,6 +2,6 @@ package com.example.library.category;
 
 import java.util.Optional;
 
-public interface CategoryPort {
+public interface CategoryLookupService {
 	Optional<Category> findById(Long id);
 }
