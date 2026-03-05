@@ -21,7 +21,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.example.library.book.Book;
-import com.example.library.book.BookRepository;
+import com.example.library.book.BookAvailabilityPort;
 import com.example.library.book.exception.BookNotFoundException;
 import com.example.library.category.Category;
 import com.example.library.loan.Loan;
@@ -36,7 +36,7 @@ import com.example.library.loan.exception.LoanNotFoundException;
 import com.example.library.loan.exception.LoanUnauthorizedException;
 import com.example.library.loan.mapper.LoanMapper;
 import com.example.library.user.User;
-import com.example.library.user.UserRepository;
+import com.example.library.user.UserLookupService;
 import com.example.library.user.exception.UserNotFoundException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,10 +56,10 @@ class LoanServiceTest {
     private LoanRepository loanRepository;
 
     @Mock
-    private BookRepository bookRepository;
+    private BookAvailabilityPort bookAvailabilityPort;
 
     @Mock
-    private UserRepository userRepository;
+    private UserLookupService userLookupService;
 
     @Mock
     private LoanMapper mapper;
@@ -141,8 +141,8 @@ class LoanServiceTest {
             Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
 
-            when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
-            when(bookRepository.decrementCopies(1L)).thenReturn(1);
+            when(bookAvailabilityPort.findById(1L)).thenReturn(Optional.of(availableBook));
+            when(bookAvailabilityPort.decrementCopies(1L)).thenReturn(1);
             when(loanRepository.save(any(Loan.class))).thenAnswer(i -> {
                 Loan loan = i.getArgument(0);
                 loan.setId(1L);
@@ -168,7 +168,7 @@ class LoanServiceTest {
             assertThat(result.id()).isEqualTo(1L);
             assertThat(result.status()).isEqualTo(LoanStatus.WAITING_RETURN);
 
-            verify(bookRepository).decrementCopies(1L);
+            verify(bookAvailabilityPort).decrementCopies(1L);
             verify(loanRepository).save(any(Loan.class));
 
             // Verifica que o loan foi criado com os campos corretos
@@ -190,13 +190,13 @@ class LoanServiceTest {
 
             Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-            when(bookRepository.findById(999L)).thenReturn(Optional.empty());
+            when(bookAvailabilityPort.findById(999L)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThatThrownBy(() -> loanService.create(dto))
                 .isInstanceOf(BookNotFoundException.class);
 
-            verify(bookRepository, never()).decrementCopies(anyLong());
+            verify(bookAvailabilityPort, never()).decrementCopies(anyLong());
             verify(loanRepository, never()).save(any());
         }
 
@@ -208,8 +208,8 @@ class LoanServiceTest {
 
             Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
-            when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
-            when(bookRepository.decrementCopies(1L)).thenReturn(0); // Sem cópias disponíveis
+            when(bookAvailabilityPort.findById(1L)).thenReturn(Optional.of(availableBook));
+            when(bookAvailabilityPort.decrementCopies(1L)).thenReturn(0); // Sem cópias disponíveis
 
             // Act & Assert
             assertThatThrownBy(() -> loanService.create(dto))
@@ -234,10 +234,10 @@ class LoanServiceTest {
             Authentication auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null);
             when(securityContext.getAuthentication()).thenReturn(auth);
 
-            when(bookRepository.findById(1L)).thenReturn(Optional.of(availableBook));
-            when(bookRepository.findById(2L)).thenReturn(Optional.of(book2));
-            when(bookRepository.decrementCopies(1L)).thenReturn(1);
-            when(bookRepository.decrementCopies(2L)).thenReturn(1);
+            when(bookAvailabilityPort.findById(1L)).thenReturn(Optional.of(availableBook));
+            when(bookAvailabilityPort.findById(2L)).thenReturn(Optional.of(book2));
+            when(bookAvailabilityPort.decrementCopies(1L)).thenReturn(1);
+            when(bookAvailabilityPort.decrementCopies(2L)).thenReturn(1);
             when(loanRepository.save(any(Loan.class))).thenAnswer(i -> {
                 Loan loan = i.getArgument(0);
                 loan.setId(1L); // ← garante que o id esteja setado para o findByIdWithItemsAndUser
@@ -261,8 +261,8 @@ class LoanServiceTest {
             loanService.create(dto);
 
             // Assert
-            verify(bookRepository).decrementCopies(1L);
-            verify(bookRepository).decrementCopies(2L);
+            verify(bookAvailabilityPort).decrementCopies(1L);
+            verify(bookAvailabilityPort).decrementCopies(2L);
 
             ArgumentCaptor<Loan> loanCaptor = ArgumentCaptor.forClass(Loan.class);
             verify(loanRepository).save(loanCaptor.capture());
@@ -463,7 +463,7 @@ class LoanServiceTest {
         @DisplayName("Deve retornar empréstimos de usuário específico")
         void shouldReturnUserLoans() {
             // Arrange
-            when(userRepository.findById(1L)).thenReturn(Optional.of(authenticatedUser));
+            when(userLookupService.findById(1L)).thenReturn(Optional.of(authenticatedUser));
             when(loanRepository.findByUserIdWithItems(1L)).thenReturn(List.of(activeLoan));
 
             // Act
@@ -477,7 +477,7 @@ class LoanServiceTest {
         @DisplayName("Deve lançar UserNotFoundException quando usuário não existe")
         void shouldThrowUserNotFoundException() {
             // Arrange
-            when(userRepository.findById(999L)).thenReturn(Optional.empty());
+            when(userLookupService.findById(999L)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThatThrownBy(() -> loanService.findByUser(999L))

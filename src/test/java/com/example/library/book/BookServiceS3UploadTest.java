@@ -20,8 +20,6 @@ import com.example.library.aws.exception.AmazonClientException;
 import com.example.library.book.exception.BookNotFoundException;
 import com.example.library.category.Category;
 
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,16 +53,14 @@ class BookServiceS3UploadTest {
     @BeforeEach
     void setUp() {
         // Inicializar BookService
-        SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
-        
         bookService = new BookService(
             bookRepository,
             null, // authorRepository
             null, // categoryRepository
             null, // bookMapper
             s3Service,
-            meterRegistry,
-            null  // delayService
+            null,  // delayService
+            null   // bookCreatedCounter
         );
         
         // Inject prefix via ReflectionTestUtils (config mudou para estrutura aninhada)

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.library.book.Book;
-import com.example.library.book.BookRepository;
+import com.example.library.book.BookAvailabilityPort;
 import com.example.library.book.exception.BookNotFoundException;
 import com.example.library.loan.dto.LoanCreateDTO;
 import com.example.library.loan.dto.LoanResponseDTO;
@@ -27,7 +27,7 @@ import com.example.library.loan.exception.LoanNotFoundException;
 import com.example.library.loan.exception.LoanUnauthorizedException;
 import com.example.library.loan.mapper.LoanMapper;
 import com.example.library.user.User;
-import com.example.library.user.UserRepository;
+import com.example.library.user.UserLookupService;
 import com.example.library.user.exception.UserNotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -39,8 +39,8 @@ public class LoanService {
     private static final Logger log = LoggerFactory.getLogger(LoanService.class);
 	
 	private final LoanRepository loanRepository;
-    private final BookRepository bookRepository;    // usado apenas para verificação e decrement atômico na criação
-	private final UserRepository userRepository;
+    private final BookAvailabilityPort bookAvailabilityPort;    // usado apenas para verificação e decrement atômico na criação
+	private final UserLookupService userLookupService;          // usado para validar existência de usuários em consultas administrativas
 	private final LoanMapper mapper;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -55,7 +55,7 @@ public class LoanService {
         
         // Valida existência de todos os livros antes de iniciar
 		for (Long bookId : dto.booksId()) {
-			bookRepository.findById(bookId)
+			bookAvailabilityPort.findById(bookId)
 				.orElseThrow(() -> new BookNotFoundException(bookId));
 		}
 
@@ -68,11 +68,11 @@ public class LoanService {
 		loan.setStatus(LoanStatus.WAITING_RETURN);
 
 		for (Long bookId : dto.booksId()) {
-			Book book = bookRepository.findById(bookId)
+			Book book = bookAvailabilityPort.findById(bookId)
 					.orElseThrow(() -> new BookNotFoundException(bookId));
 
             // Update atômico — evita race condition em empréstimos concorrentes
-			int updated = bookRepository.decrementCopies(bookId);
+			int updated = bookAvailabilityPort.decrementCopies(bookId);
 			if (updated == 0) {
 				throw new BookNotAvailableException(bookId, book.getTitle());
 			}
@@ -211,7 +211,7 @@ public class LoanService {
     
     @Transactional(readOnly = true)
     public List<LoanResponseDTO> findByUser(Long userId) {
-        userRepository.findById(userId)
+    	userLookupService.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         return loanRepository.findByUserIdWithItems(userId)
                 .stream()

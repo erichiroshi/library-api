@@ -18,10 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
 
 import com.example.library.author.Author;
-import com.example.library.author.AuthorRepository;
+import com.example.library.author.AuthorPort;
 import com.example.library.aws.S3Service;
 import com.example.library.book.dto.BookCreateDTO;
 import com.example.library.book.dto.BookResponseDTO;
@@ -30,11 +29,14 @@ import com.example.library.book.exception.BookNotFoundException;
 import com.example.library.book.exception.InvalidOperationException;
 import com.example.library.book.mapper.BookMapper;
 import com.example.library.category.Category;
-import com.example.library.category.CategoryRepository;
+import com.example.library.category.CategoryPort;
 import com.example.library.category.exception.CategoryNotFoundException;
 import com.example.library.common.config.delay_cache_test.ArtificialDelayService;
 import com.example.library.common.dto.PageResponseDTO;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Service
 public class BookService {
 	
@@ -42,29 +44,16 @@ public class BookService {
     private static final String S3_FOLDER_NAME = "books/";
 
 	private final BookRepository repository;
-	private final AuthorRepository authorRepository;
-	private final CategoryRepository categoryRepository;
+	private final AuthorPort authorPort;
+	private final CategoryPort categoryPort;
 	private final BookMapper mapper;
 	private final S3Service s3Service;
+	
 	private final ArtificialDelayService delayService;
 	private final Counter bookCreatedCounter;
 	
 	@Value("${img.prefix.book}")
 	private String prefix;
-
-	public BookService(BookRepository repository, AuthorRepository authorRepository,
-			CategoryRepository categoryRepository, BookMapper bookMapper, S3Service s3Service, MeterRegistry registry, ArtificialDelayService delayService) {
-
-		this.repository = repository;
-		this.authorRepository = authorRepository;
-		this.categoryRepository = categoryRepository;
-		this.mapper = bookMapper;
-		this.s3Service = s3Service;
-		this.delayService = delayService;
-        this.bookCreatedCounter = Counter.builder("library.books.created")
-        		.description("Quantidade de livros criados")
-                .register(registry);
-	}
 
 	@CacheEvict(value = "books", allEntries = true)
 	@Transactional
@@ -81,9 +70,9 @@ public class BookService {
 		Book book = mapper.toEntity(dto);
 		log.info("Creating book: {}", book.getTitle());
 
-		Set<Author> authors = new HashSet<>(authorRepository.findAllById(dto.authorIds()));
+		Set<Author> authors = new HashSet<>(authorPort.findAllById(dto.authorIds()));
 
-		Category category = categoryRepository.findById(dto.categoryId())
+		Category category = categoryPort.findById(dto.categoryId())
 				.orElseThrow(() -> new CategoryNotFoundException(dto.categoryId()));
 		
 		if (authors.size() != dto.authorIds().size()) {
