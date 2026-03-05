@@ -24,6 +24,12 @@ spring:
         pool:
           min-idle: 0
 
+# SWAGGER UI
+springdoc:
+  swagger-ui:
+    persist-authorization: true   # token sobrevive ao F5
+    tags-sorter: alpha            # remove — deixa na ordem do OpenApiConfig
+
 # ═══════════════════════════════════════════════════════════════════
 # TRACING — Micrometer + OpenTelemetry
 # ═══════════════════════════════════════════════════════════════════
@@ -43,6 +49,7 @@ management:
     health:
       show-details: always
 
+# LOG
 logging:
   level:
     '[com.example.library]': DEBUG

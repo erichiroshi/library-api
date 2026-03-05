@@ -23,8 +23,7 @@ public class OpenApiConfig {
         return new OpenAPI()
         		.info(apiInfo())
                 .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
-                .components(components()
-                )
+                .components(components())
                 .externalDocs(new ExternalDocumentation()
                         .description("GitHub Repository")
                         .url("https://github.com/erichiroshi/library-api"))
@@ -35,12 +34,20 @@ public class OpenApiConfig {
 		return new Components().addSecuritySchemes("Bearer Authentication",
 				new SecurityScheme()
 				.description("""
-						Insira o token JWT gerado após o login:
-						access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+						1. Execute POST /auth/login com suas credenciais
+						2. Copie o valor de access_token da resposta
+						3. Clique em "Authorize" (🔒) no topo da página
+						4. Cole o token no campo e clique em "Authorize"
+
+						O token ficará salvo para todas as chamadas da sessão.
+
+						Credenciais de teste:
+						  - ADMIN → admin@admin.com / admin123
+						  - USER  → user@user.com / user123
 						""")
 				.type(SecurityScheme.Type.HTTP)
 				.scheme("bearer")
-				.bearerFormat("JWTd"));
+				.bearerFormat("JWT"));
 	}
     
 	private Info apiInfo() {
@@ -66,10 +73,12 @@ public class OpenApiConfig {
 	}
 	
 	private List<Tag> apiTags() {
-		return List.of(new Tag().name("Auth").description("Endpoints para autenticação e renovação de tokens JWT"),
-				new Tag().name("Authors").description("Endpoints para gerenciamento de autores"),
-				new Tag().name("Books").description("Endpoints para gerenciamento de livros"),
-				new Tag().name("Loans").description("Endpoints para gerenciamento de categorias de livros"),
-				new Tag().name("Categories").description("Endpoints para gerenciamento de empréstimos de livros"));
+	    return List.of(
+	        new Tag().name("Auth").description("Endpoints para autenticação e renovação de tokens JWT"),
+	        new Tag().name("Authors").description("Endpoints para gerenciamento de autores"),
+	        new Tag().name("Books").description("Endpoints para gerenciamento de livros"),
+	        new Tag().name("Categories").description("Endpoints para gerenciamento de categorias de livros"),
+	        new Tag().name("Loans").description("Endpoints para gerenciamento de empréstimos de livros")
+	    );
 	}
 }

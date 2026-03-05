@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.example.library.auth.dto.LoginRequestDTO;
-import com.example.library.auth.dto.LogoutRequest;
+import com.example.library.auth.dto.LogoutRequestDTO;
 import com.example.library.auth.dto.RefreshTokenDTO;
 import com.example.library.auth.dto.TokenResponseDTO;
 import com.example.library.refresh_token.RefreshToken;
@@ -38,9 +38,9 @@ public class AuthController {
 	private final RefreshTokenService refreshTokenService;
 	
 	@Operation(
-			summary = "Autenticar usuário e obter tokens JWT",
-			description = "Autentica o usuário usando username e password, e retorna um access token JWT e um refresh token."
-			)
+		summary = "Autenticar usuário e obter tokens JWT",
+		description = "Autentica o usuário usando username e password, e retorna um access token JWT e um refresh token."
+	)
 	@PostMapping("/login")
 	public TokenResponseDTO login(@RequestBody LoginRequestDTO request) {
 
@@ -58,9 +58,9 @@ public class AuthController {
 	}
 	
 	@Operation(
-			summary = "Renovar tokens JWT usando refresh token",
-			description = "Valida o refresh token e, se válido, gera um novo access token e um novo refresh token (token rotation)."
-			)
+		summary = "Renovar tokens JWT usando refresh token",
+		description = "Valida o refresh token e, se válido, gera um novo access token e um novo refresh token (token rotation)."
+	)
 	@PostMapping("/refresh")
 	public ResponseEntity<TokenResponseDTO> refresh(@RequestBody RefreshTokenDTO refreshToken) {
 
@@ -83,11 +83,11 @@ public class AuthController {
 	}
 	
 	@Operation(
-			summary = "Realizar o logout usando refresh token",
-			description = "Deleta refresh token do bd."
-			)
+		summary = "Realizar o logout usando refresh token",
+		description = "Deleta refresh token do bd."
+	)
 	@PostMapping("/logout")
-	public ResponseEntity<Void> logout(@RequestBody LogoutRequest request) {
+	public ResponseEntity<Void> logout(@RequestBody LogoutRequestDTO request) {
 	    refreshTokenService.invalidate(request.refreshToken());
 	    return ResponseEntity.noContent().build();
 	}

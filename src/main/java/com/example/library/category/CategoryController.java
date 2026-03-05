@@ -23,19 +23,21 @@ import com.example.library.category.dto.CategoryResponseDTO;
 import com.example.library.common.dto.PageResponseDTO;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Categories", description = "Endpoints para gerenciamento de categorias de livros")
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/categories")
 public class CategoryController {
 
 	private final CategoryService service;
 
-	public CategoryController(CategoryService service) {
-		this.service = service;
-	}
-
-    @Operation(summary = "Create a new category")
+	@Operation(
+        summary = "Criar nova categoria",
+        description = "Cria uma nova categoria de livros. Requer permissão de administrador"
+    )
+    @ApiResponse(responseCode = "201", description = "Categoria criada com sucesso")
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<CategoryResponseDTO> create(@RequestBody @Valid CategoryCreateDTO dto) {
@@ -44,24 +46,34 @@ public class CategoryController {
 		return ResponseEntity.created(uri).body(response);
 	}
 
-    @Operation(summary = "Find category by id")
-    @ApiResponse(responseCode = "200", description = "Category found")
-    @ApiResponse(responseCode = "404", description = "Category not found")
-	@GetMapping("/{id}")
+	@Operation(
+        summary = "Buscar categoria por ID",
+        description = "Retorna os detalhes de uma categoria específica usando seu ID"
+    )
+    @ApiResponse(responseCode = "200", description = "Categoria encontrada")
+    @ApiResponse(responseCode = "404", description = "Categoria não encontrada")
+    @GetMapping("/{id}")
 	public ResponseEntity<CategoryResponseDTO> findById(@PathVariable Long id) {
 		return ResponseEntity.ok(service.findById(id));
 	}
 
-	@Operation(summary = "List all categories")
-	@GetMapping
+    @Operation(
+        summary = "Listar categorias com paginação",
+        description = "Retorna uma lista paginada de categorias"
+    )
+    @ApiResponse(responseCode = "200", description = "Lista de categorias retornada com sucesso")
+    @GetMapping
 	public ResponseEntity<PageResponseDTO<CategoryResponseDTO>> findAll(Pageable pageable) {
 		return ResponseEntity.ok(service.findAll(pageable));
 	}
 	
-	@Operation(summary = "Delete category by id")
-	@ApiResponse(responseCode = "204", description = "Category deleted")
-	@ApiResponse(responseCode = "404", description = "Category not found")
-	@DeleteMapping("/{id}")
+    @Operation(
+        summary = "Deletar categoria por ID",
+        description = "Remove uma categoria existente do sistema. Requer permissão de administrador"
+    )
+    @ApiResponse(responseCode = "204", description = "Categoria deletada com sucesso")
+    @ApiResponse(responseCode = "404", description = "Categoria não encontrada")
+    @DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> deleteById(@PathVariable Long id) {
 		service.deleteById(id);

@@ -88,6 +88,12 @@ public class BookController {
 		return ResponseEntity.noContent().build();
 	}
 	
+	@Operation(
+		    summary = "Upload de capa do livro",
+		    description = "Faz upload de uma imagem de capa para um livro existente e salva a URL no S3"
+		)
+		@ApiResponse(responseCode = "200", description = "Capa enviada com sucesso")
+		@ApiResponse(responseCode = "404", description = "Livro não encontrado")
 	@PostMapping("/{id}/cover")
 	public ResponseEntity<URI> uploadCover(@PathVariable Long id, @RequestPart	("file") MultipartFile file) {
 		URI uri = bookMediaService.uploadCover(id, file);
