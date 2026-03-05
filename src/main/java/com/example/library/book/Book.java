@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "tb_book")
+@Table(name = "tb_book", schema = "catalog")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -55,6 +55,7 @@ public class Book extends BaseEntity {
     @ManyToMany
     @JoinTable(
         name = "tb_book_author",
+        schema = "catalog",
         joinColumns = @JoinColumn(name = "book_id"),
         inverseJoinColumns = @JoinColumn(name = "author_id")
     )

@@ -20,7 +20,7 @@ class FlywayMigrationIT {
 	@Test
 	void shouldHaveUserRolesTable() throws Exception {
 		try (var conn = dataSource.getConnection();
-				var rs = conn.getMetaData().getTables(null, "public", "tb_user_roles", null)) {
+				var rs = conn.getMetaData().getTables(null, "auth", "tb_user_roles", null)) {
 
 			assertTrue(rs.next());
 		}

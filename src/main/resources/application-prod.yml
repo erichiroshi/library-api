@@ -23,6 +23,8 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    default-schema: public
+    schemas: public
     locations: 
       - classpath:db/migration/common
     clean-disabled: true

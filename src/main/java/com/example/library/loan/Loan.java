@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "tb_loan")
+@Table(name = "tb_loan", schema = "lending")
 @Getter
 @Setter
 @NoArgsConstructor

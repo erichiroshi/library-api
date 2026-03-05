@@ -6,7 +6,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -16,6 +16,8 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    default-schema: public        # ← Flyway sempre usa public
+    schemas: public               # ← Flyway só gerencia public
     locations: 
       - classpath:db/migration/common
       - classpath:db/migration/dev

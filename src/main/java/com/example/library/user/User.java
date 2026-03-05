@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "tb_user")
+@Table(name = "tb_user", schema = "auth")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -55,6 +55,7 @@ public class User extends BaseEntity implements UserDetails {
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(
 	    name = "tb_user_roles",
+   	    schema = "auth",
 	    joinColumns = @JoinColumn(name = "user_id")
 	)
 	@Column(name = "role", nullable = false)

@@ -6,9 +6,15 @@ spring:
     open-in-view: false
     properties:
       hibernate:
+        '[default_schema]': public
         '[jdbc.batch_size]': 20
         '[order_inserts]': true
         '[order_updates]': true
+        '[jakarta.persistence.schema-generation.scripts.action]': none
+
+  datasource:
+    hikari:
+      connection-init-sql: SET search_path TO auth,catalog,lending,public 
   
   jackson:
     default-property-inclusion: non_null
