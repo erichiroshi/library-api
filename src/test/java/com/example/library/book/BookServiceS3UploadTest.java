@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
@@ -31,7 +32,6 @@ import static org.mockito.Mockito.when;
 /**
  * Testes para a funcionalidade de upload de imagem de capa do livro com S3
  * 
- * VERSÃO ATUALIZADA: Inclui mock do ImageProcessingService
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("BookService - Upload S3 Tests (Updated)")
@@ -43,7 +43,8 @@ class BookServiceS3UploadTest {
     @Mock
     private S3Service s3Service;
 
-    private BookService bookService;
+    @InjectMocks
+    private BookMediaService mediaService;
 
     private Book book;
     private Category category;
@@ -52,19 +53,8 @@ class BookServiceS3UploadTest {
 
     @BeforeEach
     void setUp() {
-        // Inicializar BookService
-        bookService = new BookService(
-            bookRepository,
-            null, // authorRepository
-            null, // categoryRepository
-            null, // bookMapper
-            s3Service,
-            null,  // delayService
-            null   // bookCreatedCounter
-        );
-        
         // Inject prefix via ReflectionTestUtils (config mudou para estrutura aninhada)
-        ReflectionTestUtils.setField(bookService, "prefix", "book-");
+        ReflectionTestUtils.setField(mediaService, "prefix", "book-");
 
         // Setup category
         category = new Category();
@@ -107,7 +97,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(expectedS3Uri);
 
             // Act
-            URI result = bookService.uploadFile(1L, validImage);
+            URI result = mediaService.uploadCover(1L, validImage);
 
             // Assert
             assertThat(result).isEqualTo(expectedS3Uri);
@@ -142,7 +132,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(jpegUri);
 
             // Act
-            URI result = bookService.uploadFile(1L, jpegImage);
+            URI result = mediaService.uploadCover(1L, jpegImage);
 
             // Assert
             assertThat(result).isEqualTo(jpegUri);
@@ -160,7 +150,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(expectedS3Uri);
 
             // Act
-            bookService.uploadFile(1L, validImage);
+            mediaService.uploadCover(1L, validImage);
 
             // Assert
             ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);
@@ -180,7 +170,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(expectedS3Uri);
 
             // Act
-            bookService.uploadFile(1L, validImage);
+            mediaService.uploadCover(1L, validImage);
 
             // Assert
             // Verifica que o prefixo "book-" + ID está correto
@@ -196,7 +186,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(expectedS3Uri);
 
             // Act
-            bookService.uploadFile(1L, validImage);
+            mediaService.uploadCover(1L, validImage);
 
             // Assert
             verify(s3Service).uploadFile(validImage, "books/", "book-1");
@@ -211,7 +201,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(expectedS3Uri);
 
             // Act
-            bookService.uploadFile(1L, validImage);
+            mediaService.uploadCover(1L, validImage);
 
             // Assert
             verify(bookRepository).save(book);
@@ -232,7 +222,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(expectedS3Uri);
 
             // Act
-            bookService.uploadFile(12345L, validImage);
+            mediaService.uploadCover(12345L, validImage);
 
             // Assert
             verify(s3Service).uploadFile(validImage, "books/", "book-12345");
@@ -254,7 +244,7 @@ class BookServiceS3UploadTest {
             when(bookRepository.findById(999L)).thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThatThrownBy(() -> bookService.uploadFile(999L, validImage))
+            assertThatThrownBy(() -> mediaService.uploadCover(999L, validImage))
                 .isInstanceOf(BookNotFoundException.class);
 
             // Verifica que S3Service não foi chamado
@@ -271,7 +261,7 @@ class BookServiceS3UploadTest {
                 .thenThrow(new AmazonClientException());
 
             // Act & Assert
-            assertThatThrownBy(() -> bookService.uploadFile(1L, validImage))
+            assertThatThrownBy(() -> mediaService.uploadCover(1L, validImage))
                 .isInstanceOf(AmazonClientException.class);
 
             // Verifica que o livro NÃO foi salvo
@@ -287,7 +277,7 @@ class BookServiceS3UploadTest {
                 .thenThrow(new RuntimeException("S3 connection failed"));
 
             // Act & Assert
-            assertThatThrownBy(() -> bookService.uploadFile(1L, validImage))
+            assertThatThrownBy(() -> mediaService.uploadCover(1L, validImage))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("S3 connection failed");
 
@@ -311,7 +301,7 @@ class BookServiceS3UploadTest {
                 .thenThrow(new IllegalArgumentException("Invalid content type: application/pdf"));
 
             // Act & Assert
-            assertThatThrownBy(() -> bookService.uploadFile(1L, invalidFile))
+            assertThatThrownBy(() -> mediaService.uploadCover(1L, invalidFile))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Invalid content type");
 
@@ -335,7 +325,7 @@ class BookServiceS3UploadTest {
                 .thenThrow(new IllegalArgumentException("File too large"));
 
             // Act & Assert
-            assertThatThrownBy(() -> bookService.uploadFile(1L, largeFile))
+            assertThatThrownBy(() -> mediaService.uploadCover(1L, largeFile))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("File too large");
 
@@ -358,7 +348,7 @@ class BookServiceS3UploadTest {
                 .thenThrow(new IllegalArgumentException("File too small"));
 
             // Act & Assert
-            assertThatThrownBy(() -> bookService.uploadFile(1L, tinyFile))
+            assertThatThrownBy(() -> mediaService.uploadCover(1L, tinyFile))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("File too small");
 
@@ -388,7 +378,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(expectedS3Uri);
 
             // Act
-            bookService.uploadFile(largeId, validImage);
+            mediaService.uploadCover(largeId, validImage);
 
             // Assert
             verify(s3Service).uploadFile(validImage, "books/", "book-" + largeId);
@@ -410,7 +400,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(expectedS3Uri);
 
             // Act
-            bookService.uploadFile(1L, webpImage);
+            mediaService.uploadCover(1L, webpImage);
 
             // Assert
             verify(s3Service).uploadFile(webpImage, "books/", "book-1");
@@ -430,14 +420,14 @@ class BookServiceS3UploadTest {
                 .thenReturn(secondUri);
 
             // Act - Primeiro upload
-            URI result1 = bookService.uploadFile(1L, validImage);
+            URI result1 = mediaService.uploadCover(1L, validImage);
             
             // Assert - Primeiro upload
             assertThat(result1).isEqualTo(firstUri);
             assertThat(book.getCoverImageUrl()).isEqualTo(firstUri.toString());
 
             // Act - Segundo upload
-            URI result2 = bookService.uploadFile(1L, validImage);
+            URI result2 = mediaService.uploadCover(1L, validImage);
             
             // Assert - Segundo upload substitui
             assertThat(result2).isEqualTo(secondUri);
@@ -465,7 +455,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(expectedS3Uri);
 
             // Act
-            bookService.uploadFile(1L, validImage);
+            mediaService.uploadCover(1L, validImage);
 
             // Assert
             // Verifica ordem de chamadas
@@ -486,7 +476,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(customUri);
 
             // Act
-            URI result = bookService.uploadFile(1L, validImage);
+            URI result = mediaService.uploadCover(1L, validImage);
 
             // Assert
             assertThat(result).isEqualTo(customUri);
@@ -501,7 +491,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(expectedS3Uri);
 
             // Act
-            URI returnedUri = bookService.uploadFile(1L, validImage);
+            URI returnedUri = mediaService.uploadCover(1L, validImage);
 
             // Assert
             ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);
@@ -524,7 +514,7 @@ class BookServiceS3UploadTest {
                 .thenReturn(expectedS3Uri);
 
             // Act
-            bookService.uploadFile(1L, validImage);
+            mediaService.uploadCover(1L, validImage);
 
             // Assert
             ArgumentCaptor<Book> bookCaptor = ArgumentCaptor.forClass(Book.class);

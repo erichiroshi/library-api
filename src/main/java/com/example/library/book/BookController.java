@@ -27,8 +27,10 @@ import com.example.library.book.dto.BookResponseDTO;
 import com.example.library.common.dto.PageResponseDTO;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Books", description = "Endpoints para gerenciamento de livros")
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/books")
 public class BookController {
@@ -36,10 +38,7 @@ public class BookController {
 	private static final Logger log = LoggerFactory.getLogger(BookController.class);
 
 	private final BookService bookService;
-
-	public BookController(BookService bookService) {
-		this.bookService = bookService;
-	}
+	private final BookMediaService bookMediaService;
 
 	@Operation(
 		    summary = "Criar novo livro",
@@ -89,10 +88,10 @@ public class BookController {
 		return ResponseEntity.noContent().build();
 	}
 	
-	@PostMapping("/{bookId}/picture")
-    public ResponseEntity<Void> uploadPicture(@PathVariable Long bookId, @RequestPart("file") MultipartFile file) {
-		URI uri = bookService.uploadFile(bookId, file);
-		return ResponseEntity.created(uri).build();
-	}
+	@PostMapping("/{id}/cover")
+	public ResponseEntity<URI> uploadCover(@PathVariable Long id, @RequestPart	("file") MultipartFile file) {
+		URI uri = bookMediaService.uploadCover(id, file);
+		return ResponseEntity.ok(uri);
+	}	
 
 }
