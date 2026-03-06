@@ -53,8 +53,11 @@ jobs:
           load: ${{ github.event_name == 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
+
+          # Cache MUITO rápido
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
           build-args: |
             BUILDKIT_INLINE_CACHE=1
 
