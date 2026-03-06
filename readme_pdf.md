@@ -9,7 +9,7 @@ Backend production-ready projetado com foco em previsibilidade, observabilidade 
 - Arquitetura em camadas bem definida
 - PostgreSQL + Flyway (versionamento automático)
 - Cache distribuído com Redis
-- Observabilidade completa (Micrometer + Prometheus + Grafana)
+- Observabilidade completa (Micrometer + Prometheus + Grafana + Zipkin)
 - Testes de integração com Testcontainers (banco real)
 - CI/CD com quality gate obrigatório (80%+ cobertura)
 - Upload de imagens de capa com AWS S3
@@ -77,6 +77,7 @@ A rede `library-api_backend` é criada automaticamente.
 - pgAdmin: `http://localhost:5050` (login `admin@admin.com` / `admin`)
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3000` (login `admin` / `admin`)
+- Zipkin: `http://localhost:9411`
 
 ### 2. Subir aplicação
 
@@ -206,7 +207,7 @@ Uma biblioteca precisa:
 
 - **Seguranca:** JWT com token rotation (previne replay attacks)
 - **Performance:** Cache distribuido com Redis + atomic decrement de copias
-- **Observabilidade:** Prometheus + Grafana (dashboards prontos)
+- **Observabilidade:** Prometheus + Grafana + OpenTelemetry + Zipkin (tracing distribuido com traceId nos logs)
 - **Storage:** Upload de imagens com compressao automatica via AWS S3
 - **Qualidade:** 80%+ cobertura com threshold obrigatorio no CI
 - **CI/CD:** Quality gate automatico (SonarCloud + Codecov)
@@ -349,9 +350,10 @@ com.example.library/
 
 ```
 Application -> Actuator -> Micrometer -> Prometheus -> Grafana
-                                                          |
-                                                      Dashboards
-                                                           
+     |                                                    |
+OpenTelemetry                                         Dashboards
+     |
+   Zipkin (tracing distribuido)
 ```
 
 ### Estrategia de Cache
@@ -448,6 +450,14 @@ Request -> Controller -> Service -> Cache Hit? -> Return
 
 **Beneficio:** Trocar a implementacao de uma chamada local para HTTP/Feign requer mudanca apenas na implementacao da interface, sem tocar nos servicos consumidores.
 
+### BookMediaService — separacao de responsabilidades
+
+**Por que:** `BookService` misturava logica de dominio com integracao de infraestrutura (S3).
+
+**Implementacao:** `BookMediaService` encapsula todo o pipeline de upload: validacao, redimensionamento e envio ao S3. `BookService` nunca depende de S3 diretamente.
+
+**Beneficio:** `BookService` testavel sem mock de S3; infraestrutura substituivel sem tocar em regras de negocio.
+
 ### Schema per Service no mesmo banco
 
 **Por que:** Microservices exigem database per service. Separar bancos imediatamente seria prematuro; separar schemas e o passo intermediario seguro.
@@ -498,8 +508,21 @@ Request -> Controller -> Service -> Cache Hit? -> Return
 
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3000` (admin/admin)
+- Zipkin: `http://localhost:9411`
 - Metricas raw: `http://localhost:8080/actuator/prometheus`
 - Health: `http://localhost:8080/actuator/health`
+
+### Tracing Distribuido (OpenTelemetry + Zipkin)
+
+Cada request recebe um traceId unico propagado por toda a chamada e registrado nos logs.
+
+```
+Request -> Application -> OpenTelemetry SDK -> Zipkin
+                               |
+                     traceId injetado nos logs (SLF4J MDC)
+```
+
+Propagacao W3C Trace Context — padrao adotado, compativel com qualquer ferramenta de APM.
 
 ---
 
@@ -666,13 +689,16 @@ Marca como `OVERDUE` emprestimos com `status = WAITING_RETURN` e `dueDate < hoje
 ## Proximos Passos
 
 - [x] Rate limiting — Resilience4j
-- [x] OpenTelemetry — Tracing distribuido
+- [x] OpenTelemetry + Zipkin — Tracing distribuido com W3C Trace Context
 - [x] Bounded contexts, anticorrupcao e schema per service
-- [x] Revisao pre-Fase 3 — JWT filter otimizado, BookMediaService extraido
-- [ ] Extracao Auth-Service — primeiro servico independente
-- [ ] Extracao Catalog-Service — books, authors, categories
-- [ ] Extracao Loan-Service — separar por ultimo
-- [ ] API Gateway — roteamento entre servicos
+- [x] Revisao pre-Fase 3 — JWT filter otimizado, BookMediaService extraido, workflows corrigidos
+- [ ] Fase 3 — Extracao em Microservices (branch microservices)
+  - [ ] Config Repo + Config Server
+  - [ ] Eureka Server (service discovery)
+  - [ ] Spring Cloud Gateway (JWT centralizado)
+  - [ ] Auth Service
+  - [ ] Catalog Service
+  - [ ] Loan Service
 - [ ] Deploy em cloud — AWS ECS ou Render
 - [ ] HATEOAS — Hypermedia links
 - [ ] WebSockets — Notificacoes real-time de devolucao
@@ -694,23 +720,15 @@ Marca como `OVERDUE` emprestimos com `status = WAITING_RETURN` e `dueDate < hoje
 
 ![Prometheus](docs/images/prometheus-metrics.png)
 
+### Zipkin Tracing
+
+![Zipkin](docs/images/zipkin-tracing.png)
+
 ---
 
 ## Como Contribuir
 
 Contribuicoes sao muito bem-vindas!
-
-### Para Iniciantes
-
-- [EASY] Adicionar endpoint `GET /books/search?title=`
-- [EASY] Melhorar mensagens de erro de validacao
-- [MEDIUM] Adicionar paginacao customizada nas loans
-
-### Para Experientes
-
-- [HARD] Suporte a LocalStack nos testes de integracao
-- [HARD] Implementar HATEOAS
-- [HARD] Extracao de microservices (Auth-Service, Catalog-Service, Loan-Service)
 
 ### Processo de Contribuicao
 
