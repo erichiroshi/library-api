@@ -530,8 +530,8 @@ Request -> Controller -> Service -> Cache Hit? -> Return
 - Profile `it` — cache desabilitado (`@Profile("!it")` no `CacheConfig`)
 - Valida fluxo end-to-end
 
-**Cobertura atual:** 80%+
-**Threshold obrigatorio:** 80% (pipeline falha se menor)
+**Cobertura atual:** 80%+  
+**Threshold obrigatorio:** 80% (pipeline falha se menor)  
 **Exclusoes de cobertura:** DTOs, configs, mappers gerados
 
 **Executar testes:**
