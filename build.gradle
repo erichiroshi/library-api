@@ -57,7 +57,7 @@ configurations {
 ext {
     mapstructVersion = "1.6.3"
     lombokMapstructBindingVersion = "0.2.0"
-    springdocVersion = "3.0.1"
+    springdocVersion = "3.0.2"
     jjwtVersion = "0.13.0"
    	testcontainersVersion = "2.0.3"
    	awsS3Version = "2.42.7"
