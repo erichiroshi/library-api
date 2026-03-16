@@ -1,4 +1,4 @@
-package com.example.library.services;
+package com.example.library.author;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,9 +16,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import com.example.library.author.Author;
-import com.example.library.author.AuthorRepository;
-import com.example.library.author.AuthorService;
 import com.example.library.author.dto.AuthorCreateDTO;
 import com.example.library.author.dto.AuthorResponseDTO;
 import com.example.library.author.exception.AuthorNotFoundException;

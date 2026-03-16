@@ -1,4 +1,4 @@
-package com.example.library.services;
+package com.example.library.category;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,9 +16,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import com.example.library.category.Category;
-import com.example.library.category.CategoryRepository;
-import com.example.library.category.CategoryService;
 import com.example.library.category.dto.CategoryCreateDTO;
 import com.example.library.category.dto.CategoryResponseDTO;
 import com.example.library.category.exception.CategoryAlreadyExistsException;

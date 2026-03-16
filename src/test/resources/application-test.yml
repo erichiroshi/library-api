@@ -1,6 +1,13 @@
 spring:
   autoconfigure:
     exclude: com.example.library.aws.S3Config  # ← Desabilita S3Config em testes
+  jpa:
+    hibernate:
+      ddl-auto: create-drop 	# schema criado/destruído por teste
+
+# Redis
+  cache:
+    type: none		# cache desabilitado
 
 aws:
   access-key-id: fake-key-for-tests

@@ -1,4 +1,4 @@
-package com.example.library.services;
+package com.example.library.loan;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,10 +24,6 @@ import com.example.library.book.Book;
 import com.example.library.book.BookLookupService;
 import com.example.library.book.exception.BookNotFoundException;
 import com.example.library.category.Category;
-import com.example.library.loan.Loan;
-import com.example.library.loan.LoanRepository;
-import com.example.library.loan.LoanService;
-import com.example.library.loan.LoanStatus;
 import com.example.library.loan.dto.LoanCreateDTO;
 import com.example.library.loan.dto.LoanResponseDTO;
 import com.example.library.loan.exception.BookNotAvailableException;

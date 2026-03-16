@@ -1,4 +1,4 @@
-package com.example.library.services;
+package com.example.library.refresh_token;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -16,9 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.example.library.refresh_token.RefreshToken;
-import com.example.library.refresh_token.RefreshTokenRepository;
-import com.example.library.refresh_token.RefreshTokenService;
 import com.example.library.refresh_token.exception.ExpiredRefreshTokenException;
 import com.example.library.refresh_token.exception.InvalidRefreshTokenException;
 import com.example.library.user.User;
