@@ -82,11 +82,17 @@ resilience4j:
   circuitbreaker:
     instances:
       s3:
-        sliding-window-size: 5
-        failure-rate-threshold: 50
-        wait-duration-in-open-state: 10s
+        sliding-window-size: 5              # janela de 5 chamadas para calcular taxa de falha
+        failure-rate-threshold: 60          # abre se 60% das chamadas falharem (3 de 5)
+        wait-duration-in-open-state: 30s    # fica OPEN por 30s antes de tentar recuperar
+        permitted-number-of-calls-in-half-open-state: 3   # 3 chamadas de teste no HALF-OPEN
+        register-health-indicator: true     # /actuator/health
+
   retry:
     instances:
-      s3:
-        max-attempts: 3
-        wait-duration: 500ms
+      database:
+        maxAttempts: 3          # tenta no máximo 3 vezes
+        waitDuration: 500ms     # espera 500ms entre tentativas
+        retryExceptions:        # só faz retry nessas exceções específicas
+          - org.springframework.dao.TransientDataAccessException
+          - org.springframework.dao.QueryTimeoutException

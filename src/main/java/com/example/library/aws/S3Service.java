@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
@@ -23,6 +22,7 @@ import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import com.example.library.aws.exception.AmazonClientException;
+import com.example.library.aws.exception.S3UnavailableException;
 import com.example.library.aws.exception.URIException;
 import com.example.library.aws.utils.ImageProcessingService;
 
@@ -55,7 +55,6 @@ public class S3Service {
 	private String bucketName;
 
 	@CircuitBreaker(name = "s3", fallbackMethod = "uploadFallback")
-	@Retry(name = "s3")
 	public URI uploadFile(MultipartFile file, String folder, String fileName) {
 		
 		validateFileSize(file);
@@ -100,13 +99,24 @@ public class S3Service {
 			throw new URIException();
 		}
 	}
+	
+	@CircuitBreaker(name = "s3", fallbackMethod = "deleteFallback")
+	public void deleteCover(String coverImageUrl) {
+	    // deleção do S3
+	}
 
 	@SuppressWarnings("unused")
 	private URI uploadFallback(MultipartFile file, String folder, String fileName, Exception ex) {
-	    log.error("S3 circuit breaker open or retry exhausted | reason={}", ex.getMessage());
-	    throw new AmazonClientException();
+		log.error("S3 circuit breaker open | reason={}", ex.getMessage());
+		throw new S3UnavailableException("Cover upload temporarily unavailable.");
 	}
-	
+
+	@SuppressWarnings("unused")
+	private void deleteFallback(String coverImageUrl, Exception ex) {
+		log.error("Failed to delete S3 object: {}. Manual cleanup required.", coverImageUrl, ex);
+		// não lança exceção — a deleção do livro no banco prossegue
+	}
+
 	private String extractExtension(MultipartFile file) {
 	    String contentType = file.getContentType();
 	    
