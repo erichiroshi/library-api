@@ -18,28 +18,30 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BookMediaService {
 
-    private static final Logger log = LoggerFactory.getLogger(BookMediaService.class);
-    private static final String S3_FOLDER_NAME = "books/";
+	private static final Logger log = LoggerFactory.getLogger(BookMediaService.class);
+	private static final String S3_FOLDER_NAME = "books/";
 
-    private final BookRepository repository;
-    private final S3Service s3Service;
+	private final BookService bookService;
+	private final S3Service s3Service;
 
-    @Value("${img.prefix.book}")
-    private String prefix;
+	@Value("${img.prefix.book}")
+	private String prefix;
 
-    @Transactional
-    public URI uploadCover(Long bookId, MultipartFile file) {
-        Book book = repository.findById(bookId).orElseThrow(() -> {
-            log.warn("Book not found for cover upload: {}", bookId);
-            return new BookNotFoundException(bookId);
-        });
+	@Transactional
+	public URI uploadCover(Long bookId, MultipartFile file) {
+		try {
+			bookService.find(bookId);
 
-        String fileName = prefix + book.getId();
-        URI uri = s3Service.uploadFile(file, S3_FOLDER_NAME, fileName);
-        book.setCoverImageUrl(uri.toString());
-        repository.save(book);
+			String fileName = prefix + bookId;
+			URI uri = s3Service.uploadFile(file, S3_FOLDER_NAME, fileName);
 
-        log.info("Cover uploaded for bookId={} uri={}", bookId, uri);
-        return uri;
-    }
+			bookService.updateCoverImageUrl(bookId, fileName);
+
+			log.info("Cover uploaded for bookId={} uri={}", bookId, uri);
+			return uri;
+		} catch (BookNotFoundException _) {
+			log.warn("Book not found for cover upload: {}", bookId);
+			return null;
+		}
+	}
 }

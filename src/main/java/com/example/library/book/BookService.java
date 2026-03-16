@@ -120,6 +120,16 @@ public class BookService {
 		find(id);
 		repository.deleteById(id);
 	}
+    
+    @Caching(evict = {
+    		@CacheEvict(value = "books", allEntries = true),
+    		@CacheEvict(value = "bookById", key = "#id")
+    })
+	void updateCoverImageUrl(long bookId, String url) {
+		Book book = find(bookId);
+		book.setCoverImageUrl(url);
+		repository.save(book);
+	}
 
 	Book find(Long id) {
 		return repository.findById(id).orElseThrow(() -> {

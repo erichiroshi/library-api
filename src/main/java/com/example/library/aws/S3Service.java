@@ -107,17 +107,6 @@ public class S3Service {
 	    throw new AmazonClientException();
 	}
 	
-	private void validateContentType(MultipartFile file) {
-        String contentType = file.getContentType();
-        
-        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
-            throw new IllegalArgumentException(
-                "Invalid content type: " + contentType + 
-                ". Allowed types: " + ALLOWED_CONTENT_TYPES
-            );
-        }
-    }
-	
 	private String extractExtension(MultipartFile file) {
 	    String contentType = file.getContentType();
 	    
@@ -155,6 +144,17 @@ public class S3Service {
 			throw new IllegalArgumentException(
 					String.format("File too large: %d bytes (max: %d)", size, MAX_FILE_SIZE));
 		}
+	}
+
+	private void validateContentType(MultipartFile file) {
+	    String contentType = file.getContentType();
+	    
+	    if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+	        throw new IllegalArgumentException(
+	            "Invalid content type: " + contentType + 
+	            ". Allowed types: " + ALLOWED_CONTENT_TYPES
+	        );
+	    }
 	}
 
 }
