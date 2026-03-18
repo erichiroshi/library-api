@@ -1,4 +1,4 @@
-package com.example.library.security;
+package com.example.library.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,9 +11,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.example.library.security.filter.JwtAuthenticationFilter;
 
-@Profile("prod")
+@Profile("dev")
 @Configuration
-public class ResourceSecurityProd {
+public class ResourceSecurityDev {
 
 	
 	@Bean
@@ -23,12 +23,12 @@ public class ResourceSecurityProd {
 	            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 	        )
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/auth/**").permitAll()
-						.requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
+						.requestMatchers("/auth/**", "/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 						.anyRequest().authenticated()
 	        )
 	        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
 	    return http.build();
 	}
+
 }
