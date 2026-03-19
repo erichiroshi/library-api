@@ -1,0 +1,300 @@
+# Fase 3 — Extração de Microservices
+
+> Branch: `microservices` (saindo de `v1.3.1`)  
+> Estratégia: Strangler Fig — extração gradual, monolito permanece funcional na `main`
+
+---
+
+## Arquitetura Final
+
+```
+Client
+  ↓
+gateway:8080  ←  único ponto de entrada (valida JWT)
+  ↓
+eureka-server ←  service discovery (resolve nome → instância)
+  ↓
+auth-service:0      porta aleatória
+catalog-service:0   porta aleatória
+loan-service:0      porta aleatória
+
+config-server ←  configurações centralizadas (todos os serviços consultam na subida)
+config-repo   ←  YAMLs versionados no Git
+```
+
+---
+
+## Estrutura do Repositório
+
+```
+library-api/
+├── library-api/          monolito original (referência)
+├── config-repo/          YAMLs centralizados por serviço
+├── config-server/        Spring Cloud Config Server
+├── eureka-server/        Spring Cloud Netflix Eureka
+├── gateway/              Spring Cloud Gateway + JWT Filter
+├── auth-service/         contexto auth extraído
+├── catalog-service/      contexto catalog extraído
+├── loan-service/         contexto lending extraído
+└── docker-compose.yml    orquestra todos os serviços
+```
+
+---
+
+## Fluxo de Autenticação
+
+```
+POST /auth/login
+  → gateway (livre, sem filtro JWT)
+  → auth-service (autentica, gera JWT)
+  → retorna access_token + refresh_token ao client
+
+Qualquer outro endpoint
+  → gateway (GatewayFilter valida JWT)
+      ├── inválido → 401 (gateway rejeita, serviço nunca vê)
+      └── válido   → propaga X-User-Id e X-User-Roles nos headers
+                   → catalog-service / loan-service (confiam nos headers)
+```
+
+---
+
+## Etapas
+
+### Etapa 1 — Preparar branch e reestruturar repositório
+
+- [ ] Criar branch `microservices` a partir da tag `v1.3.1`
+- [ ] Criar estrutura de diretórios no repositório
+- [ ] Mover monolito para subdiretório `library-api/`
+- [ ] Atualizar `.gitignore` para cobrir todos os subprojetos
+- [ ] Commit: `chore: restructure repo for microservices extraction`
+
+---
+
+### Etapa 2 — Config Repo
+
+- [ ] Criar diretório `config-repo/`
+- [ ] Criar `application.yml` — propriedades comuns a todos os serviços
+  - Eureka client config
+  - Actuator endpoints
+  - Logging pattern com traceId
+- [ ] Criar `config-server.yml`
+- [ ] Criar `eureka-server.yml`
+- [ ] Criar `gateway.yml`
+  - Rotas por serviço
+  - JWT secret
+- [ ] Criar `auth-service.yml`
+  - DataSource (schema `auth`)
+  - JWT config
+  - Flyway locations
+- [ ] Criar `catalog-service.yml`
+  - DataSource (schema `catalog`)
+  - Redis config
+  - Flyway locations
+- [ ] Criar `loan-service.yml`
+  - DataSource (schema `lending`)
+  - Feign clients (auth-service, catalog-service)
+  - Flyway locations
+- [ ] Commit: `feat(config-repo): add centralized configuration files`
+
+---
+
+### Etapa 3 — Config Server
+
+- [ ] Criar projeto Spring Boot em `config-server/`
+- [ ] Dependências: `spring-cloud-config-server`
+- [ ] Anotar com `@EnableConfigServer`
+- [ ] Configurar backend Git apontando para `config-repo/` local
+- [ ] Porta fixa: `8888`
+- [ ] Adicionar ao `docker-compose.yml`
+- [ ] Testar: `GET http://localhost:8888/auth-service/default`
+- [ ] Commit: `feat(config-server): add Spring Cloud Config Server`
+
+---
+
+### Etapa 4 — Eureka Server
+
+- [ ] Criar projeto Spring Boot em `eureka-server/`
+- [ ] Dependências: `spring-cloud-starter-netflix-eureka-server`
+- [ ] Anotar com `@EnableEurekaServer`
+- [ ] Configurar como `standalone` (não se registra em si mesmo)
+- [ ] Porta fixa: `8761`
+- [ ] Buscar configuração do Config Server (`bootstrap.yml`)
+- [ ] Adicionar ao `docker-compose.yml`
+- [ ] Testar: `http://localhost:8761` — dashboard Eureka
+- [ ] Commit: `feat(eureka-server): add service discovery`
+
+---
+
+### Etapa 5 — Gateway
+
+- [ ] Criar projeto Spring Boot em `gateway/`
+- [ ] Dependências:
+  - `spring-cloud-starter-gateway`
+  - `spring-cloud-starter-netflix-eureka-client`
+  - `spring-cloud-starter-config`
+  - `jjwt` (validação JWT)
+- [ ] Configurar rotas no `gateway.yml`:
+  - `/auth/**` → `auth-service` (sem filtro JWT)
+  - `/api/v1/books/**` → `catalog-service`
+  - `/api/v1/authors/**` → `catalog-service`
+  - `/api/v1/categories/**` → `catalog-service`
+  - `/api/v1/loans/**` → `loan-service`
+- [ ] Implementar `JwtAuthenticationFilter` (GatewayFilter)
+  - Valida JWT
+  - Propaga `X-User-Id` e `X-User-Roles` nos headers
+  - Retorna 401 se inválido
+- [ ] Porta fixa: `8080`
+- [ ] Registrar no Eureka
+- [ ] Adicionar ao `docker-compose.yml`
+- [ ] Commit: `feat(gateway): add Spring Cloud Gateway with JWT validation filter`
+
+---
+
+### Etapa 6 — Auth Service
+
+- [ ] Criar projeto Spring Boot em `auth-service/`
+- [ ] Dependências:
+  - `spring-boot-starter-web`
+  - `spring-boot-starter-data-jpa`
+  - `spring-boot-starter-security`
+  - `spring-cloud-starter-netflix-eureka-client`
+  - `spring-cloud-starter-config`
+  - `jjwt`
+  - `flyway`
+  - `postgresql`
+- [ ] Copiar do monolito:
+  - `auth/` — AuthController, DTOs
+  - `user/` — User, UserRepository, UserService
+  - `refresh_token/` — RefreshToken, RefreshTokenService, RefreshTokenCleanupJob
+  - `security/` — JwtService, SecurityConfig
+  - Migrations `V001` a `V003` (tabelas auth schema)
+- [ ] Remover dependência do `SecurityContextHolder` como fonte de User
+  - Receber `X-User-Id` do header (propagado pelo gateway)
+- [ ] Porta: `0` (aleatória)
+- [ ] Registrar no Eureka com nome `auth-service`
+- [ ] Adicionar ao `docker-compose.yml`
+- [ ] Testes unitários e de integração
+- [ ] Commit: `feat(auth-service): extract authentication context from monolith`
+
+---
+
+### Etapa 7 — Catalog Service
+
+- [ ] Criar projeto Spring Boot em `catalog-service/`
+- [ ] Dependências:
+  - `spring-boot-starter-web`
+  - `spring-boot-starter-data-jpa`
+  - `spring-cloud-starter-netflix-eureka-client`
+  - `spring-cloud-starter-config`
+  - `spring-boot-starter-cache` + Redis
+  - `flyway`
+  - `postgresql`
+  - `aws-sdk` (S3 — BookMediaService)
+- [ ] Copiar do monolito:
+  - `book/` — Book, BookService, BookMediaService, BookRepository
+  - `author/` — Author, AuthorService, AuthorRepository
+  - `category/` — Category, CategoryService, CategoryRepository
+  - `aws/` — S3Service
+  - Migrations das tabelas catalog schema
+- [ ] Remover LookupServices — não há dependência de outros domínios
+- [ ] Ler `X-User-Id` e `X-User-Roles` do header (sem Spring Security completo)
+- [ ] Porta: `0` (aleatória)
+- [ ] Registrar no Eureka com nome `catalog-service`
+- [ ] Adicionar ao `docker-compose.yml`
+- [ ] Testes unitários e de integração
+- [ ] Commit: `feat(catalog-service): extract catalog context from monolith`
+
+---
+
+### Etapa 8 — Loan Service
+
+- [ ] Criar projeto Spring Boot em `loan-service/`
+- [ ] Dependências:
+  - `spring-boot-starter-web`
+  - `spring-boot-starter-data-jpa`
+  - `spring-cloud-starter-netflix-eureka-client`
+  - `spring-cloud-starter-config`
+  - `spring-cloud-starter-openfeign`
+  - `resilience4j-spring-boot3`
+  - `flyway`
+  - `postgresql`
+- [ ] Copiar do monolito:
+  - `loan/` — Loan, LoanService, LoanRepository, LoanItem
+  - Migrations das tabelas lending schema
+- [ ] Implementar Feign clients:
+  - `BookClient` → `catalog-service` (findById, decrementCopies, restoreCopies)
+  - `UserClient` → `auth-service` (findById, findByEmail)
+- [ ] Substituir LookupServices pelos Feign clients
+- [ ] Ler `X-User-Id` e `X-User-Roles` do header
+- [ ] Circuit Breaker nos Feign clients (Resilience4j)
+- [ ] Porta: `0` (aleatória)
+- [ ] Registrar no Eureka com nome `loan-service`
+- [ ] Adicionar ao `docker-compose.yml`
+- [ ] Testes unitários e de integração
+- [ ] Commit: `feat(loan-service): extract lending context from monolith`
+
+---
+
+### Etapa 9 — Docker Compose Final
+
+- [ ] Criar `docker-compose.yml` na raiz orquestrando:
+  - `postgres` (único banco, schemas separados)
+  - `redis`
+  - `config-server`
+  - `eureka-server` (depends_on: config-server)
+  - `gateway` (depends_on: eureka-server)
+  - `auth-service` (depends_on: eureka-server)
+  - `catalog-service` (depends_on: eureka-server)
+  - `loan-service` (depends_on: eureka-server)
+  - `prometheus` + `grafana` + `zipkin`
+- [ ] Healthchecks em todos os serviços
+- [ ] Commit: `chore(docker): add full microservices docker-compose`
+
+---
+
+### Etapa 10 — CI/CD atualizado
+
+- [ ] Atualizar `ci.yml` para rodar testes em todos os subprojetos
+- [ ] Atualizar `docker.yml` para buildar imagem de cada serviço
+- [ ] Atualizar `release.yml` para taggear todas as imagens
+- [ ] Commit: `ci: update workflows for microservices structure`
+
+---
+
+### Etapa 11 — Merge e Release
+
+- [ ] Abrir PR `microservices` → `main`
+- [ ] Validar CI completo
+- [ ] Merge na `main`
+- [ ] Tag `v2.0.0`
+- [ ] Commit: `chore(release): bump version to v2.0.0`
+
+---
+
+## Ordem de Subida dos Serviços
+
+```
+1. postgres + redis          infraestrutura
+2. config-server             configurações
+3. eureka-server             descoberta
+4. auth-service              autenticação
+5. catalog-service           catálogo
+6. loan-service              empréstimos
+7. gateway                   entrada
+8. prometheus + grafana      observabilidade
+```
+
+---
+
+## Checklist de Definições
+
+- [x] Monorepo — histórico linear no Git
+- [x] Branch `microservices` saindo de `v1.3.1`
+- [x] Portas aleatórias (`server.port=0`) — descoberta via Eureka
+- [x] Config Server com backend Git (`config-repo/`)
+- [x] Autenticação JWT centralizada no Gateway
+- [x] Serviços internos confiam em headers `X-User-Id` e `X-User-Roles`
+- [x] Spring Cloud Gateway como único ponto de entrada
+- [x] Feign + Resilience4j para comunicação entre serviços
+- [x] Banco único PostgreSQL com schemas separados (auth, catalog, lending)
+- [x] Migração futura para Kubernetes sem mudança de contratos
