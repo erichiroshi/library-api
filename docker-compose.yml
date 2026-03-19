@@ -1,0 +1,110 @@
+# Docker Compose — Fase 3 Microservices
+# Ordem de subida: postgres + redis → config-server → eureka-server → ... demais serviços
+# Atualizado a cada nova etapa concluída
+
+services:
+
+  # ─────────────────────────────────────────────
+  # INFRAESTRUTURA
+  # ─────────────────────────────────────────────
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: library
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - backend
+
+  # ─────────────────────────────────────────────
+  # SPRING CLOUD — INFRAESTRUTURA
+  # ─────────────────────────────────────────────
+
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config-repo:/config-repo    # ← monta config-repo dentro do container
+    environment:
+      SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS: file:/config-repo
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    depends_on:
+      config-server:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # ─────────────────────────────────────────────
+  # SERVIÇOS DE NEGÓCIO — adicionados nas próximas etapas
+  # ─────────────────────────────────────────────
+
+  # gateway:       Etapa 5
+  # auth-service:  Etapa 6
+  # catalog-service: Etapa 7
+  # loan-service:  Etapa 8
+
+  # ─────────────────────────────────────────────
+  # OBSERVABILIDADE — adicionada na Etapa 9
+  # ─────────────────────────────────────────────
+
+  # prometheus:    Etapa 9
+  # grafana:       Etapa 9
+  # zipkin:        Etapa 9
+
+networks:
+  backend:
+
+volumes:
+  postgres_data:
+  redis_data:

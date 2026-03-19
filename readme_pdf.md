@@ -103,14 +103,14 @@ apenas apontar cada servico para seu proprio banco.
 
 ### Servicos
 
-| Servico | Porta | Responsabilidade |
-|---|---|---|
-| config-server | 8888 | Configuracao centralizada |
-| eureka-server | 8761 | Service discovery |
-| gateway | 8080 | Entrada unica + JWT |
-| auth-service | aleatoria | Autenticacao |
-| catalog-service | aleatoria | Catalogo de livros |
-| loan-service | aleatoria | Emprestimos |
+| Servico | Porta | Responsabilidade | Status |
+|---|---|---|---|
+| config-server | 8888 | Configuracao centralizada | Concluido |
+| eureka-server | 8761 | Service discovery | Concluido |
+| gateway | 8080 | Entrada unica + JWT | Em desenvolvimento |
+| auth-service | aleatoria | Autenticacao | Pendente |
+| catalog-service | aleatoria | Catalogo de livros | Pendente |
+| loan-service | aleatoria | Emprestimos | Pendente |
 
 ### Ordem de Subida
 ```

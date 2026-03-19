@@ -56,8 +56,8 @@ Extração do monolito em microservices usando o padrão **Strangler Fig**.
 
 | Serviço | Descrição | Status |
 |---|---|---|
-| [`config-server/`](./config-server) | Configuração centralizada | 🔲 Em breve |
-| [`eureka-server/`](./eureka-server) | Service discovery | 🔲 Em breve |
+| [`config-server/`](./config-server) | Configuração centralizada | ✅ Concluído |
+| [`eureka-server/`](./eureka-server) | Service discovery | ✅ Concluído |
 | [`gateway/`](./gateway) | API Gateway + JWT | 🔲 Em breve |
 | [`auth-service/`](./auth-service) | Autenticação | 🔲 Em breve |
 | [`catalog-service/`](./catalog-service) | Catálogo de livros | 🔲 Em breve |
@@ -89,7 +89,24 @@ Acesse: `http://localhost:8080/swagger-ui/index.html`
 Credenciais de teste:
 - **ADMIN:** `joao.silva@email.com` / `123456`
 
-### Microservices (em breve)
+### Microservices (parcial — em desenvolvimento)
+
+Serviços disponíveis até o momento:
+
+```bash
+# 1. Config Server
+cd config-server
+./gradlew bootRun
+# Acesse: http://localhost:8888/actuator/health
+
+# 2. Eureka Server (requer Config Server rodando)
+cd eureka-server
+./gradlew bootRun
+# Acesse: http://localhost:8761
+```
+
+> Docker Compose completo disponível ao final da Fase 3.
+
 ```bash
 docker compose up -d
 ```

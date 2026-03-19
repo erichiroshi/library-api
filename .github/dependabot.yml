@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "gradle"
-    directory: "/library-api"      # ← atualizado
+    directory: "/library-api"
     schedule:
       interval: "weekly"
 
@@ -11,7 +11,7 @@ updates:
       interval: "weekly"
 
   - package-ecosystem: "gradle"
-    directory: "/eureka-server"     # ← novo
+    directory: "/eureka-server"
     schedule:
       interval: "weekly"
 
@@ -21,6 +21,16 @@ updates:
       interval: "weekly"
       
   - package-ecosystem: "docker"
-    directory: "/library-api"      # ← atualizado
+    directory: "/library-api"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/config-server"       # ← novo
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/eureka-server"       # ← novo
     schedule:
       interval: "weekly"
