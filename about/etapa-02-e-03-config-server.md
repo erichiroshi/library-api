@@ -1,4 +1,4 @@
-# Etapa 2 — Config Server
+# Etapa 2 & 3 — Config Server + Config Repo
 
 **Branch:** `microservices`  
 **Commit:** `feat(config-server): adicionar Config Server com configurações centralizadas`  
@@ -14,6 +14,7 @@
 - Verificado via curl — merging de configurações funcionando
 - `config-server` incluído no `settings.gradle` raiz
 - `dependabot.yml` atualizado com entrada do `config-server`
+- Adicionado `spring-boot-starter-actuator` explícito no `build.gradle`
 
 ---
 
@@ -21,19 +22,19 @@
 ```
 config-server/
 ├── src/main/java/com/example/configserver/
-│   └── ConfigServerApplication.java
+│   └── ConfigServerApplication.java     ← @EnableConfigServer
 ├── src/main/resources/
-│   └── application.yml
+│   └── application.yml                  ← porta 8888, perfil native
 ├── build.gradle
 └── settings.gradle
 
 config-repo/
-├── application.yml        ← compartilhado por todos
-├── auth-service.yml
-├── catalog-service.yml
-├── loan-service.yml
-├── gateway.yml
-└── eureka-server.yml
+├── application.yml        ← compartilhado por todos os serviços
+├── auth-service.yml       ← datasource auth + JWT + Flyway
+├── catalog-service.yml    ← datasource catalog + Redis + S3 + Flyway
+├── loan-service.yml       ← datasource lending + Feign + Resilience4j + Flyway
+├── gateway.yml            ← rotas + JWT secret
+└── eureka-server.yml      ← porta 8761 + standalone config
 ```
 
 ---
@@ -56,31 +57,50 @@ config-repo/
 
 ---
 
+### config-repo/application.yml — configurações compartilhadas
+
+O `application.yml` no `config-repo/` é automaticamente merged em todas as respostas do Config Server. Configurações que todos os serviços precisam ficam aqui:
+
+- URL do Eureka (`eureka.client.service-url.defaultZone`)
+- `eureka.instance.prefer-ip-address: true`
+- Management endpoints (`health`, `info`, `metrics`, `prometheus`)
+- `health.show-details: when-authorized`
+- Logging level padrão (`root: INFO`)
+
+Cada serviço só declara o que é específico seu — sem repetição.
+
+---
+
+### Por que não existe config-server.yml no config-repo/
+
+O Config Server não é cliente de si mesmo — ele **serve** o `config-repo/`, não busca configuração nele. Toda a configuração do Config Server está em `config-server/src/main/resources/application.yml`. Os outros serviços têm YAML no `config-repo/` porque são clientes do Config Server.
+
+| Serviço | Papel | Configuração fica em |
+|---|---|---|
+| `config-server` | Servidor | `config-server/src/main/resources/application.yml` |
+| `eureka-server` | Cliente | `config-repo/eureka-server.yml` |
+| `gateway` | Cliente | `config-repo/gateway.yml` |
+| `auth-service` | Cliente | `config-repo/auth-service.yml` |
+| `catalog-service` | Cliente | `config-repo/catalog-service.yml` |
+| `loan-service` | Cliente | `config-repo/loan-service.yml` |
+
+---
+
 ### Spring Cloud 2025.1.1
 
 Spring Boot 4.0.3 requer Spring Cloud 2025.1.x (Oakwood). A versão 2025.0.0 é incompatível com Boot 4.0.1+. Verificado antes de gerar o `build.gradle`.
 
 ---
 
-### `build.gradle` standalone
+### build.gradle standalone
 
-Cada serviço declara versões de plugins e `repositories { mavenCentral() }` localmente. Isso permite rodar cada serviço com `gradlew bootRun` standalone, sem depender do `build.gradle` raiz.
+Cada serviço declara versões de plugins, `repositories { mavenCentral() }` e `spring-boot-starter-actuator` explicitamente. Isso permite rodar cada serviço standalone sem depender do `build.gradle` raiz.
 
-O `build.gradle` raiz continua com `apply false` — serve para builds multi-project quando todos os serviços estiverem prontos.
-
-**Regra estabelecida:** todo `build.gradle` de serviço declara plugins com versão + `repositories` explicitamente.
-
----
-
-### Configurações compartilhadas via `application.yml`
-
-O `config-repo/application.yml` é automaticamente merged em todas as respostas do Config Server. Configurações que todos os serviços precisam ficam aqui:
-
-- URL do Eureka
-- Management endpoints
-- Logging level padrão
-
-Cada serviço só declara o que é específico seu.
+**Regra estabelecida:** todo `build.gradle` de serviço declara:
+- Plugins com versão explícita
+- `repositories { mavenCentral() }`
+- `spring-boot-starter-actuator` explícito
+- `--enable-preview` nas tasks de compilação e teste
 
 ---
 
@@ -101,10 +121,13 @@ Merge automático funcionando corretamente.
 
 ---
 
-## Regras estabelecidas nesta etapa
+## Problema encontrado e resolvido
 
-- Todo `build.gradle` de serviço declara versões de plugins e `repositories` explicitamente
-- `dependabot.yml` atualizado a cada novo serviço criado (regra da Etapa 1 aplicada)
+**Problema:** `repositories` não declarado no `build.gradle` do `config-server` causou falha na resolução de dependências ao rodar standalone.
+
+**Causa:** o `build.gradle` raiz declara `mavenCentral()` no bloco `subprojects {}`, mas esse bloco só é aplicado quando o build é executado a partir da raiz do monorepo. Rodando `gradlew bootRun` dentro de `config-server/`, o arquivo raiz não é lido.
+
+**Solução:** declarar `repositories { mavenCentral() }` em cada `build.gradle` de serviço — regra estabelecida para todos os serviços da Fase 3.
 
 ---
 
@@ -112,11 +135,11 @@ Merge automático funcionando corretamente.
 
 | Arquivo | Ação |
 |---|---|
-| `config-server/build.gradle` | Criado |
+| `config-server/build.gradle` | Criado — plugins + actuator explícito |
 | `config-server/settings.gradle` | Criado |
-| `config-server/src/main/java/.../ConfigServerApplication.java` | Criado |
-| `config-server/src/main/resources/application.yml` | Criado |
-| `config-repo/application.yml` | Criado |
+| `config-server/src/main/java/.../ConfigServerApplication.java` | Criado — @EnableConfigServer |
+| `config-server/src/main/resources/application.yml` | Criado — porta 8888, perfil native |
+| `config-repo/application.yml` | Criado — configurações compartilhadas |
 | `config-repo/auth-service.yml` | Criado |
 | `config-repo/catalog-service.yml` | Criado |
 | `config-repo/loan-service.yml` | Criado |
@@ -129,9 +152,10 @@ Merge automático funcionando corretamente.
 
 ## Próxima etapa
 
-**Etapa 3 — Eureka Server**
+**Etapa 4 — Eureka Server**
 
-- Criar projeto Spring Boot em `eureka-server/`
-- Configurar como standalone (não se registra em si mesmo)
+- Criar projeto Spring Boot em `eureka-server/` via Spring Initializr
+- Configurar como standalone (`register-with-eureka: false`, `fetch-registry: false`)
 - Porta fixa `8761`
-- Buscar configuração do Config Server via `bootstrap.yml`
+- Buscar configuração do Config Server via `spring.config.import`
+- Fallback local para rodar sem Config Server
