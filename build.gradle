@@ -61,7 +61,7 @@ ext {
     jjwtVersion = "0.13.0"
    	testcontainersVersion = "2.0.3"
    	awsS3Version = "2.42.11"
-   	shedlockVersion = "7.6.0"
+   	shedlockVersion = "7.7.0"
    	otelVersion = "1.7.0-M3"
    	openTelemetryVersion = "2.25.0"
    	aopVersion = "4.0.0-M2"
