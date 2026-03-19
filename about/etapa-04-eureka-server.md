@@ -1,110 +1,99 @@
-# Etapa 2 — Config Server
+# Etapa 4 — Eureka Server
 
 **Branch:** `microservices`  
-**Commit:** `feat(config-server): adicionar Config Server com configurações centralizadas`  
+**Commit:** `feat(eureka-server): adicionar Eureka Server com service discovery`  
 **Status:** ✅ Concluída
 
 ---
 
 ## O que foi feito
 
-- Criado `config-server/` com Spring Cloud Config Server 2025.1.1
-- Criado `config-repo/` com YAMLs para todos os serviços
-- Config Server subindo na porta `8888`
-- Verificado via curl — merging de configurações funcionando
-- `config-server` incluído no `settings.gradle` raiz
-- `dependabot.yml` atualizado com entrada do `config-server`
+- Gerado `eureka-server/` via Spring Initializr (Spring Boot 4.0.4)
+- Configurado como standalone — não se registra em si mesmo
+- Porta fixa `8761`
+- Configuração buscada do Config Server via `spring.config.import`
+- Fallback local para rodar sem Config Server
+- Dashboard verificado em `http://localhost:8761`
+- `eureka-server` incluído no `settings.gradle` raiz
+- `dependabot.yml` atualizado
 
 ---
 
 ## Estrutura criada
 ```
-config-server/
-├── src/main/java/com/example/configserver/
-│   └── ConfigServerApplication.java
+eureka-server/
+├── src/main/java/com/example/eurekaserver/
+│   └── EurekaServerApplication.java     ← @EnableEurekaServer
 ├── src/main/resources/
-│   └── application.yml
+│   └── application.yml                  ← config.import + fallback local
 ├── build.gradle
-└── settings.gradle
-
-config-repo/
-├── application.yml        ← compartilhado por todos
-├── auth-service.yml
-├── catalog-service.yml
-├── loan-service.yml
-├── gateway.yml
-└── eureka-server.yml
+├── settings.gradle
+├── gradlew / gradlew.bat                ← wrapper próprio (Initializr)
+└── gradle/wrapper/
 ```
 
 ---
 
 ## Decisões e Tradeoffs
 
-### Perfil `native` vs Git
+### Eureka vs alternativas
 
-**Decisão:** perfil `native` — lê YAMLs diretamente do filesystem.
+**Decisão:** Netflix Eureka.
 
-| | Native | Git |
-|---|---|---|
-| Setup | Zero — aponta para pasta local | Requer repositório Git separado |
-| Produção | Não recomendado | Padrão de mercado |
-| Histórico de mudanças | Não tem | Git log completo |
-| Rollback de config | Manual | `git revert` |
-| Portfólio local | Suficiente | Complexidade desnecessária |
+| | Eureka | Consul | Kubernetes |
+|---|---|---|---|
+| Integração Spring Cloud | Nativa | Boa | Nativa (diferente) |
+| Infraestrutura extra | Nenhuma | Consul agent | Cluster K8s |
+| Complexidade local | Baixa | Média | Alta |
+| Produção real | Sim | Sim | Padrão atual |
+| Path para K8s | Troca só o client | Troca só o client | Já está lá |
 
-**Por que native:** elimina dependência externa para rodar o projeto localmente. Em produção real, trocar para Git requer apenas mudar o perfil e apontar `spring.cloud.config.server.git.uri` — o resto do sistema não muda.
-
----
-
-### Spring Cloud 2025.1.1
-
-Spring Boot 4.0.3 requer Spring Cloud 2025.1.x (Oakwood). A versão 2025.0.0 é incompatível com Boot 4.0.1+. Verificado antes de gerar o `build.gradle`.
+**Por que Eureka:** zero infraestrutura extra, integração nativa com Spring Cloud Load Balancer e OpenFeign, e path claro para Kubernetes — quando migrar, basta remover a dependência do Eureka client e usar o service discovery do K8s. O código dos serviços não muda.
 
 ---
 
-### `build.gradle` standalone
+### Porta fixa vs aleatória
 
-Cada serviço declara versões de plugins e `repositories { mavenCentral() }` localmente. Isso permite rodar cada serviço com `gradlew bootRun` standalone, sem depender do `build.gradle` raiz.
+**Decisão:** porta fixa `8761`.
 
-O `build.gradle` raiz continua com `apply false` — serve para builds multi-project quando todos os serviços estiverem prontos.
-
-**Regra estabelecida:** todo `build.gradle` de serviço declara plugins com versão + `repositories` explicitamente.
+O Eureka é o ponto central de descoberta — todos os serviços precisam saber onde ele está para se registrar. Porta aleatória quebraria o bootstrap dos outros serviços. O mesmo vale para o Gateway (`8080`) e o Config Server (`8888`). Apenas os serviços de negócio (`auth`, `catalog`, `loan`) usam porta `0`.
 
 ---
 
-### Configurações compartilhadas via `application.yml`
+### spring.config.import + fallback local
 
-O `config-repo/application.yml` é automaticamente merged em todas as respostas do Config Server. Configurações que todos os serviços precisam ficam aqui:
+**Problema encontrado:** o Eureka não buscou configuração do Config Server na primeira tentativa — subiu na porta `8080` em vez de `8761`.
 
-- URL do Eureka
-- Management endpoints
-- Logging level padrão
+**Causa:** `spring.config.import` requer a dependência `spring-cloud-starter-config` no classpath. Sem ela, o import é ignorado silenciosamente.
 
-Cada serviço só declara o que é específico seu.
+**Solução:** adicionar `spring-cloud-starter-config` ao `build.gradle` + manter fallback local no `application.yml` com as configurações essenciais (`server.port`, `register-with-eureka: false`, `fetch-registry: false`).
+
+**Comportamento resultante:**
+- Com Config Server no ar: configurações do `config-repo/eureka-server.yml` sobrescrevem o fallback
+- Sem Config Server: `optional:configserver:` ignora a falha e usa o fallback local
+
+---
+
+### Ajuste no build.gradle gerado pelo Initializr
+
+O Initializr gerou Spring Cloud `2025.1.0`. Atualizado para `2025.1.1` por consistência com o `config-server`. Adicionado `--enable-preview` nas tasks de compilação e teste (padrão do projeto).
 
 ---
 
 ## Verificação
-```bash
-# Health check
-curl http://localhost:8888/actuator/health
-
-# Configuração do auth-service (específica + compartilhada merged)
-curl http://localhost:8888/auth-service/default
+```
+http://localhost:8761
 ```
 
-Resposta do `auth-service/default` retornou dois `propertySources`:
-1. `file:../config-repo/auth-service.yml` — configurações específicas
-2. `file:../config-repo/application.yml` — configurações compartilhadas
-
-Merge automático funcionando corretamente.
+Dashboard Eureka exibindo "No instances currently registered with Eureka" — correto, nenhum serviço registrado ainda.
 
 ---
 
-## Regras estabelecidas nesta etapa
-
-- Todo `build.gradle` de serviço declara versões de plugins e `repositories` explicitamente
-- `dependabot.yml` atualizado a cada novo serviço criado (regra da Etapa 1 aplicada)
+## Ordem de subida atual
+```
+1. Config Server  (porta 8888)
+2. Eureka Server  (porta 8761)
+```
 
 ---
 
@@ -112,26 +101,21 @@ Merge automático funcionando corretamente.
 
 | Arquivo | Ação |
 |---|---|
-| `config-server/build.gradle` | Criado |
-| `config-server/settings.gradle` | Criado |
-| `config-server/src/main/java/.../ConfigServerApplication.java` | Criado |
-| `config-server/src/main/resources/application.yml` | Criado |
-| `config-repo/application.yml` | Criado |
-| `config-repo/auth-service.yml` | Criado |
-| `config-repo/catalog-service.yml` | Criado |
-| `config-repo/loan-service.yml` | Criado |
-| `config-repo/gateway.yml` | Criado |
-| `config-repo/eureka-server.yml` | Criado |
-| `settings.gradle` (raiz) | Modificado — `include 'config-server'` |
-| `.github/dependabot.yml` | Modificado — entrada do `config-server` |
+| `eureka-server/` | Criado via Spring Initializr |
+| `eureka-server/build.gradle` | Ajustado — Spring Cloud 2025.1.1 + config client + enable-preview |
+| `eureka-server/src/main/resources/application.yml` | Criado — substitui application.properties |
+| `eureka-server/src/main/java/.../EurekaServerApplication.java` | Ajustado — @EnableEurekaServer adicionado |
+| `settings.gradle` (raiz) | Modificado — `include 'eureka-server'` |
+| `.github/dependabot.yml` | Modificado — entrada do `eureka-server` |
 
 ---
 
 ## Próxima etapa
 
-**Etapa 3 — Eureka Server**
+**Etapa 5 — Gateway**
 
-- Criar projeto Spring Boot em `eureka-server/`
-- Configurar como standalone (não se registra em si mesmo)
-- Porta fixa `8761`
-- Buscar configuração do Config Server via `bootstrap.yml`
+- Criar projeto Spring Boot em `gateway/`
+- Spring Cloud Gateway com JWT centralizado
+- Rotas para todos os serviços
+- Filtro JWT — valida token e propaga `X-User-Id` e `X-User-Roles`
+- Porta fixa `8080`
