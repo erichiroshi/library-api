@@ -102,7 +102,29 @@ public class S3Service {
 	
 	@CircuitBreaker(name = "s3", fallbackMethod = "deleteFallback")
 	public void deleteCover(String coverImageUrl) {
-	    // deleção do S3
+		if (coverImageUrl == null || coverImageUrl.isBlank()) {
+			log.warn("deleteCover called with null or blank URL — skipping");
+			return;
+		}
+
+		try {
+			// Extrai a key do objeto a partir da URL
+			// Ex: https://bucket.s3.region.amazonaws.com/books/book-1.jpg → books/book-1.jpg
+			URI uri = URI.create(coverImageUrl);
+			String key = uri.getPath().replaceFirst("^/", ""); // remove leading slash
+
+			log.info("Deletando objeto S3: key={}", key);
+	 
+	        s3Client.deleteObject(builder -> builder
+	                .bucket(bucketName)
+	                .key(key)
+	                .build());
+	 
+	        log.info("Objeto S3 deletado com sucesso: key={}", key);
+	 
+	    } catch (AwsServiceException | SdkClientException e) {
+	        throw new AmazonClientException();
+	    }
 	}
 
 	@SuppressWarnings("unused")
