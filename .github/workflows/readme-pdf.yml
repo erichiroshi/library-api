@@ -2,7 +2,7 @@ name: Docs - README PDF
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "microservices" ]
     paths:
       - readme_pdf.md
     tags:
