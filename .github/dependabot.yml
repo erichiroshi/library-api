@@ -4,6 +4,11 @@ updates:
     directory: "/library-api"      # ← atualizado
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "gradle"
+    directory: "/config-server"     # ← novo
+    schedule:
+      interval: "weekly"
   
   - package-ecosystem: "github-actions"
     directory: "/"
