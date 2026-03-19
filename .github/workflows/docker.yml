@@ -2,7 +2,7 @@ name: Docker Build & Push
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "microservices" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:  # Manual trigger
@@ -48,7 +48,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
         with:
-          context: .
+          context: library-api          # ← contexto aponta para library-api/
+          file: library-api/Dockerfile  # ← Dockerfile dentro de library-api/
           push: ${{ github.event_name != 'pull_request' }}  # Push apenas se não for PR
           load: ${{ github.event_name == 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}

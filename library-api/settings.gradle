@@ -1,0 +1,4 @@
+// Subprojeto — configurações do monolito standalone
+// O projeto raiz é gerenciado por ../settings.gradle
+
+//rootProject.name = 'library-api'

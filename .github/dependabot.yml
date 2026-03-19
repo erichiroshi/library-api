@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "gradle"
-    directory: "/"
+    directory: "/library-api"      # ← atualizado
     schedule:
       interval: "weekly"
   
@@ -11,6 +11,6 @@ updates:
       interval: "weekly"
       
   - package-ecosystem: "docker"
-    directory: "/"
+    directory: "/library-api"      # ← atualizado
     schedule:
       interval: "weekly"

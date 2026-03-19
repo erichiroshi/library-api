@@ -2,7 +2,7 @@ name: CI - Library API
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "microservices" ]
   pull_request:
     branches: [ "main" ]
 
@@ -11,6 +11,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: library-api   # ← todos os steps rodam dentro de library-api/
 
     steps:
       - name: Checkout repository
@@ -44,7 +48,7 @@ jobs:
         run: ./gradlew sonar --info
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de  # v5.5.2 - pinned SHA
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: build/reports/jacoco/test/jacocoTestReport.xml
