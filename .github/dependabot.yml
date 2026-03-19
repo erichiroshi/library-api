@@ -6,10 +6,15 @@ updates:
       interval: "weekly"
 
   - package-ecosystem: "gradle"
-    directory: "/config-server"     # ← novo
+    directory: "/config-server"
     schedule:
       interval: "weekly"
-  
+
+  - package-ecosystem: "gradle"
+    directory: "/eureka-server"     # ← novo
+    schedule:
+      interval: "weekly"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

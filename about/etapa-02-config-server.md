@@ -1,102 +1,110 @@
-# Etapa 1 — Reestruturação do Repositório para Monorepo
+# Etapa 2 — Config Server
 
 **Branch:** `microservices`  
-**Commit:** `chore(repo): reestruturar repositório para monorepo multi-project`  
+**Commit:** `feat(config-server): adicionar Config Server com configurações centralizadas`  
 **Status:** ✅ Concluída
 
 ---
 
 ## O que foi feito
 
-- Criação da branch `microservices` a partir de `main` (v1.3.1 estável)
-- Movimentação do monolito para `library-api/`
-- Configuração do Gradle multi-project na raiz
-- Criação das pastas para os serviços da Fase 3
-- Ajuste de todos os workflows de CI/CD
-- Criação do README raiz e do `readme_pdf.md` raiz
-- Definição de regras de evolução do repositório
+- Criado `config-server/` com Spring Cloud Config Server 2025.1.1
+- Criado `config-repo/` com YAMLs para todos os serviços
+- Config Server subindo na porta `8888`
+- Verificado via curl — merging de configurações funcionando
+- `config-server` incluído no `settings.gradle` raiz
+- `dependabot.yml` atualizado com entrada do `config-server`
 
 ---
 
-## Estrutura resultante
+## Estrutura criada
 ```
-library-api/               ← raiz do repositório
-├── library-api/           ← monolito (v1.3.1, congelado)
-├── config-server/         ← vazio (Etapa 2)
-├── eureka-server/         ← vazio (Etapa 3)
-├── gateway/               ← vazio (Etapa 5)
-├── auth-service/          ← vazio (Etapa 6)
-├── catalog-service/       ← vazio (Etapa 7)
-├── loan-service/          ← vazio (Etapa 8)
-├── config-repo/           ← vazio (Etapa 2)
-├── about/                 ← documentação das etapas
-├── settings.gradle        ← Gradle multi-project
-├── build.gradle           ← configurações compartilhadas
-├── README.md              ← vitrine do repositório
-└── readme_pdf.md          ← fonte do PDF gerado no CI
+config-server/
+├── src/main/java/com/example/configserver/
+│   └── ConfigServerApplication.java
+├── src/main/resources/
+│   └── application.yml
+├── build.gradle
+└── settings.gradle
+
+config-repo/
+├── application.yml        ← compartilhado por todos
+├── auth-service.yml
+├── catalog-service.yml
+├── loan-service.yml
+├── gateway.yml
+└── eureka-server.yml
 ```
 
 ---
 
 ## Decisões e Tradeoffs
 
-### Monorepo vs Polyrepo
+### Perfil `native` vs Git
 
-**Decisão:** Monorepo com Gradle multi-project.
+**Decisão:** perfil `native` — lê YAMLs diretamente do filesystem.
 
-| | Monorepo | Polyrepo |
+| | Native | Git |
 |---|---|---|
-| Refatoração entre serviços | Fácil — tudo visível | Difícil — PRs cruzados |
-| Configuração de build compartilhada | Sim — `build.gradle` raiz | Não — cada repo repete |
-| CI/CD | Um pipeline por serviço no mesmo repo | Um pipeline por repositório |
-| Visibilidade para recrutadores | Um repositório conta a história completa | Fragmentado |
-| Complexidade operacional | Baixa para portfólio | Alta — múltiplos repos para gerenciar |
+| Setup | Zero — aponta para pasta local | Requer repositório Git separado |
+| Produção | Não recomendado | Padrão de mercado |
+| Histórico de mudanças | Não tem | Git log completo |
+| Rollback de config | Manual | `git revert` |
+| Portfólio local | Suficiente | Complexidade desnecessária |
 
-**Por que monorepo para portfólio:** Um recrutador ou tech lead que acessa o repositório vê a evolução completa — do monolito aos microservices — em um único lugar. Polyrepo faria sentido para times grandes com domínios completamente independentes, o que não é o caso aqui.
-
----
-
-### Gradle multi-project vs builds independentes
-
-**Decisão:** Gradle multi-project com `settings.gradle` na raiz incluindo cada subprojeto.
-
-**Tradeoff principal:** O monolito continua funcionando standalone com `./gradlew` dentro de `library-api/` — isso foi uma exigência para não quebrar o CI existente. O `settings.gradle` do subprojeto foi esvaziado (comentado o `rootProject.name`) para evitar conflito com o `settings.gradle` raiz.
-
-**Regra definida:** cada novo serviço é incluído no `settings.gradle` raiz no momento da sua criação.
+**Por que native:** elimina dependência externa para rodar o projeto localmente. Em produção real, trocar para Git requer apenas mudar o perfil e apontar `spring.cloud.config.server.git.uri` — o resto do sistema não muda.
 
 ---
 
-### Monolito congelado
+### Spring Cloud 2025.1.1
 
-**Decisão:** `library-api/` é tratado como congelado a partir deste ponto.
-
-- Nenhuma feature nova será adicionada ao monolito
-- O CI do monolito continua rodando para garantir que nada quebrou
-- O `readme_pdf.md` do monolito não passa mais pelo CI — o monolito não será mais alterado
-- Bugs críticos seriam corrigidos em `main` antes de qualquer merge da branch `microservices`
+Spring Boot 4.0.3 requer Spring Cloud 2025.1.x (Oakwood). A versão 2025.0.0 é incompatível com Boot 4.0.1+. Verificado antes de gerar o `build.gradle`.
 
 ---
 
-### CI/CD ajustado
+### `build.gradle` standalone
 
-**Problema:** todos os workflows apontavam para `./gradlew` na raiz. Com o monolito em `library-api/`, todos quebrariam.
+Cada serviço declara versões de plugins e `repositories { mavenCentral() }` localmente. Isso permite rodar cada serviço com `gradlew bootRun` standalone, sem depender do `build.gradle` raiz.
 
-**Solução:** `defaults.run.working-directory: library-api` no `ci.yml` — todos os steps `run:` passam a executar dentro de `library-api/` sem repetir o caminho em cada step.
+O `build.gradle` raiz continua com `apply false` — serve para builds multi-project quando todos os serviços estiverem prontos.
 
-Para o `docker.yml` a abordagem foi diferente porque o Docker build não usa `defaults.run` — foi necessário especificar `context: library-api` e `file: library-api/Dockerfile` explicitamente no step de build.
+**Regra estabelecida:** todo `build.gradle` de serviço declara plugins com versão + `repositories` explicitamente.
 
 ---
 
-### README em dois níveis
+### Configurações compartilhadas via `application.yml`
 
-**Decisão:** dois READMEs com responsabilidades distintas.
+O `config-repo/application.yml` é automaticamente merged em todas as respostas do Config Server. Configurações que todos os serviços precisam ficam aqui:
 
-| Arquivo | Responsabilidade |
-|---|---|
-| `README.md` (raiz) | Vitrine do repositório — apresenta o projeto como um todo, links para cada serviço, status da Fase 3 |
-| `library-api/readme.md` | Documentação técnica detalhada do monolito — stack, endpoints, decisões arquiteturais, como rodar |
+- URL do Eureka
+- Management endpoints
+- Logging level padrão
 
-O GitHub exibe o README da raiz na página inicial do repositório. Com o monolito em subpasta, sem um README raiz o repositório ficaria sem apresentação.
+Cada serviço só declara o que é específico seu.
+
+---
+
+## Verificação
+```bash
+# Health check
+curl http://localhost:8888/actuator/health
+
+# Configuração do auth-service (específica + compartilhada merged)
+curl http://localhost:8888/auth-service/default
+```
+
+Resposta do `auth-service/default` retornou dois `propertySources`:
+1. `file:../config-repo/auth-service.yml` — configurações específicas
+2. `file:../config-repo/application.yml` — configurações compartilhadas
+
+Merge automático funcionando corretamente.
+
+---
+
+## Regras estabelecidas nesta etapa
+
+- Todo `build.gradle` de serviço declara versões de plugins e `repositories` explicitamente
+- `dependabot.yml` atualizado a cada novo serviço criado (regra da Etapa 1 aplicada)
 
 ---
 
@@ -104,26 +112,26 @@ O GitHub exibe o README da raiz na página inicial do repositório. Com o monoli
 
 | Arquivo | Ação |
 |---|---|
-| `README.md` | Criado — vitrine do repositório |
-| `readme_pdf.md` | Criado — fonte do PDF da visão geral |
-| `settings.gradle` | Criado — Gradle multi-project |
-| `build.gradle` | Criado — configurações compartilhadas |
-| `.gitignore` | Criado — cobrindo todos os subprojetos |
-| `library-api/settings.gradle` | Modificado — `rootProject.name` comentado |
-| `about/fase3/etapa-01-reestruturacao-monorepo.md` | Criado — este arquivo |
-| `.github/workflows/ci.yml` | Modificado — `working-directory: library-api` |
-| `.github/workflows/docker.yml` | Modificado — `context` e `file` apontando para `library-api/` |
-| `.github/workflows/readme-pdf.yml` | Modificado — apenas PDF da raiz |
-| `.github/dependabot.yml` | Modificado — `directory: "/library-api"` |
+| `config-server/build.gradle` | Criado |
+| `config-server/settings.gradle` | Criado |
+| `config-server/src/main/java/.../ConfigServerApplication.java` | Criado |
+| `config-server/src/main/resources/application.yml` | Criado |
+| `config-repo/application.yml` | Criado |
+| `config-repo/auth-service.yml` | Criado |
+| `config-repo/catalog-service.yml` | Criado |
+| `config-repo/loan-service.yml` | Criado |
+| `config-repo/gateway.yml` | Criado |
+| `config-repo/eureka-server.yml` | Criado |
+| `settings.gradle` (raiz) | Modificado — `include 'config-server'` |
+| `.github/dependabot.yml` | Modificado — entrada do `config-server` |
 
 ---
 
 ## Próxima etapa
 
-**Etapa 2 — Config Server**
+**Etapa 3 — Eureka Server**
 
-- Criar projeto Spring Boot em `config-server/`
-- Configurar Spring Cloud Config Server
-- Criar `config-repo/` com YAMLs por serviço
-- Registrar `config-server` no `settings.gradle` raiz
-- Adicionar entrada no `dependabot.yml`
+- Criar projeto Spring Boot em `eureka-server/`
+- Configurar como standalone (não se registra em si mesmo)
+- Porta fixa `8761`
+- Buscar configuração do Config Server via `bootstrap.yml`
