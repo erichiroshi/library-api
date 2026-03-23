@@ -60,7 +60,7 @@ ext {
     springdocVersion = "3.0.2"
     jjwtVersion = "0.13.0"
    	testcontainersVersion = "2.0.4"
-   	awsS3Version = "2.42.11"
+   	awsS3Version = "2.42.18"
    	shedlockVersion = "7.7.0"
    	otelVersion = "1.7.0-M3"
    	openTelemetryVersion = "2.25.0"
