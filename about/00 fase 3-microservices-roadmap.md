@@ -62,91 +62,91 @@ Qualquer outro endpoint
 
 ### Etapa 1 — Preparar branch e reestruturar repositório
 
-- [ ] Criar branch `microservices` a partir da tag `v1.3.1`
-- [ ] Criar estrutura de diretórios no repositório
-- [ ] Mover monolito para subdiretório `library-api/`
-- [ ] Atualizar `.gitignore` para cobrir todos os subprojetos
-- [ ] Commit: `chore: restructure repo for microservices extraction`
+- [x] Criar branch `microservices` a partir da tag `v1.3.1`
+- [x] Criar estrutura de diretórios no repositório
+- [x] Mover monolito para subdiretório `library-api/`
+- [x] Atualizar `.gitignore` para cobrir todos os subprojetos
+- [x] Commit: `chore: restructure repo for microservices extraction`
 
 ---
 
 ### Etapa 2 — Config Repo
 
-- [ ] Criar diretório `config-repo/`
-- [ ] Criar `application.yml` — propriedades comuns a todos os serviços
+- [x] Criar diretório `config-repo/`
+- [x] Criar `application.yml` — propriedades comuns a todos os serviços
   - Eureka client config
   - Actuator endpoints
   - Logging pattern com traceId
-- [ ] Criar `config-server.yml`
-- [ ] Criar `eureka-server.yml`
-- [ ] Criar `gateway.yml`
+- [x] Criar `config-server.yml`
+- [x] Criar `eureka-server.yml`
+- [x] Criar `gateway.yml`
   - Rotas por serviço
   - JWT secret
-- [ ] Criar `auth-service.yml`
+- [x] Criar `auth-service.yml`
   - DataSource (schema `auth`)
   - JWT config
   - Flyway locations
-- [ ] Criar `catalog-service.yml`
+- [x] Criar `catalog-service.yml`
   - DataSource (schema `catalog`)
   - Redis config
   - Flyway locations
-- [ ] Criar `loan-service.yml`
+- [x] Criar `loan-service.yml`
   - DataSource (schema `lending`)
   - Feign clients (auth-service, catalog-service)
   - Flyway locations
-- [ ] Commit: `feat(config-repo): add centralized configuration files`
+- [x] Commit: `feat(config-repo): add centralized configuration files`
 
 ---
 
 ### Etapa 3 — Config Server
 
-- [ ] Criar projeto Spring Boot em `config-server/`
-- [ ] Dependências: `spring-cloud-config-server`
-- [ ] Anotar com `@EnableConfigServer`
-- [ ] Configurar backend Git apontando para `config-repo/` local
-- [ ] Porta fixa: `8888`
-- [ ] Adicionar ao `docker-compose.yml`
-- [ ] Testar: `GET http://localhost:8888/auth-service/default`
-- [ ] Commit: `feat(config-server): add Spring Cloud Config Server`
+- [x] Criar projeto Spring Boot em `config-server/`
+- [x] Dependências: `spring-cloud-config-server`
+- [x] Anotar com `@EnableConfigServer`
+- [x] Configurar backend Git apontando para `config-repo/` local
+- [x] Porta fixa: `8888`
+- [x] Adicionar ao `docker-compose.yml`
+- [x] Testar: `GET http://localhost:8888/auth-service/default`
+- [x] Commit: `feat(config-server): add Spring Cloud Config Server`
 
 ---
 
 ### Etapa 4 — Eureka Server
 
-- [ ] Criar projeto Spring Boot em `eureka-server/`
-- [ ] Dependências: `spring-cloud-starter-netflix-eureka-server`
-- [ ] Anotar com `@EnableEurekaServer`
-- [ ] Configurar como `standalone` (não se registra em si mesmo)
-- [ ] Porta fixa: `8761`
-- [ ] Buscar configuração do Config Server (`bootstrap.yml`)
-- [ ] Adicionar ao `docker-compose.yml`
-- [ ] Testar: `http://localhost:8761` — dashboard Eureka
-- [ ] Commit: `feat(eureka-server): add service discovery`
+- [x] Criar projeto Spring Boot em `eureka-server/`
+- [x] Dependências: `spring-cloud-starter-netflix-eureka-server`
+- [x] Anotar com `@EnableEurekaServer`
+- [x] Configurar como `standalone` (não se registra em si mesmo)
+- [x] Porta fixa: `8761`
+- [x] Buscar configuração do Config Server (`bootstrap.yml`)
+- [x] Adicionar ao `docker-compose.yml`
+- [x] Testar: `http://localhost:8761` — dashboard Eureka
+- [x] Commit: `feat(eureka-server): add service discovery`
 
 ---
 
 ### Etapa 5 — Gateway
 
-- [ ] Criar projeto Spring Boot em `gateway/`
-- [ ] Dependências:
+- [x] Criar projeto Spring Boot em `gateway/`
+- [x] Dependências:
   - `spring-cloud-starter-gateway`
   - `spring-cloud-starter-netflix-eureka-client`
   - `spring-cloud-starter-config`
   - `jjwt` (validação JWT)
-- [ ] Configurar rotas no `gateway.yml`:
+- [x] Configurar rotas no `gateway.yml`:
   - `/auth/**` → `auth-service` (sem filtro JWT)
   - `/api/v1/books/**` → `catalog-service`
   - `/api/v1/authors/**` → `catalog-service`
   - `/api/v1/categories/**` → `catalog-service`
   - `/api/v1/loans/**` → `loan-service`
-- [ ] Implementar `JwtAuthenticationFilter` (GatewayFilter)
+- [x] Implementar `JwtAuthenticationFilter` (GatewayFilter)
   - Valida JWT
   - Propaga `X-User-Id` e `X-User-Roles` nos headers
   - Retorna 401 se inválido
-- [ ] Porta fixa: `8080`
-- [ ] Registrar no Eureka
-- [ ] Adicionar ao `docker-compose.yml`
-- [ ] Commit: `feat(gateway): add Spring Cloud Gateway with JWT validation filter`
+- [x] Porta fixa: `8080`
+- [x] Registrar no Eureka
+- [x] Adicionar ao `docker-compose.yml`
+- [x] Commit: `feat(gateway): add Spring Cloud Gateway with JWT validation filter`
 
 ---
 

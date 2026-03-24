@@ -2,7 +2,7 @@
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
   instance:
     prefer-ip-address: true
 
@@ -10,7 +10,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info"
+        include: "*"
   endpoint:
     health:
       show-details: always #when-authorized

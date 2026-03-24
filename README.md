@@ -93,16 +93,23 @@ Credenciais de teste:
 
 Serviços disponíveis até o momento:
 
+Rodar via CLI - perfil dev
+
 ```bash
 # 1. Config Server
 cd config-server
-./gradlew bootRun
+./gradlew bootRun --args='--spring.profiles.active=native,dev'
 # Acesse: http://localhost:8888/actuator/health
 
 # 2. Eureka Server (requer Config Server rodando)
 cd eureka-server
-./gradlew bootRun
+./gradlew bootRun --args='--spring.profiles.active=dev'
 # Acesse: http://localhost:8761
+
+# 3. Gateway (requer Config Server e Eureka Server rodando)
+cd eureka-server
+./gradlew bootRun --args='--spring.profiles.active=dev'
+# Acesse: http://localhost:8080/actuator/health
 ```
 
 > Docker Compose completo disponível ao final da Fase 3.

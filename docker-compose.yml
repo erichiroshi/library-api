@@ -75,6 +75,8 @@ services:
     depends_on:
       config-server:
         condition: service_healthy
+    environment:
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
     networks:
       - backend
     restart: unless-stopped
@@ -85,11 +87,35 @@ services:
       retries: 5
       start_period: 40s
 
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-insecure-key-for-local-development-only-do-not-use-in-production}
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
   # ─────────────────────────────────────────────
   # SERVIÇOS DE NEGÓCIO — adicionados nas próximas etapas
   # ─────────────────────────────────────────────
 
-  # gateway:       Etapa 5
   # auth-service:  Etapa 6
   # catalog-service: Etapa 7
   # loan-service:  Etapa 8
