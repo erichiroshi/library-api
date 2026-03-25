@@ -5,6 +5,6 @@ include 'config-server'
 include 'eureka-server'
 include 'gateway'
 include 'auth-service'
+ include 'catalog-service'
 // Os demais serão incluídos conforme criados:
-// include 'catalog-service'
 // include 'loan-service'

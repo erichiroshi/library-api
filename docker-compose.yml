@@ -140,11 +140,45 @@ services:
       retries: 5
       start_period: 60s
 
+  catalog-service:
+    build:
+      context: ./catalog-service
+      dockerfile: Dockerfile
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/library
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      AWS_KEY: ${AWS_KEY:-fake-key}
+      AWS_SECRET: ${AWS_SECRET:-fake-secret}
+      BUCKET_NAME: ${BUCKET_NAME:-library-api-s3}
+      BUCKET_REGION: ${BUCKET_REGION:-sa-east-1}
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
   # ─────────────────────────────────────────────
   # SERVIÇOS DE NEGÓCIO — adicionados nas próximas etapas
   # ─────────────────────────────────────────────
 
-  # catalog-service: Etapa 7
   # loan-service:  Etapa 8
 
   # ─────────────────────────────────────────────

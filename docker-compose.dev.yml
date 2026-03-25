@@ -1,5 +1,5 @@
 # Docker Compose — Fase 3 Microservices
-# Ordem de subida: postgres + redis → config-server → eureka-server → ... demais serviços
+# Ordem de subida: postgres + redis + pgadmin → config-server → eureka-server → ... demais serviços
 
 services:
 
@@ -11,8 +11,8 @@ services:
     image: postgres:16
     environment:
       POSTGRES_DB: library
-      POSTGRES_USER: ${DB_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
@@ -41,9 +41,31 @@ services:
     networks:
       - backend
 
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/misc/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3	
+    networks:
+      - backend
+
 networks:
   backend:
 
 volumes:
   postgres_data:
   redis_data:
+  pgadmin_data:

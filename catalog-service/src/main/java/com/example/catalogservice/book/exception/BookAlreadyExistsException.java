@@ -1,0 +1,21 @@
+package com.example.catalogservice.book.exception;
+
+import java.net.URI;
+
+import org.springframework.http.HttpStatus;
+
+import com.example.catalogservice.common.exception.ApiException;
+
+public class BookAlreadyExistsException extends ApiException {
+
+	public BookAlreadyExistsException(String isbn) {
+
+		HttpStatus httpStatus = HttpStatus.CONFLICT;
+		String title = "Book Already Exists";
+		String detail = "Book Already Exists. ISBN: " + isbn;
+		URI type = URI.create("https://api.library/errors/book-already-exists");
+
+		super(title, type, detail, httpStatus);
+	}
+
+}

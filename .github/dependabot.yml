@@ -23,7 +23,12 @@ updates:
   - package-ecosystem: "gradle"
     directory: "/auth-service"
     schedule:
-      interval: "weekly"      
+      interval: "weekly"
+
+  - package-ecosystem: "gradle"
+    directory: "/catalog-service"
+    schedule:
+      interval: "weekly"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -54,3 +59,8 @@ updates:
     directory: "/auth-service"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/catalog-service"
+    schedule:
+      interval: "weekly"      
