@@ -60,7 +60,7 @@ Extração do monolito em microservices usando o padrão **Strangler Fig**.
 | [`eureka-server/`](./eureka-server) | Service discovery | ✅ Concluído |
 | [`gateway/`](./gateway) | API Gateway + JWT | ✅ Concluído |
 | [`auth-service/`](./auth-service) | Autenticação | ✅ Concluído |
-| [`catalog-service/`](./catalog-service) | Catálogo de livros | 🔲 Em breve |
+| [`catalog-service/`](./catalog-service) | Catálogo de livros | ✅ Concluído |
 | [`loan-service/`](./loan-service) | Empréstimos | 🔲 Em breve |
 
 **Decisões arquiteturais:**
@@ -87,7 +87,7 @@ Serviços disponíveis até o momento:
 Rodar via CLI - perfil dev
 
 ```bash
-# 1. Infraestrutra - Docker Compose (Postgres + Redis)
+# 1. Infraestrutra - Docker Compose (Postgres + Redis + PgAdmin)
 cd library-api
 docker compose -f docker-compose.dev.yml up -d
 
@@ -108,6 +108,11 @@ cd gateway
 
 # 5. Auth Service (requer Config Server, Eureka e Postgres)
 cd auth-service
+./gradlew bootRun --args='--spring.profiles.active=dev'
+# Acesse: http://localhost:{port-spring}/actuator/health
+
+# 6. Catalog Service (requer Config Server, Eureka e Postgres)
+cd catalog-service
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 # Acesse: http://localhost:{port-spring}/actuator/health
 ```

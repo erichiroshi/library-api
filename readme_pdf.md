@@ -109,7 +109,7 @@ apenas apontar cada servico para seu proprio banco.
 | eureka-server | 8761 | Service discovery | Concluido |
 | gateway | 8080 | Entrada unica + JWT | Concluido |
 | auth-service | aleatoria | Autenticacao | Concluido |
-| catalog-service | aleatoria | Catalogo de livros | Pendente |
+| catalog-service | aleatoria | Catalogo de livros | Concluido |
 | loan-service | aleatoria | Emprestimos | Pendente |
 
 ### Ordem de Subida
