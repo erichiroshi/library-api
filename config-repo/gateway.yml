@@ -4,31 +4,33 @@ server:
 spring:
   cloud:
     gateway:
-      routes:
-        - id: auth-service
-          uri: lb://auth-service
-          predicates:
-            - Path=/auth/**
+      server:
+        webflux:
+          routes:
+            - id: auth-service
+              uri: lb://auth-service
+              predicates:
+                - Path=/auth/**
 
-        - id: catalog-books
-          uri: lb://catalog-service
-          predicates:
-            - Path=/api/v1/books/**
+            - id: catalog-books
+              uri: lb://catalog-service
+              predicates:
+                - Path=/api/v1/books/**
 
-        - id: catalog-authors
-          uri: lb://catalog-service
-          predicates:
-            - Path=/api/v1/authors/**
+            - id: catalog-authors
+              uri: lb://catalog-service
+              predicates:
+                - Path=/api/v1/authors/**
 
-        - id: catalog-categories
-          uri: lb://catalog-service
-          predicates:
-            - Path=/api/v1/categories/**
+            - id: catalog-categories
+              uri: lb://catalog-service
+              predicates:
+                - Path=/api/v1/categories/**
 
-        - id: loan-service
-          uri: lb://loan-service
-          predicates:
-            - Path=/api/v1/loans/**
+            - id: loan-service
+              uri: lb://loan-service
+              predicates:
+                - Path=/api/v1/loans/**
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}

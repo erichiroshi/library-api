@@ -1,0 +1,17 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop 	# schema criado/destruído por teste
+  datasource:
+    url: jdbc:postgresql://localhost:5432/library
+    username: postgres
+    password: postgres
+
+  flyway:
+    enabled: false
+
+# JWT - valor de teste
+jwt:
+  secret-key: test-secret-key-for-integration-tests-that-must-be-at-least-256-bits-long-for-hs256
+  access-token-seconds: 900 # 15 minutes
+  refresh-token-days: 7 # 7 days

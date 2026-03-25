@@ -1,5 +1,5 @@
 server:
-  port: 0   # porta aleatória — Eureka cuida da descoberta
+  port: ${PORT:0}
 
 spring:
   datasource:
@@ -20,7 +20,8 @@ spring:
 
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    locations: 
+      - classpath:db/migration
     default-schema: auth
     schemas: auth
     baseline-on-migrate: true
@@ -29,3 +30,7 @@ jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-token-seconds: ${JWT_ACCESS_TOKEN_SECONDS:900}
   refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:7}
+
+logging:
+  level:
+    '[com.example.authservice]': DEBUG

@@ -2,22 +2,24 @@ package com.example.gateway.security;
 
 import java.util.List;
 
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.function.HandlerFilterFunction;
-import org.springframework.web.servlet.function.HandlerFunction;
-import org.springframework.web.servlet.function.ServerRequest;
-import org.springframework.web.servlet.function.ServerResponse;
+import org.springframework.web.server.ServerWebExchange;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter implements HandlerFilterFunction<ServerResponse, ServerResponse> {
-
+public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
+	
     private final JwtService jwtService;
 
     // Rotas públicas — não passam pelo filtro JWT
@@ -27,48 +29,55 @@ public class JwtAuthenticationFilter implements HandlerFilterFunction<ServerResp
             "/auth/logout",
             "/actuator"
     );
-
+	
 	@Override
-	public ServerResponse filter(ServerRequest request, HandlerFunction<ServerResponse> next) throws Exception {
-        String path = request.path();
+	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+		String path = exchange.getRequest().getURI().getPath();
 
-        // 1. Rota pública — deixa passar (next.handle continua o fluxo)
+        // Rota pública — deixa passar
         if (isPublicPath(path)) {
-            return next.handle(request);
+            return chain.filter(exchange);
         }
 
-        // 2. Extração do Header (API Síncrona do ServerRequest)
-        String authHeader = request.headers().firstHeader(HttpHeaders.AUTHORIZATION);
+        String authHeader = exchange.getRequest()
+                .getHeaders()
+                .getFirst(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             log.warn("Missing or invalid Authorization header for path: {}", path);
-            return ServerResponse.status(HttpStatus.UNAUTHORIZED).build();
+            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+            return exchange.getResponse().setComplete();
         }
 
         String token = authHeader.substring(7);
 
         if (!jwtService.isTokenValid(token)) {
             log.warn("Invalid JWT token for path: {}", path);
-            return ServerResponse.status(HttpStatus.UNAUTHORIZED).build();
+            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+            return exchange.getResponse().setComplete();
         }
-        
+
         // Propaga identidade do usuário nos headers para os serviços downstream
         String username = jwtService.extractUsername(token);
         List<String> roles = jwtService.extractRoles(token);
 
-        log.debug("JWT validated for user={} path={}", username, path);
-
-        // 4. Mutação da Request (No WebMVC, usamos o builder do ServerRequest)
-        ServerRequest mutatedRequest = ServerRequest.from(request)
+        ServerHttpRequest mutatedRequest = exchange.getRequest()
+                .mutate()
                 .header("X-User-Id", username)
                 .header("X-User-Roles", String.join(",", roles))
                 .build();
 
-        return next.handle(mutatedRequest);
+        log.debug("JWT validated for user={} path={}", username, path);
+
+        return chain.filter(exchange.mutate().request(mutatedRequest).build());
+    }
+	
+    @Override
+    public int getOrder() {
+        return -1; // executa antes de todos os outros filtros
     }
 
     private boolean isPublicPath(String path) {
         return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
     }
-
 }
