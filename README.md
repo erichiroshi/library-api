@@ -58,8 +58,8 @@ Extração do monolito em microservices usando o padrão **Strangler Fig**.
 |---|---|---|
 | [`config-server/`](./config-server) | Configuração centralizada | ✅ Concluído |
 | [`eureka-server/`](./eureka-server) | Service discovery | ✅ Concluído |
-| [`gateway/`](./gateway) | API Gateway + JWT | 🔲 Em breve |
-| [`auth-service/`](./auth-service) | Autenticação | 🔲 Em breve |
+| [`gateway/`](./gateway) | API Gateway + JWT | ✅ Concluído |
+| [`auth-service/`](./auth-service) | Autenticação | ✅ Concluído |
 | [`catalog-service/`](./catalog-service) | Catálogo de livros | 🔲 Em breve |
 | [`loan-service/`](./loan-service) | Empréstimos | 🔲 Em breve |
 
@@ -77,15 +77,6 @@ Extração do monolito em microservices usando o padrão **Strangler Fig**.
 
 ## 🚀 Quick Start
 
-### Monolito (modo dev)
-```bash
-cd library-api
-docker compose -f docker-compose.dev.yml up -d
-./gradlew clean build
-```
-
-Acesse: `http://localhost:8080/swagger-ui/index.html`
-
 Credenciais de teste:
 - **ADMIN:** `joao.silva@email.com` / `123456`
 
@@ -96,20 +87,29 @@ Serviços disponíveis até o momento:
 Rodar via CLI - perfil dev
 
 ```bash
-# 1. Config Server
+# 1. Infraestrutra - Docker Compose (Postgres + Redis)
+cd library-api
+docker compose -f docker-compose.dev.yml up -d
+
+# 2. Config Server
 cd config-server
-./gradlew bootRun --args='--spring.profiles.active=native,dev'
+./gradlew bootRun
 # Acesse: http://localhost:8888/actuator/health
 
-# 2. Eureka Server (requer Config Server rodando)
+# 3. Eureka Server (requer Config Server rodando)
 cd eureka-server
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 # Acesse: http://localhost:8761
 
-# 3. Gateway (requer Config Server e Eureka Server rodando)
-cd eureka-server
+# 4. Gateway (requer Config Server e Eureka Server rodando)
+cd gateway
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 # Acesse: http://localhost:8080/actuator/health
+
+# 5. Auth Service (requer Config Server, Eureka e Postgres)
+cd auth-service
+./gradlew bootRun --args='--spring.profiles.active=dev'
+# Acesse: http://localhost:{port-spring}/actuator/health
 ```
 
 > Docker Compose completo disponível ao final da Fase 3.
@@ -117,16 +117,6 @@ cd eureka-server
 ```bash
 docker compose up -d
 ```
-
----
-
-## 📊 Métricas do Projeto
-
-- **~8.000** linhas de código (monolito)
-- **125+** testes (unit + integration)
-- **80%+** cobertura (JaCoCo)
-- **30+** endpoints REST versionados
-- **4** workflows GitHub Actions
 
 ---
 

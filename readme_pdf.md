@@ -107,8 +107,8 @@ apenas apontar cada servico para seu proprio banco.
 |---|---|---|---|
 | config-server | 8888 | Configuracao centralizada | Concluido |
 | eureka-server | 8761 | Service discovery | Concluido |
-| gateway | 8080 | Entrada unica + JWT | Em desenvolvimento |
-| auth-service | aleatoria | Autenticacao | Pendente |
+| gateway | 8080 | Entrada unica + JWT | Concluido |
+| auth-service | aleatoria | Autenticacao | Concluido |
 | catalog-service | aleatoria | Catalogo de livros | Pendente |
 | loan-service | aleatoria | Emprestimos | Pendente |
 
@@ -127,15 +127,6 @@ apenas apontar cada servico para seu proprio banco.
 ---
 
 ## Quick Start
-
-### Monolito (modo dev)
-```bash
-cd library-api
-docker compose -f docker-compose.dev.yml up -d
-./gradlew clean build
-```
-
-Acesse: http://localhost:8080/swagger-ui/index.html
 
 Credenciais de teste:
 - ADMIN: joao.silva@email.com / 123456
