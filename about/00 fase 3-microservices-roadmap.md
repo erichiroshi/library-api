@@ -152,8 +152,8 @@ Qualquer outro endpoint
 
 ### Etapa 6 — Auth Service
 
-- [ ] Criar projeto Spring Boot em `auth-service/`
-- [ ] Dependências:
+- [x] Criar projeto Spring Boot em `auth-service/`
+- [x] Dependências:
   - `spring-boot-starter-web`
   - `spring-boot-starter-data-jpa`
   - `spring-boot-starter-security`
@@ -162,26 +162,26 @@ Qualquer outro endpoint
   - `jjwt`
   - `flyway`
   - `postgresql`
-- [ ] Copiar do monolito:
+- [x] Copiar do monolito:
   - `auth/` — AuthController, DTOs
   - `user/` — User, UserRepository, UserService
   - `refresh_token/` — RefreshToken, RefreshTokenService, RefreshTokenCleanupJob
   - `security/` — JwtService, SecurityConfig
   - Migrations `V001` a `V003` (tabelas auth schema)
-- [ ] Remover dependência do `SecurityContextHolder` como fonte de User
+- [x] Remover dependência do `SecurityContextHolder` como fonte de User
   - Receber `X-User-Id` do header (propagado pelo gateway)
-- [ ] Porta: `0` (aleatória)
-- [ ] Registrar no Eureka com nome `auth-service`
-- [ ] Adicionar ao `docker-compose.yml`
+- [x] Porta: `0` (aleatória)
+- [x] Registrar no Eureka com nome `auth-service`
+- [x] Adicionar ao `docker-compose.yml`
 - [ ] Testes unitários e de integração
-- [ ] Commit: `feat(auth-service): extract authentication context from monolith`
+- [x] Commit: `feat(auth-service): extract authentication context from monolith`
 
 ---
 
 ### Etapa 7 — Catalog Service
 
-- [ ] Criar projeto Spring Boot em `catalog-service/`
-- [ ] Dependências:
+- [x] Criar projeto Spring Boot em `catalog-service/`
+- [x] Dependências:
   - `spring-boot-starter-web`
   - `spring-boot-starter-data-jpa`
   - `spring-cloud-starter-netflix-eureka-client`
@@ -190,19 +190,19 @@ Qualquer outro endpoint
   - `flyway`
   - `postgresql`
   - `aws-sdk` (S3 — BookMediaService)
-- [ ] Copiar do monolito:
+- [x] Copiar do monolito:
   - `book/` — Book, BookService, BookMediaService, BookRepository
   - `author/` — Author, AuthorService, AuthorRepository
   - `category/` — Category, CategoryService, CategoryRepository
   - `aws/` — S3Service
   - Migrations das tabelas catalog schema
-- [ ] Remover LookupServices — não há dependência de outros domínios
-- [ ] Ler `X-User-Id` e `X-User-Roles` do header (sem Spring Security completo)
-- [ ] Porta: `0` (aleatória)
-- [ ] Registrar no Eureka com nome `catalog-service`
-- [ ] Adicionar ao `docker-compose.yml`
+- [x] Remover LookupServices — não há dependência de outros domínios
+- [x] Ler `X-User-Id` e `X-User-Roles` do header (sem Spring Security completo)
+- [x] Porta: `0` (aleatória)
+- [x] Registrar no Eureka com nome `catalog-service`
+- [x] Adicionar ao `docker-compose.yml`
 - [ ] Testes unitários e de integração
-- [ ] Commit: `feat(catalog-service): extract catalog context from monolith`
+- [x] Commit: `feat(catalog-service): extract catalog context from monolith`
 
 ---
 
