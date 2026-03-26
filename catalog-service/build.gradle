@@ -71,7 +71,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-aop:${aopVersion}"
 	implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jVersion}"   
 
- 	// MapStruct + Lombok
+ 	// Lombok + MapStruct
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 

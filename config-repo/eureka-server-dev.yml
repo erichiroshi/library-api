@@ -1,3 +1,6 @@
+server:
+  port: 8761
+  
 eureka:
   instance:
     hostname: localhost
@@ -5,4 +8,4 @@ eureka:
     register-with-eureka: false   # não se registra em si mesmo
     fetch-registry: false
   server:
-    wait-time-in-ms-when-sync-empty: 0   # startup mais rápido em dev
+    wait-time-in-ms-when-sync-empty: 0   # startup mais rápido em dev    

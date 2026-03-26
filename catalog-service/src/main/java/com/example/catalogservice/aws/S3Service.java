@@ -59,7 +59,7 @@ public class S3Service {
 		
 		validateFileSize(file);
         validateContentType(file);
-		
+        
 		try {
 			file = imageProcessingService.compressImage(file, maxWidth);
 			

@@ -1,6 +1,6 @@
 server:
-  port: ${PORT:0}
-
+  port: ${PORT:0}   # porta aleatória — Eureka cuida da descoberta
+  
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/library
@@ -10,6 +10,7 @@ spring:
       connection-init-sql: SET search_path TO auth,public
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: validate
     properties:
@@ -29,6 +30,15 @@ jwt:
   secret-key: dev-insecure-key-for-local-development-only-do-not-use-in-production
   access-token-seconds: 900
   refresh-token-days: 7
+    
+# Springdoc
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    persist-authorization: true   # token sobrevive ao F5
+    tags-sorter: alpha            # remove — deixa na ordem do OpenApiConfig       
 
 logging:
   level:

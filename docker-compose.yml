@@ -117,7 +117,7 @@ services:
       context: ./auth-service
       dockerfile: Dockerfile
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/library
+      DB_URL: ${DB_URL:jdbc:postgresql://postgres:5432/library}
       DB_USERNAME: ${DB_USERNAME:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-7Wp3aOTk27lQ5RFKWHkNENof45qNVFX4CPpXdfimnNgsen3tweHuJM3dsIsUDF1xFQ9hzYZVjfVoG59Fbv3ILO}
@@ -145,7 +145,7 @@ services:
       context: ./catalog-service
       dockerfile: Dockerfile
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/library
+      DB_URL: ${DB_URL:jdbc:postgresql://postgres:5432/library
       DB_USERNAME: ${DB_USERNAME:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       REDIS_HOST: redis

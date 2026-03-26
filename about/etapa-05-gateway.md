@@ -28,8 +28,8 @@ gateway/
 │       ├── JwtService.java               ← extrai claims do JWT
 │       └── JwtAuthenticationFilter.java  ← HandlerFilterFunction, valida e propaga headers
 ├── src/main/resources/
-│   └── application.yml                   ← config.import + fallback local
-│   └── application-dev.yml               ← config.import + fallback local
+│   └── application.yml                   ← config.import
+│   └── application-dev.yml               ← config.import local
 ├── build.gradle
 ├── Dockerfile
 └── settings.gradle

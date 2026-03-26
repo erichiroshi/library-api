@@ -16,7 +16,7 @@ public class ShedLockConfig {
 
     /**
      * Usa o próprio PostgreSQL como backend de lock distribuído.
-     * Não requer infraestrutura extra — apenas a tabela `shedlock` (V007).
+     * Não requer infraestrutura extra — apenas a tabela `shedlock` (V004).
      *
      * defaultLockAtMostFor = "10m": tempo máximo que o lock pode ficar ativo.
      * Garante liberação automática se a instância travar ou morrer sem liberar o lock.

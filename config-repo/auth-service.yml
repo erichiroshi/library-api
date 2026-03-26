@@ -1,17 +1,23 @@
 server:
-  port: ${PORT:0}
+  port: ${PORT:0}   # porta aleatória — Eureka cuida da descoberta
 
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://postgres:5432/library}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+# HikariCP
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000  # 1min (detect leaks)
       connection-init-sql: SET search_path TO auth,public
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: validate
     properties:
@@ -26,11 +32,21 @@ spring:
     schemas: auth
     baseline-on-migrate: true
 
+# SCHEDULED TASKS
+  task:
+    scheduling:
+      pool:
+        size: 2
+      thread-name-prefix: "scheduled-task-"
+
 jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-token-seconds: ${JWT_ACCESS_TOKEN_SECONDS:900}
   refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:7}
 
-logging:
-  level:
-    '[com.example.authservice]': DEBUG
+# Springdoc
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

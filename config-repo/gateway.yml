@@ -34,8 +34,3 @@ spring:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
-
-logging:
-  level:
-    '[com.example.gateway]': DEBUG
-    '[org.springframework.cloud.gateway]': DEBUG

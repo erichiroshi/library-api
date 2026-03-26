@@ -1,5 +1,5 @@
 server:
-  port: ${PORT:0}
+  port: ${PORT:0}   # porta aleatória — Eureka cuida da descoberta
 
 spring:
   datasource:
@@ -10,6 +10,7 @@ spring:
       connection-init-sql: SET search_path TO catalog,public
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: validate
     properties:
@@ -25,13 +26,23 @@ spring:
     schemas: catalog
     baseline-on-migrate: true
 
+  cache:
+    type: redis
   data:
     redis:
       host: localhost
       port: 6379
+      lettuce:
+        pool:
+          min-idle: 0
 
-  cache:
-    type: redis
+  jackson:
+    default-property-inclusion: non_null
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 aws:
   access-key-id: fake-key
@@ -45,6 +56,16 @@ img:
   prefix:
     book: book-
   maxWidth: 400
+
+# Springdoc
+springdoc:
+  api-docs:
+    enabled: true
+# SWAGGER UI
+  swagger-ui:
+    enabled: true
+    persist-authorization: true   # token sobrevive ao F5
+    tags-sorter: alpha            # remove — deixa na ordem do OpenApiConfig    
 
 logging:
   level:

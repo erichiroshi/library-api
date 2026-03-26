@@ -120,7 +120,7 @@ public class BookService {
     
     @Caching(evict = {
     		@CacheEvict(value = "books", allEntries = true),
-    		@CacheEvict(value = "bookById", key = "#id")
+    		@CacheEvict(value = "bookById", key = "#bookId")
     })
 	void updateCoverImageUrl(long bookId, String url) {
 		Book book = find(bookId);

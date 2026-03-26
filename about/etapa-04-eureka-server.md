@@ -12,7 +12,7 @@
 - Configurado como standalone — não se registra em si mesmo
 - Porta fixa `8761`
 - Configuração buscada do Config Server via `spring.config.import`
-- Fallback local para rodar sem Config Server
+- Perfil dev para rodar Config Server Local, sem Docker
 - Dashboard verificado em `http://localhost:8761`
 - `eureka-server` incluído no `settings.gradle` raiz
 - `dependabot.yml` atualizado
@@ -25,10 +25,11 @@ eureka-server/
 ├── src/main/java/com/example/eurekaserver/
 │   └── EurekaServerApplication.java     ← @EnableEurekaServer
 ├── src/main/resources/
-│   └── application.yml                  ← config.import + fallback local
+│   └── application.yml                  ← config.import
+│   └── application-dev.yml              ← config.import local
 ├── build.gradle
 ├── settings.gradle
-├── gradlew / gradlew.bat                ← wrapper próprio (Initializr)
+├── gradlew / gradlew.bat                ← wrapper próprio
 └── gradle/wrapper/
 ```
 
@@ -57,20 +58,6 @@ eureka-server/
 **Decisão:** porta fixa `8761`.
 
 O Eureka é o ponto central de descoberta — todos os serviços precisam saber onde ele está para se registrar. Porta aleatória quebraria o bootstrap dos outros serviços. O mesmo vale para o Gateway (`8080`) e o Config Server (`8888`). Apenas os serviços de negócio (`auth`, `catalog`, `loan`) usam porta `0`.
-
----
-
-### spring.config.import + fallback local
-
-**Problema encontrado:** o Eureka não buscou configuração do Config Server na primeira tentativa — subiu na porta `8080` em vez de `8761`.
-
-**Causa:** `spring.config.import` requer a dependência `spring-cloud-starter-config` no classpath. Sem ela, o import é ignorado silenciosamente.
-
-**Solução:** adicionar `spring-cloud-starter-config` ao `build.gradle` + manter fallback local no `application.yml` com as configurações essenciais (`server.port`, `register-with-eureka: false`, `fetch-registry: false`).
-
-**Comportamento resultante:**
-- Com Config Server no ar: configurações do `config-repo/eureka-server.yml` sobrescrevem o fallback
-- Sem Config Server: `optional:configserver:` ignora a falha e usa o fallback local
 
 ---
 

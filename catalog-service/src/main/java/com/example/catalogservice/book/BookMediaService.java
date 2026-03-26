@@ -35,7 +35,7 @@ public class BookMediaService {
 			String fileName = prefix + bookId;
 			URI uri = s3Service.uploadFile(file, S3_FOLDER_NAME, fileName);
 
-			bookService.updateCoverImageUrl(bookId, fileName);
+			bookService.updateCoverImageUrl(bookId, uri.toString());
 
 			log.info("Cover uploaded for bookId={} uri={}", bookId, uri);
 			return uri;

@@ -11,9 +11,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -76,6 +79,18 @@ public class GlobalExceptionHandler {
 	    );
 	}
 
+	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	public ProblemDetail handleInvalidSort(HttpRequestMethodNotSupportedException ex) {
+		
+		log.warn("Method Not Supported | msg={}", ex.getMessage());
+		
+		return setProblemDetail(
+				HttpStatus.METHOD_NOT_ALLOWED,
+				"Method Not Supported",
+				"The Method '" + ex.getMethod() + "' does not supported for this endpoint. Supported methods are: " + ex.getSupportedHttpMethods(),
+				URI.create("https://api.library/errors/method-not-supported")
+				);
+	}
 
     // ─────────────────────────────────────────────
     // BANCO DE DADOS
@@ -98,6 +113,12 @@ public class GlobalExceptionHandler {
     // ─────────────────────────────────────────────
     // FALLBACK
     // ─────────────────────────────────────────────
+	
+	@ExceptionHandler(NoResourceFoundException.class)
+	public ResponseEntity<Void> handleUnexpected(NoResourceFoundException ex) {
+		
+		return ResponseEntity.notFound().build();
+	}
 	
 	@ExceptionHandler(Exception.class)
 	public ProblemDetail handleUnexpected(Exception ex) {
