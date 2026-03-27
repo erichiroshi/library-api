@@ -1,23 +1,35 @@
 global:
-  scrape_interval: 5s
+  scrape_interval: 10s
 
 scrape_configs:
   - job_name: 'gateway'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['gateway:8080']
+        labels:
+          service: 'gateway'
+          environment: 'prod'
 
   - job_name: 'auth-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['auth-service:8090']
+        labels:
+          service: 'auth-service'
+          environment: 'prod'
 
   - job_name: 'catalog-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['catalog-service:8090']
+        labels:
+          service: 'catalog-service'
+          environment: 'prod'
 
   - job_name: 'loan-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['loan-service:8090']
+        labels:
+          service: 'loan-service'
+          environment: 'prod'      

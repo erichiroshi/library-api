@@ -208,8 +208,8 @@ Qualquer outro endpoint
 
 ### Etapa 8 — Loan Service
 
-- [ ] Criar projeto Spring Boot em `loan-service/`
-- [ ] Dependências:
+- [x] Criar projeto Spring Boot em `loan-service/`
+- [x] Dependências:
   - `spring-boot-starter-web`
   - `spring-boot-starter-data-jpa`
   - `spring-cloud-starter-netflix-eureka-client`
@@ -218,26 +218,26 @@ Qualquer outro endpoint
   - `resilience4j-spring-boot3`
   - `flyway`
   - `postgresql`
-- [ ] Copiar do monolito:
+- [x] Copiar do monolito:
   - `loan/` — Loan, LoanService, LoanRepository, LoanItem
   - Migrations das tabelas lending schema
-- [ ] Implementar Feign clients:
+- [x] Implementar Feign clients:
   - `BookClient` → `catalog-service` (findById, decrementCopies, restoreCopies)
   - `UserClient` → `auth-service` (findById, findByEmail)
-- [ ] Substituir LookupServices pelos Feign clients
-- [ ] Ler `X-User-Id` e `X-User-Roles` do header
-- [ ] Circuit Breaker nos Feign clients (Resilience4j)
-- [ ] Porta: `0` (aleatória)
-- [ ] Registrar no Eureka com nome `loan-service`
-- [ ] Adicionar ao `docker-compose.yml`
+- [x] Substituir LookupServices pelos Feign clients
+- [x] Ler `X-User-Id` e `X-User-Roles` do header
+- [x] Circuit Breaker nos Feign clients (Resilience4j)
+- [x] Porta: `0` (aleatória)
+- [x] Registrar no Eureka com nome `loan-service`
+- [x] Adicionar ao `docker-compose.yml`
 - [ ] Testes unitários e de integração
-- [ ] Commit: `feat(loan-service): extract lending context from monolith`
+- [x] Commit: `feat(loan-service): extract lending context from monolith`
 
 ---
 
 ### Etapa 9 — Docker Compose Final
 
-- [ ] Criar `docker-compose.yml` na raiz orquestrando:
+- [x] Criar `docker-compose.yml` na raiz orquestrando:
   - `postgres` (único banco, schemas separados)
   - `redis`
   - `config-server`
@@ -247,8 +247,8 @@ Qualquer outro endpoint
   - `catalog-service` (depends_on: eureka-server)
   - `loan-service` (depends_on: eureka-server)
   - `prometheus` + `grafana` + `zipkin`
-- [ ] Healthchecks em todos os serviços
-- [ ] Commit: `chore(docker): add full microservices docker-compose`
+- [x] Healthchecks em todos os serviços
+- [x] Commit: `chore(docker): add full microservices docker-compose`
 
 ---
 

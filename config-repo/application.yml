@@ -13,7 +13,7 @@ eureka:
 
 management:
   server:
-    port: 8090      # ← porta fixa só para actuator, independente da porta do servidor
+    port: 8090      # ← porta fixa para actuator em prod, independente da porta do servidor
   endpoints:
     web:
       exposure:
@@ -25,7 +25,7 @@ management:
     propagation:
       type: w3c     # TRACING — Micrometer + OpenTelemetry
     sampling:
-      probability: 1.0      # 10% em prod — ajustável via env
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.1}  # 10% em prod — ajustável via env
     export:
       zipkin:
         endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}
@@ -34,12 +34,7 @@ management:
 logging:
   level:
     root: INFO
-    '[com.example.library]': INFO
     '[org.springframework.web]': WARN
     '[org.hibernate]': WARN
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-  file:
-    name: logs/application.log
-    max-size: 10MB
-    max-history: 30
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5level [%X{traceId:-},%X{spanId:-}] [%thread] %-40.40logger{39} : %msg%n"

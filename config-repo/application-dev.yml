@@ -1,4 +1,4 @@
-# Configurações compartilhadas por todos os microservices
+# Configurações compartilhadas em dev por todos os microservices
 eureka:
   client:
     service-url:
@@ -15,7 +15,7 @@ eureka:
 
 management:
   server:
-    port: null  # actuator porta padrão do serviço
+    port: null      # actuator porta padrão do serviço
   endpoints:
     web:
       exposure:
@@ -28,14 +28,17 @@ management:
     prometheus:
       enabled: true
   tracing:
+    propagation:
+      type: w3c  
     sampling:
-       probability: 1.0   # 100% das requisições rastreadas em dev
+       probability: 1.0     # 100% das requisições rastreadas em dev
     export:
       zipkin:
-        endpoint: http://localhost:9411/api/v2/spans   # Zipkin local (docker-compose.dev.yml)      
+        endpoint: http://localhost:9411/api/v2/spans      # Zipkin local (docker-compose.dev.yml)      
       
 # LOG
 logging:
   level:
-    '[org.hibernate.SQL]': DEBUG
-    '[org.hibernate.orm.jdbc.bind]': TRACE
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5level [%X{traceId:-},%X{spanId:-}] [%thread] %-40.40logger{39} : %msg%n"
