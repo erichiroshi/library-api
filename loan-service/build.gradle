@@ -77,7 +77,14 @@ dependencies {
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
 	
 	// feign-hc5
-	implementation 'io.github.openfeign:feign-hc5'	
+	implementation 'io.github.openfeign:feign-hc5'
+	
+    // Observabilidade - Prometheus + Zipkin
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'org.springframework.boot:spring-boot-starter-zipkin'    
+    
+    // OpenTelemetry exporter — envia traces para Zipkin (visualização local)
+    implementation 'io.opentelemetry:opentelemetry-exporter-zipkin'
 	
     // Testes
 	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'

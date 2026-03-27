@@ -30,7 +30,12 @@ jwt:
   secret-key: dev-insecure-key-for-local-development-only-do-not-use-in-production
   access-token-seconds: 900
   refresh-token-days: 7
-    
+
+# ACTUATOR
+management:
+  server:
+    port: 8091  # actuator porta do serviço para prometheus
+
 # Springdoc
 springdoc:
   api-docs:

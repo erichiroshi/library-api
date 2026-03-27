@@ -62,6 +62,55 @@ services:
     networks:
       - backend
 
+  # ─────────────────────────────────────────────
+  # OBSERVABILIDADE
+  # ─────────────────────────────────────────────
+
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus-dev.yml:/etc/prometheus/prometheus-dev.yml
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana:11.5.2
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/data:/var/lib/grafana
+    environment:
+      - GF_ALERTING_ENABLED=true
+      - GF_UNIFIED_ALERTING_ENABLED=true
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - backend
+
+  zipkin:
+    image: openzipkin/zipkin:3.5.0
+    ports:
+      - "9411:9411"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9411/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - backend
+
 networks:
   backend:
 
@@ -69,3 +118,4 @@ volumes:
   postgres_data:
   redis_data:
   pgadmin_data:
+  prometheus_data:

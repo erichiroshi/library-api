@@ -35,6 +35,10 @@ spring:
 jwt:
   secret-key: dev-insecure-key-for-local-development-only-do-not-use-in-production
 
+management:
+  server:
+    port: 8080
+
 logging:
   level:
     '[com.example.gateway]': DEBUG

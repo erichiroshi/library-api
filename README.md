@@ -61,7 +61,7 @@ Extração do monolito em microservices usando o padrão **Strangler Fig**.
 | [`gateway/`](./gateway) | API Gateway + JWT | ✅ Concluído |
 | [`auth-service/`](./auth-service) | Autenticação | ✅ Concluído |
 | [`catalog-service/`](./catalog-service) | Catálogo de livros | ✅ Concluído |
-| [`loan-service/`](./loan-service) | Empréstimos | 🔲 Em breve |
+| [`loan-service/`](./loan-service) | Empréstimos | ✅ Concluído |
 
 **Decisões arquiteturais:**
 - Monorepo com Gradle multi-project
@@ -87,7 +87,7 @@ Serviços disponíveis até o momento:
 Rodar via CLI - perfil dev
 
 ```bash
-# 1. Infraestrutra - Docker Compose (Postgres + Redis + PgAdmin)
+# 1. Infraestrutra - Docker Compose (Postgres + Redis + PgAdmin + Grafana + Prometheus + Zipkin)
 cd library-api
 docker compose -f docker-compose.dev.yml up -d
 
@@ -100,6 +100,7 @@ cd config-server
 cd eureka-server
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 # Acesse: http://localhost:8761
+# Acesse: http://localhost:8761/actuator/health
 
 # 4. Gateway (requer Config Server e Eureka Server rodando)
 cd gateway
@@ -113,6 +114,11 @@ cd auth-service
 
 # 6. Catalog Service (requer Config Server, Eureka e Postgres)
 cd catalog-service
+./gradlew bootRun --args='--spring.profiles.active=dev'
+# Acesse: http://localhost:{port-spring}/actuator/health
+
+# 7. Loan Service (requer Config Server, Eureka e Postgres)
+cd loan-service
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 # Acesse: http://localhost:{port-spring}/actuator/health
 ```

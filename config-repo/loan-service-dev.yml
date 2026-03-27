@@ -57,6 +57,11 @@ resilience4j:
         wait-duration-in-open-state: 30s
         permitted-number-of-calls-in-half-open-state: 3
 
+# ACTUATOR
+management:
+  server:
+    port: 8093  # actuator porta do serviço para prometheus
+
 # Springdoc
 springdoc:
   api-docs:

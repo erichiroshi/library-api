@@ -57,6 +57,11 @@ img:
     book: book-
   maxWidth: 400
 
+# ACTUATOR
+management:
+  server:
+    port: 8092  # actuator porta do serviço para prometheus
+
 # Springdoc
 springdoc:
   api-docs:

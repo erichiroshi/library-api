@@ -110,7 +110,7 @@ apenas apontar cada servico para seu proprio banco.
 | gateway | 8080 | Entrada unica + JWT | Concluido |
 | auth-service | aleatoria | Autenticacao | Concluido |
 | catalog-service | aleatoria | Catalogo de livros | Concluido |
-| loan-service | aleatoria | Emprestimos | Pendente |
+| loan-service | aleatoria | Emprestimos | Concluido |
 
 ### Ordem de Subida
 ```

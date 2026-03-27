@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.0.4'
+	id 'org.springframework.boot' version '4.0.5'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -68,6 +68,13 @@ dependencies {
     
     // OpenAPI / Swagger	
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+	
+    // Observabilidade - Prometheus + Zipkin
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'org.springframework.boot:spring-boot-starter-zipkin'    
+    
+    // OpenTelemetry exporter — envia traces para Zipkin (visualização local)
+    implementation 'io.opentelemetry:opentelemetry-exporter-zipkin'
 	
     // Testes
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
