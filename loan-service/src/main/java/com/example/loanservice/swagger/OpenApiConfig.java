@@ -1,4 +1,4 @@
-package com.example.catalogservice.swagger;
+package com.example.loanservice.swagger;
 
 import java.util.List;
 
@@ -74,9 +74,7 @@ public class OpenApiConfig {
 	
 	private List<Tag> apiTags() {
 	    return List.of(
-	        new Tag().name("Authors").description("Endpoints para gerenciamento de autores"),
-	        new Tag().name("Books").description("Endpoints para gerenciamento de livros"),
-	        new Tag().name("Categories").description("Endpoints para gerenciamento de categorias de livros")
+	        new Tag().name("Loan").description("Endpoints para gerenciamento de empréstimos de livros")
 	    );
 	}
 }

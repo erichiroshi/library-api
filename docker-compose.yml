@@ -81,7 +81,7 @@ services:
       - backend
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -94,7 +94,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-insecure-key-for-local-development-only-do-not-use-in-production}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-7Wp3aOTk27lQ5RFKWHkNENof45qNVFX4CPpXdfimnNgsen3tweHuJM3dsIsUDF1xFQ9hzYZVjfVoG59Fbv3ILO}
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     depends_on:
@@ -106,7 +106,7 @@ services:
       - backend
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -117,7 +117,7 @@ services:
       context: ./auth-service
       dockerfile: Dockerfile
     environment:
-      DB_URL: ${DB_URL:jdbc:postgresql://postgres:5432/library}
+      DB_URL: ${DB_URL:-jdbc:postgresql://postgres:5432/library}
       DB_USERNAME: ${DB_USERNAME:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-7Wp3aOTk27lQ5RFKWHkNENof45qNVFX4CPpXdfimnNgsen3tweHuJM3dsIsUDF1xFQ9hzYZVjfVoG59Fbv3ILO}
@@ -134,7 +134,7 @@ services:
       - backend
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -145,7 +145,7 @@ services:
       context: ./catalog-service
       dockerfile: Dockerfile
     environment:
-      DB_URL: ${DB_URL:jdbc:postgresql://postgres:5432/library
+      DB_URL: ${DB_URL:-jdbc:postgresql://postgres:5432/library}
       DB_USERNAME: ${DB_USERNAME:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       REDIS_HOST: redis
@@ -169,17 +169,38 @@ services:
       - backend
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 60s
 
-  # ─────────────────────────────────────────────
-  # SERVIÇOS DE NEGÓCIO — adicionados nas próximas etapas
-  # ─────────────────────────────────────────────
-
-  # loan-service:  Etapa 8
+  loan-service:
+    build:
+      context: ./loan-service
+      dockerfile: Dockerfile
+    environment:
+      DB_URL: ${DB_URL:-jdbc:postgresql://postgres:5432/library}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   # ─────────────────────────────────────────────
   # OBSERVABILIDADE — adicionada na Etapa 9

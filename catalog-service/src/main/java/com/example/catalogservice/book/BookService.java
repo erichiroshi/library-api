@@ -118,6 +118,17 @@ public class BookService {
 		repository.deleteById(id);
 	}
     
+    @Transactional
+    public int decrementCopies(Long id) {
+        return repository.decrementCopies(id);
+    }
+
+    @Transactional
+    public void restoreCopies(Long id, int quantity) {
+        Book book = find(id);
+        book.setAvailableCopies(book.getAvailableCopies() + quantity);
+    }
+    
     @Caching(evict = {
     		@CacheEvict(value = "books", allEntries = true),
     		@CacheEvict(value = "bookById", key = "#bookId")

@@ -1,5 +1,5 @@
 server:
-  port: 0
+  port: ${PORT:0}   # porta aleatória — Eureka cuida da descoberta
 
 spring:
   datasource:
@@ -21,7 +21,9 @@ spring:
 
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    locations: 
+      - classpath:db/migration
+      - classpath:db/dev_migration
     default-schema: lending
     schemas: lending
     baseline-on-migrate: true
@@ -32,6 +34,12 @@ feign:
       default:
         connect-timeout: 5000
         read-timeout: 10000
+
+  cloud:
+    openfeign:
+      httpclient:
+        hc5:
+          enabled: true
 
 resilience4j:
   circuitbreaker:
@@ -46,3 +54,10 @@ resilience4j:
         failure-rate-threshold: 60
         wait-duration-in-open-state: 30s
         permitted-number-of-calls-in-half-open-state: 3
+
+# Springdoc
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false        

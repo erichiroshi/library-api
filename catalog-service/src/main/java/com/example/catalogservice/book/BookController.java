@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -96,6 +97,17 @@ public class BookController {
 	public ResponseEntity<URI> uploadCover(@PathVariable Long id, @RequestPart	("file") MultipartFile file) {
 		URI uri = bookMediaService.uploadCover(id, file);
 		return ResponseEntity.ok(uri);
-	}	
+	}
+	
+	@PatchMapping("/{id}/decrement")
+	public ResponseEntity<Integer> decrementCopies(@PathVariable Long id) {
+	    return ResponseEntity.ok(bookService.decrementCopies(id));
+	}
+
+	@PatchMapping("/{id}/restore/{quantity}")
+	public ResponseEntity<Void> restoreCopies(@PathVariable Long id, @PathVariable int quantity) {
+	    bookService.restoreCopies(id, quantity);
+	    return ResponseEntity.noContent().build();
+	}
 
 }

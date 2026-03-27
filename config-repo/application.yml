@@ -3,11 +3,17 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
+    healthcheck:
+      enabled: true
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
     prefer-ip-address: true
+    metadata-map:
+      management.port: 8090
 
 management:
+  server:
+    port: 8090   # ← porta fixa só para actuator, independente da porta do servidor
   endpoints:
     web:
       exposure:

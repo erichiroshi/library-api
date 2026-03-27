@@ -122,7 +122,7 @@ public class S3Service {
 	 
 	        log.info("Objeto S3 deletado com sucesso: key={}", key);
 	 
-	    } catch (AwsServiceException | SdkClientException e) {
+	    } catch (AwsServiceException | SdkClientException _) {
 	        throw new AmazonClientException();
 	    }
 	}
