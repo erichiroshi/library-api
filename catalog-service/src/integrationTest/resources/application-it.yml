@@ -1,0 +1,51 @@
+spring:
+  cloud:
+    config:
+      enabled: false	
+
+  datasource:
+    url: jdbc:tc:postgresql:16:///testdb
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    hikari:
+      connection-init-sql: SET search_path TO catalog,public
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        '[default_schema]': catalog
+
+  flyway:
+    enabled: true
+    locations:
+      - classpath:db/migration
+    default-schema: catalog
+    schemas: catalog
+    baseline-on-migrate: true
+
+  cache:
+    type: none
+
+eureka:
+  client:
+    enabled: false	
+
+aws:
+  access-key-id: fake-key
+  secret-access-key: fake-secret
+
+s3:
+  bucket: test-bucket
+  region: us-east-1
+
+img:
+  prefix:
+    book: book-
+  maxWidth: 400
+
+management:
+  endpoints:
+    web:
+      exposure:
+        exclude: '*'

@@ -20,7 +20,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
             JOIN FETCH l.items
             WHERE l.id = :id
             """)
-    Optional<Loan> findByIdWithItemsAndUser(@Param("id") Long id);
+    Optional<Loan> findByIdWithItems(@Param("id") Long id);
     
     /**
      * Todos os empréstimos de um usuário específico, com itens e livros carregados.
@@ -61,4 +61,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
             AND l.status = com.example.loanservice.loan.LoanStatus.WAITING_RETURN
             """)
     long countActiveByUserId(@Param("userId") Long userId);
+
+
 }

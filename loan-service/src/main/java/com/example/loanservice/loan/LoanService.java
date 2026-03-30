@@ -49,11 +49,11 @@ public class LoanService {
 
         // Carrega todos os livros de uma vez — elimina double fetch
         Map<Long, BookDTO> books = dto.booksId().stream()
-            .distinct()
-            .collect(Collectors.toMap(
-                id -> id,
-                id -> bookClient.findById(id).get()
-            ));
+		    .distinct()
+		    .collect(Collectors.toMap(
+		        id -> id,
+		        id -> bookClient.findById(id).get()		           
+		    ));
 
         log.info("Creating loan for user={} books={}", userDTO.email(), dto.booksId());
         
@@ -216,7 +216,7 @@ public class LoanService {
      * Garante que o mapper acessa as coleções LAZY dentro da transação ativa.
      */
     private Loan findWithItemsOrThrow(Long loanId) {
-        return loanRepository.findByIdWithItemsAndUser(loanId)
+        return loanRepository.findByIdWithItems(loanId)
                 .orElseThrow(() -> new LoanNotFoundException(loanId));
     }
 	

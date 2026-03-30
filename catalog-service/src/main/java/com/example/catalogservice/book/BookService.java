@@ -120,6 +120,7 @@ public class BookService {
     
     @Transactional
     public int decrementCopies(Long id) {
+    	find(id);
         return repository.decrementCopies(id);
     }
 

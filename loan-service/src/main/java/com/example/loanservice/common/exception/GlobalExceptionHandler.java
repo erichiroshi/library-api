@@ -135,9 +135,9 @@ public class GlobalExceptionHandler {
         );
 	}
 	
-    // ─────────────────────────────────────────────
-    // HELPERS
-    // ─────────────────────────────────────────────
+	// ─────────────────────────────────────────────
+	// HELPERS
+	// ─────────────────────────────────────────────
 
 	private ProblemDetail setProblemDetail(HttpStatus status, String title, String detail, URI type) {
 		
