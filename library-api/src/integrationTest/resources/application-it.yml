@@ -1,0 +1,59 @@
+spring:
+  config:
+    import:
+    - "optional:configserver:"
+
+  datasource:
+    url: jdbc:tc:postgresql:16:///testdb
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    hikari:
+      connection-init-sql: SET search_path TO auth,catalog,lending,public
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate  # Flyway gerencia o schema
+    properties:
+      hibernate:
+        '[default_schema]': public
+        '[jdbc.batch_size]': 20
+        '[order_inserts]': true
+        '[order_updates]': true
+        '[jakarta.persistence.schema-generation.scripts.action]': none
+
+  flyway:
+    default-schema: public
+    schemas: public
+    baseline-on-migrate: true
+    enabled: true
+    locations:
+      - classpath:db/migration/common
+
+# Redis
+  cache:
+    type: redis             # Redis real via Testcontainers
+
+management:
+  endpoints:
+    web:
+      exposure:
+        exclude:
+        - '*'
+  
+# JWT - valor de teste
+jwt:
+  secret-key: test-secret-key-for-integration-tests-that-must-be-at-least-256-bits-long-for-hs256
+  access-token-seconds: 900 # 15 minutes
+  refresh-token-days: 7 # 7 days
+
+logging:
+  level:
+    '[com.example.library]': DEBUG
+    '[org.springframework.security]': DEBUG
+
+  # AWS - BUCKET
+aws:
+  access-key-id: chave-aws-teste
+  secret-access-key: chave-aws-teste
+s3:
+  bucket: bucket-teste
+  region: region-teste

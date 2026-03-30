@@ -1,0 +1,77 @@
+server:
+  port: ${PORT:0}   # porta aleatória — Eureka cuida da descoberta
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+# HikariCP
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000  # 1min (detect leaks)
+      connection-init-sql: SET search_path TO catalog,public
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        '[default_schema]': catalog
+
+  flyway:
+    enabled: true
+    locations: 
+      - classpath:db/migration
+      - classpath:db/dev_migration
+    default-schema: catalog
+    schemas: catalog
+    baseline-on-migrate: true
+
+  cache:
+    type: redis
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      timeout: 60000
+      lettuce:
+        pool:
+          min-idle: 2
+          max-active: 8
+          max-idle: 8
+      repositories:
+        enabled: false
+
+  jackson:
+    default-property-inclusion: non_null
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+aws:
+  access-key-id: ${AWS_KEY}
+  secret-access-key: ${AWS_SECRET}
+
+s3:
+  bucket: ${BUCKET_NAME}
+  region: ${BUCKET_REGION}
+
+img:
+  prefix:
+    book: book-
+  maxWidth: 400
+
+# Springdoc
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

@@ -1,1 +1,9 @@
 rootProject.name = 'library-api'
+
+include 'library-api'
+include 'config-server'
+include 'eureka-server'
+include 'gateway'
+include 'auth-service'
+include 'catalog-service'
+include 'loan-service'

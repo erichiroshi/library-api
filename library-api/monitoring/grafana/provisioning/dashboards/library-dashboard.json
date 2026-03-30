@@ -1,0 +1,86 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total Books",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "library_books_total", "refId": "A" }
+      ],
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests per Second",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count{uri!=\"/actuator/prometheus\"}[1m])",
+          "legendFormat": "RPS",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 6, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests by Endpoint",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count{uri!=\"/actuator/prometheus\"}[1m])",
+          "legendFormat": "{{uri}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "5xx Errors per Second",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count{status=~\"5..\"}[1m])",
+          "legendFormat": "5xx",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Average Response Time (ms)",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_sum[1m]) / rate(http_server_requests_seconds_count[1m]) * 1000",
+          "legendFormat": "Avg Response",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 }
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate (%)",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "(rate(http_server_requests_seconds_count{status=~\"5..\"}[1m]) / rate(http_server_requests_seconds_count[1m])) * 100",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 13 }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["library", "observability"],
+  "time": { "from": "now-15m", "to": "now" },
+  "title": "Library API - Production Dashboard",
+  "version": 1
+}

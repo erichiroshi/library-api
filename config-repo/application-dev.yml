@@ -1,0 +1,44 @@
+# Configurações compartilhadas em dev por todos os microservices
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    healthcheck:
+      enabled: true      
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    prefer-ip-address: true
+
+# ═══════════════════════════════════════════════════════════════════
+# TRACING — Micrometer + OpenTelemetry
+# ═══════════════════════════════════════════════════════════════════
+
+management:
+  server:
+    port: null      # actuator porta padrão do serviço
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,traces
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true
+    prometheus:
+      enabled: true
+  tracing:
+    propagation:
+      type: w3c  
+    sampling:
+       probability: 1.0     # 100% das requisições rastreadas em dev
+    export:
+      zipkin:
+        endpoint: http://localhost:9411/api/v2/spans      # Zipkin local (docker-compose.dev.yml)      
+      
+# LOG
+logging:
+  level:
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5level [%X{traceId:-},%X{spanId:-}] [%thread] %-40.40logger{39} : %msg%n"

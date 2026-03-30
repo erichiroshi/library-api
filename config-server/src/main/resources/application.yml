@@ -1,0 +1,25 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:../config-repo   # ← lê os YAMLs da pasta config-repo/
+      label: main
+
+  profiles:
+    active: native   # ← usa sistema de arquivos local (não Git)
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"
+  endpoint:
+    health:
+      show-details: always

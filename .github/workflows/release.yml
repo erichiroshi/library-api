@@ -6,7 +6,13 @@ on:
       - 'v*'
 
 jobs:
-  release:
+
+  # ─────────────────────────────────────────────
+  # MONOLITO
+  # ─────────────────────────────────────────────
+
+  release-monolith:
+    name: Release — monolith
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -69,3 +75,56 @@ jobs:
               -e SPRING_PROFILES_ACTIVE=prod \
               ${{ secrets.DOCKERHUB_USERNAME }}/library-api:${{ steps.version.outputs.VERSION }}
             ```
+
+  # ─────────────────────────────────────────────
+  # MICROSERVICES
+  # ─────────────────────────────────────────────
+
+  release-microservices:
+    name: Release — ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: config-server
+            image: library-config-server
+          - service: eureka-server
+            image: library-eureka-server
+          - service: gateway
+            image: library-gateway
+          - service: auth-service
+            image: library-auth-service
+          - service: catalog-service
+            image: library-catalog-service
+          - service: loan-service
+            image: library-loan-service
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Login to DockerHub
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Tag and push versioned image
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          VERSION: ${{ steps.version.outputs.VERSION }}
+          IMAGE: ${{ matrix.image }}
+        run: |
+          docker pull $DOCKERHUB_USERNAME/$IMAGE:latest
+          docker tag $DOCKERHUB_USERNAME/$IMAGE:latest \
+                     $DOCKERHUB_USERNAME/$IMAGE:$VERSION
+          docker push $DOCKERHUB_USERNAME/$IMAGE:$VERSION

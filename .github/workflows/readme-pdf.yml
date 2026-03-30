@@ -2,7 +2,7 @@ name: Docs - README PDF
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "microservices" ]
     paths:
       - readme_pdf.md
     tags:
@@ -47,12 +47,12 @@ jobs:
       - name: Upload README PDF
         uses: actions/upload-artifact@v7
         with:
-          name: library-readme-pdf
-          path: library.pdf
+          name: library-api-overview-pdf
+          path: library-api-overview.pdf
           retention-days: 30
 
       - name: Upload PDF to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe
         with:
-          files: library.pdf
+          files: library-api-overview.pdf

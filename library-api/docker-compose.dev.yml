@@ -1,0 +1,113 @@
+services:
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: library
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/misc/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3	
+    networks:
+      - backend
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "promtool", "check", "healthy", "--probe=http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3	
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      # provisioning config
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+
+      # banco interno (persistência real)
+      - ./monitoring/grafana/data:/var/lib/grafana
+    environment:
+      - GF_ALERTING_ENABLED=true
+      - GF_UNIFIED_ALERTING_ENABLED=true
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - backend
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - backend
+
+  zipkin:
+     image: openzipkin/zipkin:3
+     ports:
+       - "9411:9411"
+     restart: unless-stopped
+     healthcheck:
+       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9411/health"]
+       interval: 30s
+       timeout: 10s
+       retries: 3
+     networks:
+       - backend
+
+networks:
+  backend:
+
+volumes:
+  postgres_data:
+  redis_data:
+  pgadmin_data:
+  prometheus_data:

@@ -1,0 +1,26 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        '[default_schema]': auth
+
+  cache:
+    type: none
+
+jwt:
+  secret-key: test-secret-key-for-unit-tests-that-must-be-at-least-256-bits-long
+  access-token-seconds: 900
+  refresh-token-days: 7
+
+aws:
+  access-key-id: fake-key
+  secret-access-key: fake-secret
+
+s3:
+  bucket: test-bucket
+  region: us-east-1

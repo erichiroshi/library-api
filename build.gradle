@@ -1,3 +1,4 @@
+// Build raiz — configurações compartilhadas entre todos os subprojetos
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '4.0.5'
@@ -7,9 +8,10 @@ plugins {
     id 'com.google.cloud.tools.jib' version '3.5.3'
 }
 
-group = 'com.example'
-version = 'v1.3.1'
-description = 'Library API - Service'
+// Configurações aplicadas a todos os subprojetos
+subprojects {
+    group = 'com.example'
+}
 
 java {
 	toolchain {
@@ -197,89 +199,12 @@ tasks.named("jacocoTestReport") {
        html.required = true  // Útil para visualização local
     }
 
-    // Consolida os execution data de unit + integration tests
-    executionData.setFrom(
-        fileTree(layout.buildDirectory).include(
-            "jacoco/test.exec",
-            "jacoco/integrationTest.exec"
-        )
-    )
-    
-    classDirectories.setFrom(
-        files(
-            sourceSets.main.output.asFileTree.matching {
-                exclude(coverageExclusions)
-            }
-        )
-    )
-    
-}
-
-// ─────────────────────────────────────────────
-// TESTES
-// ─────────────────────────────────────────────
-
-test {
-	useJUnitPlatform()
-	systemProperty "spring.profiles.active", "test"
-	finalizedBy jacocoTestReport
-}
-
-tasks.named("jacocoTestCoverageVerification") {
-    dependsOn(tasks.named("jacocoTestReport"))
-
-    violationRules {
-        rule {
-            element = 'BUNDLE'
-            limit {
-                counter = 'LINE'
-                value = 'COVEREDRATIO'
-                minimum = 0.80
-            }
-        }
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs += '--enable-preview'
     }
 
-    // Consolida os execution data — mesma fonte do jacocoTestReport
-    executionData.setFrom(
-        fileTree(layout.buildDirectory).include(
-            "jacoco/test.exec",
-            "jacoco/integrationTest.exec"
-        )
-    )
-}
-
-check.dependsOn jacocoTestCoverageVerification
-
-// ─────────────────────────────────────────────
-// MISC
-// ─────────────────────────────────────────────
-
-tasks.withType(Copy).configureEach {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += "--enable-preview"
-}
-
-tasks.withType(Test).configureEach {
-    jvmArgs += "--enable-preview"
-}
-
-// ─────────────────────────────────────────────
-// SONARCLOUD
-// ─────────────────────────────────────────────
-
-sonar {
-  properties {
-    property "sonar.projectKey", "library-api"
-    property "sonar.organization", "erichiroshi"
-    property "sonar.host.url", "https://sonarcloud.io"
-    property "sonar.java.source", "25"
-    property "sonar.java.enablePreview", "true"
-    property "sonar.exclusions", coverageExclusions.join(',')
-    
-    property "sonar.coverage.jacoco.xmlReportPaths",
-             "build/reports/jacoco/test/jacocoTestReport.xml"
-  }
+    tasks.withType(Test).configureEach {
+        jvmArgs += '--enable-preview'
+        useJUnitPlatform()
+    }
 }

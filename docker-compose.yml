@@ -1,11 +1,19 @@
+# Docker Compose — Fase 3 Microservices
+# Ordem de subida: postgres + redis → config-server → eureka-server → ... demais serviços
+# Atualizado a cada nova etapa concluída
+
 services:
+
+  # ─────────────────────────────────────────────
+  # INFRAESTRUTURA
+  # ─────────────────────────────────────────────
 
   postgres:
     image: postgres:16
     environment:
       POSTGRES_DB: library
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:
@@ -16,62 +24,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - backend
-
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/misc/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3	
-    networks:
-      - backend
-
-  prometheus:
-    image: prom/prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "promtool", "check", "healthy", "--probe=http://localhost:9090/-/healthy"]
-      interval: 30s
-      timeout: 10s
-      retries: 3	
-    networks:
-      - backend
-
-  grafana:
-    image: grafana/grafana
-    ports:
-      - "3000:3000"
-    volumes:
-      # provisioning config
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
-
-      # banco interno (persistência real)
-      - ./monitoring/grafana/data:/var/lib/grafana
-    environment:
-      - GF_ALERTING_ENABLED=true
-      - GF_UNIFIED_ALERTING_ENABLED=true
-    depends_on:
-      - prometheus
-    restart: unless-stopped
     networks:
       - backend
 
@@ -90,58 +42,222 @@ services:
     networks:
       - backend
 
-  zipkin:
-     image: openzipkin/zipkin:3
-     ports:
-       - "9411:9411"
-     restart: unless-stopped
-     healthcheck:
-       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9411/health"]
-       interval: 30s
-       timeout: 10s
-       retries: 3
-     networks:
-       - backend
+  # ─────────────────────────────────────────────
+  # SPRING CLOUD — INFRAESTRUTURA
+  # ─────────────────────────────────────────────
 
-  library-api:
-      deploy:
-        resources:
-          limits:
-            cpus: '1'
-            memory: 1G
-          reservations:
-            cpus: '0.5'
-            memory: 512M
-      build: .
-      image: library-api
-      environment:
-        SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-        DB_URL: ${DB_URL}
-        DB_USERNAME: ${DB_USERNAME}
-        DB_PASSWORD: ${DB_PASSWORD}
-        JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-        REDIS_HOST: ${REDIS_HOST}
-        REDIS_PORT: ${REDIS_PORT}
-        AWS_KEY: ${AWS_KEY}
-        AWS_SECRET: ${AWS_SECRET}
-        BUCKET_NAME: ${BUCKET_NAME}
-        BUCKET_REGION: ${BUCKET_REGION}
-      ports:
-        - "8080:8080"
-      depends_on:
-        postgres:
-          condition: service_healthy
-        redis:
-          condition: service_healthy
-      networks:
-        - backend
-      restart: unless-stopped
-      healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-        interval: 30s
-        timeout: 10s
-        retries: 3
-        start_period: 40s
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config-repo:/config-repo    # ← monta config-repo dentro do container
+    environment:
+      SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS: file:/config-repo
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - backend
+
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    depends_on:
+      config-server:
+        condition: service_healthy
+    environment:
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - backend
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-7Wp3aOTk27lQ5RFKWHkNENof45qNVFX4CPpXdfimnNgsen3tweHuJM3dsIsUDF1xFQ9hzYZVjfVoG59Fbv3ILO}
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - backend
+  
+  # ─────────────────────────────────────────────
+  # SERVIÇOS DE NEGÓCIO
+  # ─────────────────────────────────────────────
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    environment:
+      DB_URL: ${DB_URL:-jdbc:postgresql://postgres:5432/library}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-7Wp3aOTk27lQ5RFKWHkNENof45qNVFX4CPpXdfimnNgsen3tweHuJM3dsIsUDF1xFQ9hzYZVjfVoG59Fbv3ILO}
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  catalog-service:
+    build:
+      context: ./catalog-service
+      dockerfile: Dockerfile
+    environment:
+      DB_URL: ${DB_URL:-jdbc:postgresql://postgres:5432/library}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      AWS_KEY: ${AWS_KEY:-fake-key}
+      AWS_SECRET: ${AWS_SECRET:-fake-secret}
+      BUCKET_NAME: ${BUCKET_NAME:-library-api-s3}
+      BUCKET_REGION: ${BUCKET_REGION:-sa-east-1}
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  loan-service:
+    build:
+      context: ./loan-service
+      dockerfile: Dockerfile
+    environment:
+      DB_URL: ${DB_URL:-jdbc:postgresql://postgres:5432/library}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      catalog-service:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - backend
+
+  # ─────────────────────────────────────────────
+  # OBSERVABILIDADE
+  # ─────────────────────────────────────────────
+
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana:11.5.2
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/data:/var/lib/grafana
+    environment:
+      - GF_ALERTING_ENABLED=true
+      - GF_UNIFIED_ALERTING_ENABLED=true
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - backend
+
+  zipkin:
+    image: openzipkin/zipkin:3.5.0
+    ports:
+      - "9411:9411"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9411/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - backend
 
 networks:
   backend:
@@ -149,5 +265,4 @@ networks:
 volumes:
   postgres_data:
   redis_data:
-  pgadmin_data:
   prometheus_data:

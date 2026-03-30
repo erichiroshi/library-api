@@ -1,0 +1,40 @@
+# Configurações compartilhadas por todos os microservices
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    healthcheck:
+      enabled: true
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    prefer-ip-address: true
+    metadata-map:
+      management.port: 8090
+
+management:
+  server:
+    port: 8090      # ← porta fixa para actuator em prod, independente da porta do servidor
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics,prometheus"
+  endpoint:
+    health:
+      show-details: when-authorized
+  tracing:
+    propagation:
+      type: w3c     # TRACING — Micrometer + OpenTelemetry
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.1}  # 10% em prod — ajustável via env
+    export:
+      zipkin:
+        endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}
+
+# Logging
+logging:
+  level:
+    root: INFO
+    '[org.springframework.web]': WARN
+    '[org.hibernate]': WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5level [%X{traceId:-},%X{spanId:-}] [%thread] %-40.40logger{39} : %msg%n"

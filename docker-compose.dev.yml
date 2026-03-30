@@ -1,4 +1,11 @@
+# Docker Compose — Fase 3 Microservices
+# Ordem de subida: postgres + redis + pgadmin → config-server → eureka-server → ... demais serviços
+
 services:
+
+  # ─────────────────────────────────────────────
+  # INFRAESTRUTURA
+  # ─────────────────────────────────────────────
 
   postgres:
     image: postgres:16
@@ -15,6 +22,21 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
       retries: 5
     networks:
       - backend
@@ -40,31 +62,32 @@ services:
     networks:
       - backend
 
+  # ─────────────────────────────────────────────
+  # OBSERVABILIDADE
+  # ─────────────────────────────────────────────
+
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v3.2.1
     ports:
       - "9090:9090"
     volumes:
-      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/prometheus-dev.yml:/etc/prometheus/prometheus-dev.yml
       - prometheus_data:/prometheus
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "promtool", "check", "healthy", "--probe=http://localhost:9090/-/healthy"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
       interval: 30s
       timeout: 10s
-      retries: 3	
+      retries: 3
     networks:
       - backend
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:11.5.2
     ports:
       - "3000:3000"
     volumes:
-      # provisioning config
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
-
-      # banco interno (persistência real)
       - ./monitoring/grafana/data:/var/lib/grafana
     environment:
       - GF_ALERTING_ENABLED=true
@@ -75,33 +98,18 @@ services:
     networks:
       - backend
 
-  redis:
-    image: redis:7
+  zipkin:
+    image: openzipkin/zipkin:3.5.0
     ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
+      - "9411:9411"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9411/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - backend
-
-  zipkin:
-     image: openzipkin/zipkin:3
-     ports:
-       - "9411:9411"
-     restart: unless-stopped
-     healthcheck:
-       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9411/health"]
-       interval: 30s
-       timeout: 10s
-       retries: 3
-     networks:
-       - backend
 
 networks:
   backend:
