@@ -8,7 +8,12 @@ on:
 
 jobs:
   
-  test:
+  # ─────────────────────────────────────────────
+  # MONOLITO
+  # ─────────────────────────────────────────────
+
+  test-monolith:
+    name: Test — monolith
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -54,4 +59,44 @@ jobs:
           files: build/reports/jacoco/test/jacocoTestReport.xml
           fail_ci_if_error: true
           verbose: false
-          
+
+  # ─────────────────────────────────────────────
+  # MICROSERVICES
+  # ─────────────────────────────────────────────
+
+  test-microservices:
+    name: Test — ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false   # ← não cancela os outros se um falhar
+      matrix:
+        service:
+          - config-server
+          - eureka-server
+          - gateway
+          - auth-service
+          - catalog-service
+          - loan-service
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.service }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+          cache: gradle
+
+      - name: Grant execute permission for Gradle
+        run: chmod +x gradlew
+
+      - name: Build + Test
+        run: ./gradlew clean build --quiet          

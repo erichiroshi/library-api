@@ -14,7 +14,7 @@ updates:
     directory: "/eureka-server"
     schedule:
       interval: "weekly"
-  
+
   - package-ecosystem: "gradle"
     directory: "/gateway"
     schedule:
@@ -33,13 +33,13 @@ updates:
   - package-ecosystem: "gradle"
     directory: "/loan-service"
     schedule:
-      interval: "weekly"      
+      interval: "weekly"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-      
+
   - package-ecosystem: "docker"
     directory: "/library-api"
     schedule:
@@ -74,4 +74,3 @@ updates:
     directory: "/loan-service"
     schedule:
       interval: "weekly"
-      

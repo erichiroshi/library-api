@@ -12,7 +12,13 @@ env:
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/library-api
 
 jobs:
-  build:
+
+  # ─────────────────────────────────────────────
+  # MONOLITO
+  # ─────────────────────────────────────────────
+  
+  build-monolith:
+    name: Docker — monolith
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -70,5 +76,91 @@ jobs:
           image-ref: ${{ env.IMAGE_NAME }}:latest
           format: 'table'
           exit-code: 0  # Não falha CI, apenas avisa
+          severity: 'CRITICAL,HIGH'
+
+  # ─────────────────────────────────────────────
+  # MICROSERVICES
+  # ─────────────────────────────────────────────
+
+  build-microservices:
+    name: Docker — ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: config-server
+            image: library-config-server
+          - service: eureka-server
+            image: library-eureka-server
+          - service: gateway
+            image: library-gateway
+          - service: auth-service
+            image: library-auth-service
+          - service: catalog-service
+            image: library-catalog-service
+          - service: loan-service
+            image: library-loan-service
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+          cache: gradle
+
+      - name: Grant execute permission for Gradle
+        run: chmod +x ${{ matrix.service }}/gradlew
+
+      - name: Build JAR
+        working-directory: ${{ matrix.service }}
+        run: ./gradlew bootJar --quiet
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
+
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583020
+        with:
+          context: ${{ matrix.service }}
+          file: ${{ matrix.service }}/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          load: ${{ github.event_name == 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scanner
+        if: github.event_name != 'pull_request'
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:latest
+          format: 'table'
+          exit-code: 0
           severity: 'CRITICAL,HIGH'
           
