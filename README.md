@@ -129,6 +129,41 @@ cd loan-service
 docker compose up -d
 ```
 
+**Serviços disponíveis após o startup:**
+- API Gateway: `http://localhost:8080`
+- Eureka Dashboard: `http://localhost:8761`
+- Config Server: `http://localhost:8888`
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000` (admin/admin)
+- Zipkin: `http://localhost:9411`
+
+**Credenciais de teste:**
+- ADMIN: `joao.silva@email.com` / `123456`
+
+**Ordem de subida (automática via depends_on):**
+```
+postgres + redis → config-server → eureka-server → gateway
+→ auth-service + catalog-service → loan-service
+→ prometheus + grafana + zipkin
+```
+
+---
+
+## 📊 Métricas do Projeto
+
+### Monolito (v1.3.1)
+- **~8.000** linhas de código
+- **125+** testes (unit + integration)
+- **80%+** cobertura (JaCoCo)
+- **30+** endpoints REST versionados
+
+### Microservices (v2.0.0)
+- **6** serviços extraídos do monolito
+- **10** containers orquestrados via Docker Compose
+- **1** ponto de entrada (Gateway com JWT centralizado)
+- **3** schemas isolados por domínio (auth, catalog, lending)
+- **W3C Trace Context** propagado em todos os serviços
+
 ---
 
 ## Autor
