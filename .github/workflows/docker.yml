@@ -159,7 +159,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
         with:
-          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:latest
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:${{ github.ref_name }}        
           format: 'table'
           exit-code: 0
           severity: 'CRITICAL,HIGH'
