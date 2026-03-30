@@ -108,7 +108,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	
     // WireMock para simular auth-service e catalog-service nos testes de integração
-    testImplementation 'org.wiremock:wiremock-standalone:3.9.1'
+    testImplementation 'org.wiremock:wiremock-standalone:3.13.2'
     // WireMock via Spring Cloud Contract
     testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner'
 
