@@ -1,12 +1,18 @@
 # 📚 Library API
 
 ![CI](https://github.com/erichiroshi/library-api/actions/workflows/ci.yml/badge.svg)
+![PDF](https://github.com/erichiroshi/library-api/actions/workflows/readme-pdf.yml/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=library-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=library-api)
 [![codecov](https://codecov.io/github/erichiroshi/library-api/graph/badge.svg?token=Y71AMP148X)](https://codecov.io/github/erichiroshi/library-api)
 
 ![Java](https://img.shields.io/badge/Java-25-red)
 ![Spring Boot 4](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen)
 ![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-microservices-blue)
+![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
+![Redis](https://img.shields.io/badge/Redis-Cache-red)
+![Observability](https://img.shields.io/badge/Observability-OpenTelemetry%20%2B%20Zipkin-purple)
+![Resilience](https://img.shields.io/badge/Resilience-Resilience4j-orange)
+![AWS S3](https://img.shields.io/badge/AWS-S3-black)
 
 Backend production-ready para gerenciamento de biblioteca, evoluindo de monolito para arquitetura de microservices.
 
