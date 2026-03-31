@@ -55,7 +55,7 @@ ext {
     lombokMapstructBindingVersion = "0.2.0"
     springdocVersion = "3.0.2"
    	aopVersion = "4.0.0-M2"
-   	resilience4jVersion = "2.3.0"
+   	resilience4jVersion = "2.4.0"
 }
 dependencies {
     // Spring Boot
