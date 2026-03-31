@@ -107,11 +107,6 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	
-    // WireMock para simular auth-service e catalog-service nos testes de integração
-    testImplementation 'org.wiremock:wiremock-standalone:3.9.1'
-    // WireMock via Spring Cloud Contract
-    testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner'
-
     // Testcontainers
     testImplementation platform("org.testcontainers:testcontainers-bom:2.0.3")
     testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
