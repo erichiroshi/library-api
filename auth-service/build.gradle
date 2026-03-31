@@ -67,8 +67,8 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.13.0'
 	
 	// ShedLock
-    implementation 'net.javacrumbs.shedlock:shedlock-spring:6.9.0'
-    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.9.0'
+    implementation 'net.javacrumbs.shedlock:shedlock-spring:7.7.0'
+    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.7.0'
 
 	// Lombok + MapStruct
 	compileOnly 'org.projectlombok:lombok'
