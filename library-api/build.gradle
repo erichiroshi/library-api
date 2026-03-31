@@ -65,7 +65,7 @@ ext {
    	otelVersion = "1.7.0-M3"
    	openTelemetryVersion = "2.25.0"
    	aopVersion = "4.0.0-M2"
-   	resilience4jVersion = "2.3.0"
+   	resilience4jVersion = "2.4.0"
 }
 
 dependencies {
