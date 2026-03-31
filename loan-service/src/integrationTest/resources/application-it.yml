@@ -2,15 +2,6 @@ spring:
   cloud:
     config:
       enabled: false
-    loadbalancer:
-      enabled: false
-
-    openfeign:
-      client:
-        config:
-          default:
-            read-timeout: 5000
-            connect-timeout: 5000
 
   datasource:
     url: jdbc:tc:postgresql:16:///testdb
@@ -39,9 +30,3 @@ spring:
 eureka:
   client:
     enabled: false
-
-management:
-  endpoints:
-    web:
-      exposure:
-        exclude: '*'

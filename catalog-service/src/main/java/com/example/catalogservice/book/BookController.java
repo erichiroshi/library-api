@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -82,6 +83,7 @@ public class BookController {
 	@ApiResponse(responseCode = "204", description = "Livro deletado com sucesso")
 	@ApiResponse(responseCode = "404", description = "Livro não encontrado")
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> deleteById(@PathVariable Long id) {
 		bookService.deleteById(id);
 		return ResponseEntity.noContent().build();

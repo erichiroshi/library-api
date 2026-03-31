@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @Testcontainers
 @Transactional
 @ActiveProfiles("it")
@@ -72,9 +72,9 @@ class BookInternalControllerIT {
 
         @Test
         @DisplayName("Deve decrementar cópias disponíveis")
-        @WithMockUser
         void shouldDecrementCopies() throws Exception {
-            mockMvc.perform(patch("/api/v1/books/{id}/decrement", book.getId()))
+            mockMvc.perform(patch("/api/v1/books/{id}/decrement", book.getId())
+            		.with(asUser()))
                 .andExpect(status().isOk());
 
             Book updated = bookRepository.findById(book.getId()).orElseThrow();
@@ -83,20 +83,20 @@ class BookInternalControllerIT {
 
         @Test
         @DisplayName("Deve retornar 0 quando não há cópias disponíveis")
-        @WithMockUser
         void shouldReturnZeroWhenNoCopies() throws Exception {
             book.setAvailableCopies(0);
             bookRepository.save(book);
 
-            mockMvc.perform(patch("/api/v1/books/{id}/decrement", book.getId()))
+            mockMvc.perform(patch("/api/v1/books/{id}/decrement", book.getId())
+            		.with(asUser()))
                 .andExpect(status().isOk());
         }
 
         @Test
         @DisplayName("Deve retornar 404 quando livro não existe")
-        @WithMockUser
         void shouldReturn404WhenBookNotFound() throws Exception {
-            mockMvc.perform(patch("/api/v1/books/{id}/decrement", 999L))
+            mockMvc.perform(patch("/api/v1/books/{id}/decrement", 999L)
+            		.with(asUser()))
                 .andExpect(status().isNotFound());
         }
     }
@@ -107,9 +107,9 @@ class BookInternalControllerIT {
 
         @Test
         @DisplayName("Deve restaurar cópias disponíveis")
-        @WithMockUser
         void shouldRestoreCopies() throws Exception {
-            mockMvc.perform(patch("/api/v1/books/{id}/restore/{quantity}", book.getId(), 3))
+            mockMvc.perform(patch("/api/v1/books/{id}/restore/{quantity}", book.getId(), 3)
+            		.with(asUser()))
                 .andExpect(status().isNoContent());
 
             Book updated = bookRepository.findById(book.getId()).orElseThrow();
@@ -118,10 +118,22 @@ class BookInternalControllerIT {
 
         @Test
         @DisplayName("Deve retornar 404 quando livro não existe")
-        @WithMockUser
         void shouldReturn404WhenBookNotFound() throws Exception {
-            mockMvc.perform(patch("/api/v1/books/{id}/restore/{quantity}", 999L, 1))
+            mockMvc.perform(patch("/api/v1/books/{id}/restore/{quantity}", 999L, 1)
+            		.with(asUser()))
                 .andExpect(status().isNotFound());
         }
     }
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════════════════════════════════
+    
+	private RequestPostProcessor asUser() {
+		return request -> {
+			request.addHeader("X-User-Id", "john@example.com");
+			request.addHeader("X-User-Roles", "ROLE_USER");
+			return request;
+		};
+	}
 }

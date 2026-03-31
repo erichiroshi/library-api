@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Profile;
 @Profile("it")
 public class CacheTestConfig {
 
-    @Bean
-    CacheManager cacheManager() {
-        return new NoOpCacheManager();
-    }
+	@Bean
+	CacheManager cacheManager() {
+		return new NoOpCacheManager();
+	}
 }

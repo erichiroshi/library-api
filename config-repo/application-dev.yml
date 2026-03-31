@@ -19,13 +19,11 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus,traces
+        include: health,info,metrics,prometheus,traces,gateway
   endpoint:
     health:
       show-details: always
     gateway:
-      enabled: true
-    prometheus:
       enabled: true
   tracing:
     propagation:

@@ -9,9 +9,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc (addFilters = false)
+@AutoConfigureMockMvc
 @Testcontainers
 @Transactional
 @ActiveProfiles("it")
@@ -90,7 +90,6 @@ class BookControllerIT {
 
         @Test
         @DisplayName("Deve criar livro com sucesso")
-        //  @WithMockUser(roles = "ADMIN")
         void shouldCreateBook() throws Exception {
             // Arrange
             String requestBody = """
@@ -107,7 +106,9 @@ class BookControllerIT {
             // Act & Assert
             mockMvc.perform(post("/api/v1/books")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
+                    .content(requestBody)
+                    .with(asAdmin()))
+            
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
                 .andExpect(jsonPath("$.id").exists())
@@ -120,7 +121,6 @@ class BookControllerIT {
 
         @Test
         @DisplayName("Deve retornar 409 quando ISBN já existe")
-        //  @WithMockUser(roles = "ADMIN")
         void shouldReturn409WhenIsbnExists() throws Exception {
             // Arrange - usar ISBN do livro existente
             String requestBody = """
@@ -137,14 +137,14 @@ class BookControllerIT {
             // Act & Assert
             mockMvc.perform(post("/api/v1/books")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
+                    .content(requestBody)
+                    .with(asAdmin()))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.title").value("Book Already Exists"));
         }
 
         @Test
         @DisplayName("Deve retornar 400 quando authorIds está vazio")
-        //  @WithMockUser(roles = "ADMIN")
         void shouldReturn400WhenNoAuthors() throws Exception {
             // Arrange
             String requestBody = """
@@ -161,13 +161,13 @@ class BookControllerIT {
             // Act & Assert
             mockMvc.perform(post("/api/v1/books")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
+                    .content(requestBody)
+                    .with(asAdmin()))
                 .andExpect(status().isBadRequest());
         }
 
         @Test
         @DisplayName("Deve retornar 404 quando categoria não existe")
-        //  @WithMockUser(roles = "ADMIN")
         void shouldReturn404WhenCategoryNotFound() throws Exception {
             // Arrange
             String requestBody = """
@@ -184,8 +184,10 @@ class BookControllerIT {
             // Act & Assert
             mockMvc.perform(post("/api/v1/books")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
-                .andExpect(status().isNotFound())
+                    .content(requestBody)
+                    .with(asAdmin()))
+                .andExpect(status().isNotFound()
+                		)
                 .andExpect(jsonPath("$.title").value("Category Not Found"));
         }
     }
@@ -200,9 +202,9 @@ class BookControllerIT {
 
         @Test
         @DisplayName("Deve retornar livro quando existe")
-        @WithMockUser(roles = "USER")
         void shouldReturnBookWhenExists() throws Exception {
-            mockMvc.perform(get("/api/v1/books/{id}", book.getId()))
+            mockMvc.perform(get("/api/v1/books/{id}", book.getId())
+            		.with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(book.getId()))
                 .andExpect(jsonPath("$.title").value("Clean Code"))
@@ -211,9 +213,9 @@ class BookControllerIT {
 
         @Test
         @DisplayName("Deve retornar 404 quando livro não existe")
-        @WithMockUser(roles = "USER")
         void shouldReturn404WhenBookNotFound() throws Exception {
-            mockMvc.perform(get("/api/v1/books/{id}", 999L))
+            mockMvc.perform(get("/api/v1/books/{id}", 999L)
+            		.with(asUser()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Book Not Found"));
         }
@@ -229,11 +231,11 @@ class BookControllerIT {
 
         @Test
         @DisplayName("Deve retornar página de livros")
-        @WithMockUser(roles = "USER")
         void shouldReturnPageOfBooks() throws Exception {
             mockMvc.perform(get("/api/v1/books")
                     .param("page", "0")
-                    .param("size", "10"))
+                    .param("size", "10")
+                    .with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].title").value("Clean Code"))
@@ -243,7 +245,6 @@ class BookControllerIT {
 
         @Test
         @DisplayName("Deve retornar página vazia quando não há livros")
-        @WithMockUser(roles = "USER")
         void shouldReturnEmptyPageWhenNoBooks() throws Exception {
             // Arrange - deletar o livro criado no setUp
             bookRepository.deleteAll();
@@ -251,7 +252,8 @@ class BookControllerIT {
             // Act & Assert
             mockMvc.perform(get("/api/v1/books")
                     .param("page", "0")
-                    .param("size", "10"))
+                    .param("size", "10")
+                    .with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isEmpty())
                 .andExpect(jsonPath("$.totalElements").value(0));
@@ -259,12 +261,12 @@ class BookControllerIT {
 
         @Test
         @DisplayName("Deve retornar 400 quando campo de ordenação inválido")
-        @WithMockUser(roles = "USER")
         void shouldReturn400WhenInvalidSortField() throws Exception {
             mockMvc.perform(get("/api/v1/books")
                     .param("page", "0")
                     .param("size", "10")
-                    .param("sort", "invalidField,asc"))
+                    .param("sort", "invalidField,asc")
+                    .with(asUser()))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Invalid Sort Field"));
         }
@@ -280,10 +282,10 @@ class BookControllerIT {
 
         @Test
         @DisplayName("Deve deletar livro com sucesso")
-        //  @WithMockUser(roles = "ADMIN")
         void shouldDeleteBook() throws Exception {
             // Act
-            mockMvc.perform(delete("/api/v1/books/{id}", book.getId()))
+            mockMvc.perform(delete("/api/v1/books/{id}", book.getId())
+            		.with(asAdmin()))
                 .andExpect(status().isNoContent());
 
             // Assert - verificar que foi deletado
@@ -292,20 +294,20 @@ class BookControllerIT {
 
         @Test
         @DisplayName("Deve retornar 404 ao tentar deletar livro inexistente")
-        //  @WithMockUser(roles = "ADMIN")
         void shouldReturn404WhenDeletingNonExistent() throws Exception {
-            mockMvc.perform(delete("/api/v1/books/{id}", 999L))
+            mockMvc.perform(delete("/api/v1/books/{id}", 999L)
+            		.with(asAdmin()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Book Not Found"));
         }
 
-//        @Test
-//        @DisplayName("Deve retornar 403 quando usuário comum tenta deletar")
-//        @WithMockUser(roles = "USER")
-//        void shouldReturn403WhenUserTriesToDelete() throws Exception {
-//            mockMvc.perform(delete("/api/v1/books/{id}", book.getId()))
-//                .andExpect(status().isForbidden());
-//        }
+		@Test
+		@DisplayName("Deve retornar 403 quando usuário comum tenta deletar")
+		void shouldReturn403WhenUserTriesToDelete() throws Exception {
+			mockMvc.perform(delete("/api/v1/books/{id}", book.getId())
+					.with(asUser()))
+						.andExpect(status().isForbidden());
+		}
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -318,10 +320,10 @@ class BookControllerIT {
 
         @Test
         @DisplayName("Deve retornar dados atualizados sem cache")
-        @WithMockUser(roles = "USER")
         void shouldReturnFreshDataWithoutCache() throws Exception {
             // Primeira busca
-            mockMvc.perform(get("/api/v1/books/{id}", book.getId()))
+            mockMvc.perform(get("/api/v1/books/{id}", book.getId())
+            		.with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Clean Code"));
 
@@ -330,9 +332,30 @@ class BookControllerIT {
             bookRepository.save(book);
 
             // Segunda busca - deve retornar o título atualizado (sem cache)
-            mockMvc.perform(get("/api/v1/books/{id}", book.getId()))
+            mockMvc.perform(get("/api/v1/books/{id}", book.getId())
+            		.with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Clean Code - Updated"));
         }
     }
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════════════════════════════════
+    
+	private RequestPostProcessor asUser() {
+		return request -> {
+			request.addHeader("X-User-Id", "john@example.com");
+			request.addHeader("X-User-Roles", "ROLE_USER");
+			return request;
+		};
+	}
+	
+	private RequestPostProcessor asAdmin() {
+		return request -> {
+			request.addHeader("X-User-Id", "john@example.com");
+			request.addHeader("X-User-Roles", "ROLE_ADMIN");
+			return request;
+		};
+	}
 }

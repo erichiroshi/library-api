@@ -8,9 +8,3 @@ spring:
 
   cache:
     type: none
-
-management:
-  endpoints:
-    web:
-      exposure:
-        exclude: '*'

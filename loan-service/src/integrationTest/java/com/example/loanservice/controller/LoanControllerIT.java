@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -33,6 +34,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -91,10 +93,10 @@ class LoanControllerIT {
         void shouldCreateLoan() throws Exception {
             mockMvc.perform(post("/api/v1/loans")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header("X-User-Id", USER_EMAIL)
                     .content("""
                         {"booksId": [%d]}
-                        """.formatted(BOOK_ID)))
+                        """.formatted(BOOK_ID))
+                    .with(asUser()))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
                 .andExpect(jsonPath("$.status").value("WAITING_RETURN"));
@@ -107,10 +109,10 @@ class LoanControllerIT {
         void shouldDecrementCopiesOnCreate() throws Exception {
             mockMvc.perform(post("/api/v1/loans")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header("X-User-Id", USER_EMAIL)
                     .content("""
                         {"booksId": [%d]}
-                        """.formatted(BOOK_ID)))
+                        """.formatted(BOOK_ID))
+                    .with(asUser()))
                 .andExpect(status().isCreated());
 
             // Verifica que o decrement foi chamado
@@ -124,10 +126,10 @@ class LoanControllerIT {
 
             mockMvc.perform(post("/api/v1/loans")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header("X-User-Id", USER_EMAIL)
                     .content("""
                         {"booksId": [%d]}
-                        """.formatted(BOOK_ID)))
+                        """.formatted(BOOK_ID))
+                    .with(asUser()))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.title").value("Book Not Available"));
         }
@@ -139,10 +141,10 @@ class LoanControllerIT {
 
             mockMvc.perform(post("/api/v1/loans")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header("X-User-Id", USER_EMAIL)
                     .content("""
                         {"booksId": [999]}
-                        """))
+                        """)
+                    .with(asUser()))
                 .andExpect(status().isNotFound());
         }
 
@@ -151,10 +153,10 @@ class LoanControllerIT {
         void shouldReturn400WhenBooksIdEmpty() throws Exception {
             mockMvc.perform(post("/api/v1/loans")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header("X-User-Id", USER_EMAIL)
                     .content("""
                         {"booksId": []}
-                        """))
+                        """)
+                    .with(asUser()))
                 .andExpect(status().isBadRequest());
         }
 
@@ -167,10 +169,10 @@ class LoanControllerIT {
 
             mockMvc.perform(post("/api/v1/loans")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header("X-User-Id", USER_EMAIL)
                     .content("""
                         {"booksId": [%d, 2]}
-                        """.formatted(BOOK_ID)))
+                        """.formatted(BOOK_ID))
+                    .with(asUser()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.books").isArray());
         }
@@ -190,7 +192,7 @@ class LoanControllerIT {
             Loan loan = createLoan(testUser.id());
 
             mockMvc.perform(get("/api/v1/loans/{id}", loan.getId())
-                    .header("X-User-Id", USER_EMAIL))
+                    .with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(loan.getId()));
         }
@@ -205,7 +207,7 @@ class LoanControllerIT {
                 .thenReturn(Optional.of(otherUser));
 
             mockMvc.perform(get("/api/v1/loans/{id}", loan.getId())
-                    .header("X-User-Id", "other@example.com"))
+            		.with(asOtherUser()))
                 .andExpect(status().isNotFound());
         }
 
@@ -215,7 +217,7 @@ class LoanControllerIT {
             Loan loan = createLoan(testUser.id());
 
             mockMvc.perform(get("/api/v1/loans/{id}", loan.getId())
-                    .header("X-User-Id", "admin@example.com"))
+            		.with(asAdmin()))
                 .andExpect(status().isOk());
         }
 
@@ -223,7 +225,7 @@ class LoanControllerIT {
         @DisplayName("Deve retornar 404 quando empréstimo não existe")
         void shouldReturn404WhenLoanNotFound() throws Exception {
             mockMvc.perform(get("/api/v1/loans/{id}", 999L)
-                    .header("X-User-Id", USER_EMAIL))
+            		.with(asUser()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Loan Not Found"));
         }
@@ -243,7 +245,7 @@ class LoanControllerIT {
             createLoan(testUser.id());
 
             mockMvc.perform(get("/api/v1/loans/me")
-                    .header("X-User-Id", USER_EMAIL))
+            		.with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
         }
@@ -252,7 +254,7 @@ class LoanControllerIT {
         @DisplayName("Retorna lista vazia quando não há empréstimos")
         void shouldReturnEmptyList() throws Exception {
             mockMvc.perform(get("/api/v1/loans/me")
-                    .header("X-User-Id", USER_EMAIL))
+            		.with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
         }
@@ -272,7 +274,7 @@ class LoanControllerIT {
             Loan loan = createLoan(testUser.id());
 
             mockMvc.perform(patch("/api/v1/loans/{id}/return", loan.getId())
-                    .header("X-User-Id", USER_EMAIL))
+            		.with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("RETURNED"))
                 .andExpect(jsonPath("$.returnDate").exists());
@@ -291,7 +293,7 @@ class LoanControllerIT {
             loanRepository.save(loan);
 
             mockMvc.perform(patch("/api/v1/loans/{id}/return", loan.getId())
-                    .header("X-User-Id", USER_EMAIL))
+            		.with(asUser()))
                 .andExpect(status().isConflict());
         }
     }
@@ -310,7 +312,8 @@ class LoanControllerIT {
             Loan loan = createLoan(testUser.id());
 
             mockMvc.perform(patch("/api/v1/loans/{id}/cancel", loan.getId())
-                    .header("X-User-Id", USER_EMAIL))
+            		.with(asUser()))
+            .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELED"));
 
@@ -326,7 +329,7 @@ class LoanControllerIT {
             loanRepository.save(loan);
 
             mockMvc.perform(patch("/api/v1/loans/{id}/cancel", loan.getId())
-                    .header("X-User-Id", USER_EMAIL))
+            		.with(asUser()))
                 .andExpect(status().isConflict());
         }
     }
@@ -345,7 +348,7 @@ class LoanControllerIT {
             createLoan(testUser.id());
 
             mockMvc.perform(get("/api/v1/loans")
-                    .header("X-User-Id", "admin@example.com"))
+            		.with(asAdmin()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
         }
@@ -354,7 +357,8 @@ class LoanControllerIT {
         @DisplayName("GET /api/v1/loans - USER comum recebe 403")
         void userShouldReceive403() throws Exception {
             mockMvc.perform(get("/api/v1/loans")
-                    .header("X-User-Id", USER_EMAIL))
+            		.with(asUser()))
+            .andDo(print())
                 .andExpect(status().isForbidden());
         }
 
@@ -367,7 +371,7 @@ class LoanControllerIT {
             loanRepository.save(loan);
 
             mockMvc.perform(get("/api/v1/loans/overdue")
-                    .header("X-User-Id", "admin@example.com"))
+            		.with(asAdmin()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
         }
@@ -397,4 +401,28 @@ class LoanControllerIT {
 
         return loanRepository.save(loan);
     }
+    
+	private RequestPostProcessor asUser() {
+		return request -> {
+			request.addHeader("X-User-Id", "john@example.com");
+			request.addHeader("X-User-Roles", "ROLE_USER");
+			return request;
+		};
+	}
+	
+	private RequestPostProcessor asAdmin() {
+		return request -> {
+			request.addHeader("X-User-Id", "john@example.com");
+			request.addHeader("X-User-Roles", "ROLE_ADMIN");
+			return request;
+		};
+	}
+	
+	private RequestPostProcessor asOtherUser() {
+		return request -> {
+			request.addHeader("X-User-Id", "other@example.com");
+			request.addHeader("X-User-Roles", "ROLE_USER");
+			return request;
+		};
+	}
 }

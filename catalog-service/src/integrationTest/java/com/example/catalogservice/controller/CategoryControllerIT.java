@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc (addFilters = false)
+@AutoConfigureMockMvc
 @Testcontainers
 @Transactional
 @ActiveProfiles("it")
@@ -53,13 +53,13 @@ class CategoryControllerIT {
 
         @Test
         @DisplayName("ADMIN deve criar categoria com sucesso")
-        @WithMockUser(roles = "ADMIN")
         void shouldCreateCategory() throws Exception {
             mockMvc.perform(post("/api/v1/categories")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Science"}
-                        """))
+                        """)
+                    .with(asAdmin()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Science"));
 
@@ -68,41 +68,41 @@ class CategoryControllerIT {
 
         @Test
         @DisplayName("Deve retornar 409 quando categoria já existe")
-        @WithMockUser(roles = "ADMIN")
         void shouldReturn409WhenExists() throws Exception {
             mockMvc.perform(post("/api/v1/categories")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Technology"}
-                        """))
+                        """)
+                    .with(asAdmin()))
                 .andExpect(status().isConflict());
         }
         
         @Test
         @DisplayName("Deve retornar 400 quando nome está em branco")
-        @WithMockUser(roles = "ADMIN")
         void shouldReturn400WhenNameBlank() throws Exception {
             mockMvc.perform(post("/api/v1/categories")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": ""}
-                        """))
+                        """)
+                    .with(asAdmin()))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Validation Error"))
                 .andExpect(jsonPath("$.errors.name").exists());
         }
 
-//        @Test
-//        @DisplayName("Deve retornar 403 quando usuário comum tenta criar")
-//        @WithMockUser(roles = "USER")
-//        void shouldReturn403ForUser() throws Exception {
-//            mockMvc.perform(post("/api/v1/categories")
-//                    .contentType(MediaType.APPLICATION_JSON)
-//                    .content("""
-//                        {"name": "Science"}
-//                        """))
-//                .andExpect(status().isForbidden());
-//        }
+        @Test
+        @DisplayName("Deve retornar 403 quando usuário comum tenta criar")
+        void shouldReturn403ForUser() throws Exception {
+            mockMvc.perform(post("/api/v1/categories")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        {"name": "Science"}
+                        """)
+                    .with(asUser()))
+                .andExpect(status().isForbidden());
+        }
     }
 
     @Nested
@@ -111,18 +111,18 @@ class CategoryControllerIT {
 
         @Test
         @DisplayName("Deve retornar categoria quando existe")
-        @WithMockUser
         void shouldReturnCategory() throws Exception {
-            mockMvc.perform(get("/api/v1/categories/{id}", category.getId()))
+            mockMvc.perform(get("/api/v1/categories/{id}", category.getId())
+            		.with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Technology"));
         }
 
         @Test
         @DisplayName("Deve retornar 404 quando não existe")
-        @WithMockUser
         void shouldReturn404() throws Exception {
-            mockMvc.perform(get("/api/v1/categories/{id}", 999L))
+            mockMvc.perform(get("/api/v1/categories/{id}", 999L)
+            		.with(asUser()))
                 .andExpect(status().isNotFound());
         }
     }
@@ -133,9 +133,9 @@ class CategoryControllerIT {
 
         @Test
         @DisplayName("Deve listar categorias paginadas")
-        @WithMockUser
         void shouldListCategories() throws Exception {
-            mockMvc.perform(get("/api/v1/categories"))
+            mockMvc.perform(get("/api/v1/categories")
+            		.with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].name").value("Technology"));
@@ -143,11 +143,11 @@ class CategoryControllerIT {
         
         @Test
         @DisplayName("Deve retornar página vazia quando não há categorias")
-        @WithMockUser
         void shouldReturnEmptyPage() throws Exception {
             categoryRepository.deleteAll();
 
-            mockMvc.perform(get("/api/v1/categories"))
+            mockMvc.perform(get("/api/v1/categories")
+            		.with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isEmpty())
                 .andExpect(jsonPath("$.totalElements").value(0));
@@ -160,9 +160,9 @@ class CategoryControllerIT {
 
         @Test
         @DisplayName("ADMIN deve deletar categoria com sucesso")
-        @WithMockUser(roles = "ADMIN")
         void shouldDeleteCategory() throws Exception {
-            mockMvc.perform(delete("/api/v1/categories/{id}", category.getId()))
+            mockMvc.perform(delete("/api/v1/categories/{id}", category.getId())
+            		.with(asAdmin()))
                 .andExpect(status().isNoContent());
 
             assertThat(categoryRepository.findById(category.getId())).isEmpty();
@@ -170,19 +170,40 @@ class CategoryControllerIT {
 
         @Test
         @DisplayName("Deve retornar 404 ao deletar categoria inexistente")
-        @WithMockUser(roles = "ADMIN")
         void shouldReturn404WhenDeleting() throws Exception {
-            mockMvc.perform(delete("/api/v1/categories/{id}", 999L))
+            mockMvc.perform(delete("/api/v1/categories/{id}", 999L)
+            		.with(asAdmin()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Category Not Found"));
         }
 
-//        @Test
-//        @DisplayName("Deve retornar 403 quando usuário comum tenta deletar")
-//        @WithMockUser(roles = "USER")
-//        void shouldReturn403ForUser() throws Exception {
-//            mockMvc.perform(delete("/api/v1/categories/{id}", category.getId()))
-//                .andExpect(status().isForbidden());
-//        }
+        @Test
+        @DisplayName("Deve retornar 403 quando usuário comum tenta deletar")
+        void shouldReturn403ForUser() throws Exception {
+            mockMvc.perform(delete("/api/v1/categories/{id}", category.getId())
+            		.with(asUser()))
+                .andExpect(status().isForbidden());
+        }
     }
+    
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════════════════════════════════
+    
+	private RequestPostProcessor asUser() {
+		return request -> {
+			request.addHeader("X-User-Id", "john@example.com");
+			request.addHeader("X-User-Roles", "ROLE_USER");
+			return request;
+		};
+	}
+	
+	private RequestPostProcessor asAdmin() {
+		return request -> {
+			request.addHeader("X-User-Id", "john@example.com");
+			request.addHeader("X-User-Roles", "ROLE_ADMIN");
+			return request;
+		};
+	}
 }

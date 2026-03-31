@@ -1,6 +1,7 @@
 package com.example.loanservice.loan;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -14,6 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.example.loanservice.client.BookClient;
 import com.example.loanservice.client.UserClient;
@@ -51,6 +55,7 @@ class LoanServiceTest {
     private UserDTO adminUser;
     private BookDTO availableBook;
     private Loan activeLoan;
+    UsernamePasswordAuthenticationToken authentication;
 
     @BeforeEach
     void setUp() {
@@ -66,7 +71,7 @@ class LoanServiceTest {
         activeLoan.setDueDate(LocalDate.now().plusDays(7));
         activeLoan.setStatus(LoanStatus.WAITING_RETURN);
     }
-
+    
     @Nested
     @DisplayName("create() - criar empréstimo")
     class CreateLoanTests {
@@ -91,8 +96,10 @@ class LoanServiceTest {
             });
             when(loanRepository.findByIdWithItems(1L)).thenReturn(Optional.of(activeLoan));
             when(mapper.toDTO(any(Loan.class))).thenReturn(expectedResponse);
+            
+            setAuthentication(authenticatedUser);
 
-            LoanResponseDTO result = loanService.create(dto, "john@example.com");
+            LoanResponseDTO result = loanService.create(dto);
 
             assertThat(result).isNotNull();
             assertThat(result.status()).isEqualTo(LoanStatus.WAITING_RETURN);
@@ -109,8 +116,10 @@ class LoanServiceTest {
                 .thenReturn(Optional.of(authenticatedUser));
             when(bookClient.findById(1L)).thenReturn(Optional.of(availableBook));
             when(bookClient.decrementCopies(1L)).thenReturn(0);
+            
+            setAuthentication(authenticatedUser);
 
-            assertThatThrownBy(() -> loanService.create(dto, "john@example.com"))
+            assertThatThrownBy(() -> loanService.create(dto))
                 .isInstanceOf(BookNotAvailableException.class);
 
             verify(loanRepository, never()).save(any());
@@ -129,7 +138,9 @@ class LoanServiceTest {
             when(loanRepository.findByIdWithItems(1L))
                 .thenReturn(Optional.of(activeLoan));
 
-            loanService.returnLoan(1L, "john@example.com");
+            setAuthentication(authenticatedUser);
+            
+            loanService.returnLoan(1L);
 
             assertThat(activeLoan.getStatus()).isEqualTo(LoanStatus.RETURNED);
             assertThat(activeLoan.getReturnDate()).isEqualTo(LocalDate.now());
@@ -142,8 +153,10 @@ class LoanServiceTest {
                 .thenReturn(Optional.of(authenticatedUser));
             when(loanRepository.findByIdWithItems(999L))
                 .thenReturn(Optional.empty());
+            
+            setAuthentication(authenticatedUser);
 
-            assertThatThrownBy(() -> loanService.returnLoan(999L, "john@example.com"))
+            assertThatThrownBy(() -> loanService.returnLoan(999L))
                 .isInstanceOf(LoanNotFoundException.class);
         }
 
@@ -156,8 +169,10 @@ class LoanServiceTest {
                 .thenReturn(Optional.of(otherUser));
             when(loanRepository.findByIdWithItems(1L))
                 .thenReturn(Optional.of(activeLoan));
+            
+            setAuthentication(otherUser);
 
-            assertThatThrownBy(() -> loanService.returnLoan(1L, "other@example.com"))
+            assertThatThrownBy(() -> loanService.returnLoan(1L))
                 .isInstanceOf(LoanUnauthorizedException.class);
         }
 
@@ -169,7 +184,9 @@ class LoanServiceTest {
             when(loanRepository.findByIdWithItems(1L))
                 .thenReturn(Optional.of(activeLoan));
 
-            loanService.returnLoan(1L, "admin@example.com");
+            setAuthentication(adminUser);
+
+            loanService.returnLoan(1L);
 
             assertThat(activeLoan.getStatus()).isEqualTo(LoanStatus.RETURNED);
         }
@@ -184,8 +201,10 @@ class LoanServiceTest {
             when(loanRepository.findByIdWithItems(1L))
                 .thenReturn(Optional.of(activeLoan));
             activeLoan.setStatus(LoanStatus.RETURNED);
+            
+            setAuthentication(authenticatedUser);
 
-            assertThatThrownBy(() -> loanService.returnLoan(1L, "john@example.com"))
+            assertThatThrownBy(() -> loanService.returnLoan(1L))
                 .isInstanceOf(LoanAlreadyReturnedException.class);
         }
     }
@@ -202,9 +221,26 @@ class LoanServiceTest {
             when(loanRepository.findByUserIdWithItems(1L))
                 .thenReturn(List.of(activeLoan));
 
-            loanService.findMyLoans("john@example.com");
+            setAuthentication(authenticatedUser);
+            
+            loanService.findMyLoans();
 
             verify(loanRepository).findByUserIdWithItems(1L);
         }
     }
+ 
+// ═══════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════
+    
+	private void setAuthentication(UserDTO user) {
+		String userEmail = user.email();
+		String roles = user.roles().toString();
+
+		List<SimpleGrantedAuthority> authorities = Arrays.stream(roles.split(",")).map(String::trim)
+				.map(SimpleGrantedAuthority::new).toList();
+
+		authentication = new UsernamePasswordAuthenticationToken(userEmail, null, authorities);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+	}
 }

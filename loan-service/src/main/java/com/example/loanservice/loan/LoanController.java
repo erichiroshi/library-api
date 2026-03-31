@@ -4,12 +4,12 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -38,8 +38,8 @@ public class LoanController {
 			description = "Permite que um usuário solicite um empréstimo de um livro. O status inicial é WAITING_RETURN."
 			)
 	@PostMapping
-	public ResponseEntity<LoanResponseDTO> create(@Valid @RequestBody LoanCreateDTO dto, @RequestHeader("X-User-Id") String userEmail) {
-		LoanResponseDTO response = service.create(dto, userEmail);
+	public ResponseEntity<LoanResponseDTO> create(@Valid @RequestBody LoanCreateDTO dto) {
+		LoanResponseDTO response = service.create(dto);
 		URI uri = ServletUriComponentsBuilder
 				.fromCurrentRequest()
 				.path("/{id}")
@@ -53,8 +53,8 @@ public class LoanController {
 			description = "Retorna os detalhes de um empréstimo específico. Usuário comum só pode acessar seus próprios empréstimos; ADMIN pode acessar qualquer um."
 			)
 	@GetMapping("/{loanId}")
-	public ResponseEntity<LoanResponseDTO> findById(@PathVariable Long loanId, @RequestHeader("X-User-Id") String userEmail) {
-		return ResponseEntity.ok(service.findById(loanId, userEmail));
+	public ResponseEntity<LoanResponseDTO> findById(@PathVariable Long loanId) {
+		return ResponseEntity.ok(service.findById(loanId));
 	}
 
 	@Operation(
@@ -62,8 +62,8 @@ public class LoanController {
 			description = "Retorna uma lista de todos os empréstimos do usuário autenticado. Usuário comum vê apenas os próprios; ADMIN vê todos."
 			)
     @GetMapping("/me")
-    public ResponseEntity<List<LoanResponseDTO>> findMyLoans(@RequestHeader("X-User-Id") String userEmail) {
-        return ResponseEntity.ok(service.findMyLoans(userEmail));
+    public ResponseEntity<List<LoanResponseDTO>> findMyLoans() {
+        return ResponseEntity.ok(service.findMyLoans());
     }
 
     @Operation(
@@ -71,6 +71,7 @@ public class LoanController {
     		description = "Retorna uma lista de todos os empréstimos no sistema. Apenas ADMIN pode acessar este endpoint."
 			)
     @GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<LoanResponseDTO>> findAll() {
         return ResponseEntity.ok(service.findAll());
     }
@@ -80,6 +81,7 @@ public class LoanController {
 			description = "Retorna uma lista de empréstimos para um usuário específico. Apenas ADMIN pode acessar este endpoint."
 			)
     @GetMapping("/user/{userId}")
+	@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<LoanResponseDTO>> findByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(service.findByUser(userId));
     }
@@ -89,6 +91,7 @@ public class LoanController {
 			description = "Retorna uma lista de empréstimos que estão atrasados (status WAITING_RETURN e data de devolução prevista já passou). Apenas ADMIN pode acessar este endpoint."
 			)
     @GetMapping("/overdue")
+	@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<LoanResponseDTO>> findOverdue() {
         return ResponseEntity.ok(service.findOverdue());
     }
@@ -98,8 +101,8 @@ public class LoanController {
 			description = "Marca um empréstimo como DEVOLVED. Usuário comum só pode devolver seus próprios empréstimos; ADMIN pode devolver qualquer um."
 			)
     @PatchMapping("/{loanId}/return")
-    public ResponseEntity<LoanResponseDTO> returnLoan(@PathVariable Long loanId, @RequestHeader("X-User-Id") String userEmail) {
-        return ResponseEntity.ok(service.returnLoan(loanId, userEmail));
+    public ResponseEntity<LoanResponseDTO> returnLoan(@PathVariable Long loanId) {
+        return ResponseEntity.ok(service.returnLoan(loanId));
     }
     
     @Operation(
@@ -107,7 +110,7 @@ public class LoanController {
 			description = "Permite que um usuário cancele um empréstimo que ainda não foi devolvido. O status do empréstimo é atualizado para CANCELED. Usuário comum só pode cancelar seus próprios empréstimos; ADMIN pode cancelar qualquer um."
 			)
     @PatchMapping("/{loanId}/cancel")
-    public ResponseEntity<LoanResponseDTO> cancelLoan(@PathVariable Long loanId, @RequestHeader("X-User-Id") String userEmail) {
-        return ResponseEntity.ok(service.cancelLoan(loanId, userEmail));
+    public ResponseEntity<LoanResponseDTO> cancelLoan(@PathVariable Long loanId) {
+        return ResponseEntity.ok(service.cancelLoan(loanId));
     }
 }

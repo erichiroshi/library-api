@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc (addFilters = false)
+@AutoConfigureMockMvc
 @Testcontainers
 @Transactional
 @ActiveProfiles("it")
@@ -55,7 +55,6 @@ class AuthorControllerIT {
 
         @Test
         @DisplayName("Deve criar autor com sucesso")
-        @WithMockUser(roles = "ADMIN")
         void shouldCreateAuthor() throws Exception {
             mockMvc.perform(post("/api/v1/authors")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -64,7 +63,8 @@ class AuthorControllerIT {
                             "name": "Martin Fowler",
                             "biography": "Autor e engenheiro de software"
                         }
-                        """))
+                        """)
+                    .with(asAdmin()))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
                 .andExpect(jsonPath("$.name").value("Martin Fowler"))
@@ -75,7 +75,6 @@ class AuthorControllerIT {
 
         @Test
         @DisplayName("Deve criar autor sem biografia")
-        @WithMockUser(roles = "ADMIN")
         void shouldCreateAuthorWithoutBirthDate() throws Exception {
             mockMvc.perform(post("/api/v1/authors")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -83,7 +82,8 @@ class AuthorControllerIT {
                         {
                             "name": "Unknown Author"
                         }
-                        """))
+                        """)
+                    .with(asAdmin()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Unknown Author"))
                 .andExpect(jsonPath("$.birthDate").doesNotExist());
@@ -91,7 +91,6 @@ class AuthorControllerIT {
 
         @Test
         @DisplayName("Deve retornar 400 quando nome está em branco")
-        @WithMockUser(roles = "ADMIN")
         void shouldReturn400WhenNameBlank() throws Exception {
             mockMvc.perform(post("/api/v1/authors")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -99,7 +98,8 @@ class AuthorControllerIT {
                         {
                             "name": ""
                         }
-                        """))
+                        """)
+                    .with(asAdmin()))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Validation Error"));
         }
@@ -111,9 +111,9 @@ class AuthorControllerIT {
 
         @Test
         @DisplayName("Deve retornar autor quando existe")
-        @WithMockUser
         void shouldReturnAuthor() throws Exception {
-            mockMvc.perform(get("/api/v1/authors/{id}", author.getId()))
+            mockMvc.perform(get("/api/v1/authors/{id}", author.getId())
+            		.with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(author.getId()))
                 .andExpect(jsonPath("$.name").value("Robert C. Martin"))
@@ -122,9 +122,9 @@ class AuthorControllerIT {
 
         @Test
         @DisplayName("Deve retornar 404 quando autor não existe")
-        @WithMockUser
         void shouldReturn404WhenNotFound() throws Exception {
-            mockMvc.perform(get("/api/v1/authors/{id}", 999L))
+            mockMvc.perform(get("/api/v1/authors/{id}", 999L)
+            		.with(asUser()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Author Not Found"));
         }
@@ -136,11 +136,11 @@ class AuthorControllerIT {
 
         @Test
         @DisplayName("Deve listar autores com paginação")
-        @WithMockUser
         void shouldListAuthors() throws Exception {
             mockMvc.perform(get("/api/v1/authors")
                     .param("page", "0")
-                    .param("size", "10"))
+                    .param("size", "10")
+                    .with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].name").value("Robert C. Martin"))
@@ -149,11 +149,11 @@ class AuthorControllerIT {
 
         @Test
         @DisplayName("Deve retornar página vazia quando não há autores")
-        @WithMockUser
         void shouldReturnEmptyPage() throws Exception {
             authorRepository.deleteAll();
 
-            mockMvc.perform(get("/api/v1/authors"))
+            mockMvc.perform(get("/api/v1/authors")
+            		.with(asUser()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isEmpty())
                 .andExpect(jsonPath("$.totalElements").value(0));
@@ -166,9 +166,9 @@ class AuthorControllerIT {
 
         @Test
         @DisplayName("Deve deletar autor com sucesso")
-        @WithMockUser(roles = "ADMIN")
         void shouldDeleteAuthor() throws Exception {
-            mockMvc.perform(delete("/api/v1/authors/{id}", author.getId()))
+            mockMvc.perform(delete("/api/v1/authors/{id}", author.getId())
+            		.with(asAdmin()))
                 .andExpect(status().isNoContent());
 
             assertThat(authorRepository.findById(author.getId())).isEmpty();
@@ -176,19 +176,39 @@ class AuthorControllerIT {
 
         @Test
         @DisplayName("Deve retornar 404 ao deletar autor inexistente")
-        @WithMockUser(roles = "ADMIN")
         void shouldReturn404WhenDeleting() throws Exception {
-            mockMvc.perform(delete("/api/v1/authors/{id}", 999L))
+            mockMvc.perform(delete("/api/v1/authors/{id}", 999L)
+            		.with(asAdmin()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Author Not Found"));
         }
 
-//        @Test
-//        @DisplayName("Deve retornar 403 quando usuário comum tenta deletar")
-//        @WithMockUser(roles = "USER")
-//        void shouldReturn403ForUser() throws Exception {
-//            mockMvc.perform(delete("/api/v1/authors/{id}", author.getId()))
-//                .andExpect(status().isForbidden());
-//        }
+		@Test
+		@DisplayName("Deve retornar 403 quando usuário comum tenta deletar")
+		void shouldReturn403ForUser() throws Exception {
+			mockMvc.perform(delete("/api/v1/authors/{id}", author.getId())
+					.with(asUser()))
+			.andExpect(status().isForbidden());
+		}
     }
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════════════════════════════════
+    
+	private RequestPostProcessor asUser() {
+		return request -> {
+			request.addHeader("X-User-Id", "john@example.com");
+			request.addHeader("X-User-Roles", "ROLE_USER");
+			return request;
+		};
+	}
+	
+	private RequestPostProcessor asAdmin() {
+		return request -> {
+			request.addHeader("X-User-Id", "john@example.com");
+			request.addHeader("X-User-Roles", "ROLE_ADMIN");
+			return request;
+		};
+	}
 }

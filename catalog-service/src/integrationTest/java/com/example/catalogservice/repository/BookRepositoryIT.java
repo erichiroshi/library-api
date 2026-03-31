@@ -2,7 +2,6 @@ package com.example.catalogservice.repository;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
@@ -14,7 +13,6 @@ import com.example.catalogservice.author.Author;
 import com.example.catalogservice.book.Book;
 import com.example.catalogservice.book.BookRepository;
 import com.example.catalogservice.category.Category;
-import com.example.catalogservice.common.security.UserContext;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -30,9 +28,6 @@ class BookRepositoryIT {
 
 	@Autowired
 	private TestEntityManager em;
-	
-	@Mock
-	private UserContext userContext;
 	
 	@Test
 	void shouldPersistBook() {

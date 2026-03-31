@@ -121,20 +121,6 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.notFound().build();
 	}
 	
-	@ExceptionHandler(Exception.class)
-	public ProblemDetail handleUnexpected(Exception ex) {
-
-        log.error("Unexpected error | type={} | message={}",
-                ex.getClass().getSimpleName(), ex.getMessage(), ex);
-        
-        return setProblemDetail(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Internal Server Error",
-                "An unexpected error occurred. Please try again later.",
-                null
-        );
-	}
-	
 	// ─────────────────────────────────────────────
 	// HELPERS
 	// ─────────────────────────────────────────────

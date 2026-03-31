@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import com.example.loanservice.client.dto.UserDTO;
 import com.example.loanservice.loan.dto.LoanCreateDTO;
 import com.example.loanservice.loan.dto.LoanResponseDTO;
 import com.example.loanservice.loan.exception.BookNotAvailableException;
+import com.example.loanservice.loan.exception.BookNotFoundException;
 import com.example.loanservice.loan.exception.LoanAlreadyReturnedException;
 import com.example.loanservice.loan.exception.LoanNotFoundException;
 import com.example.loanservice.loan.exception.LoanUnauthorizedException;
@@ -41,8 +43,9 @@ public class LoanService {
     // ─────────────────────────────────────────────
 	
     @Transactional
-    public LoanResponseDTO create(LoanCreateDTO dto, String userEmail) {
-
+    public LoanResponseDTO create(LoanCreateDTO dto) {
+    	
+        String userEmail = getUserEmail();
         UserDTO userDTO = getAuthenticatedUser(userEmail);
         
         log.debug("user= {}", userDTO);
@@ -52,7 +55,7 @@ public class LoanService {
 		    .distinct()
 		    .collect(Collectors.toMap(
 		        id -> id,
-		        id -> bookClient.findById(id).get()		           
+		        id -> bookClient.findById(id).orElseThrow(() ->new BookNotFoundException(id))
 		    ));
 
         log.info("Creating loan for user={} books={}", userDTO.email(), dto.booksId());
@@ -93,14 +96,20 @@ public class LoanService {
         return mapper.toDTO(findWithItemsOrThrow(saved.getId()));
     }
 
+	private String getUserEmail() {
+		return SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+	}
+
 	// ─────────────────────────────────────────────
     // DEVOLVER EMPRÉSTIMO
     // ─────────────────────────────────────────────
 	
 	@Transactional
-	public LoanResponseDTO returnLoan(Long loanId, String userEmail) {
+	public LoanResponseDTO returnLoan(Long loanId) {
 
-        UserDTO userDTO = getAuthenticatedUser(userEmail);
+        UserDTO userDTO = getAuthenticatedUser(getUserEmail());
 		Loan loan = findWithItemsOrThrow(loanId);
 		
         validateOwnershipOrAdmin(loan, userDTO);
@@ -116,6 +125,7 @@ public class LoanService {
 		loan.setReturnDate(LocalDate.now());
 		loan.setStatus(LoanStatus.RETURNED);
 
+		loan.getItems().forEach(item -> bookClient.restoreCopies(item.getId().getBookId(), item.getQuantity()));
 
         log.info("Loan returned: loanId={} user={}", loanId, userDTO.email());
 
@@ -127,9 +137,9 @@ public class LoanService {
     // ─────────────────────────────────────────────
 	
     @Transactional
-    public LoanResponseDTO cancelLoan(Long loanId, String userEmail) {
+    public LoanResponseDTO cancelLoan(Long loanId) {
 
-        UserDTO userDTO = getAuthenticatedUser(userEmail);
+        UserDTO userDTO = getAuthenticatedUser(getUserEmail());
         Loan loan = findWithItemsOrThrow(loanId);
 
         validateOwnershipOrAdmin(loan, userDTO);
@@ -139,6 +149,8 @@ public class LoanService {
         }
 
         loan.setStatus(LoanStatus.CANCELED);
+        
+		loan.getItems().forEach(item -> bookClient.restoreCopies(item.getId().getBookId(), item.getQuantity()));
 
         log.info("Loan canceled: loanId={} user={}", loanId, userDTO.email());
 
@@ -164,16 +176,16 @@ public class LoanService {
     // ─────────────────────────────────────────────
     
     @Transactional(readOnly = true)
-	public LoanResponseDTO findById(Long loanId, String userEmail) {
-    	UserDTO userDTO = getAuthenticatedUser(userEmail);
+	public LoanResponseDTO findById(Long loanId) {
+    	UserDTO userDTO = getAuthenticatedUser(getUserEmail());
         Loan loan = findWithItemsOrThrow(loanId);
         validateOwnershipOrAdmin(loan, userDTO);
 		return mapper.toDTO(loan);
 	}
     
     @Transactional(readOnly = true)
-    public List<LoanResponseDTO> findMyLoans(String userEmail) {
-    	UserDTO userDTO = getAuthenticatedUser(userEmail);
+    public List<LoanResponseDTO> findMyLoans() {
+    	UserDTO userDTO = getAuthenticatedUser(getUserEmail());
         log.debug("Fetching loans for user={}", userDTO.email());
         return loanRepository.findByUserIdWithItems(userDTO.id())
                 .stream()
