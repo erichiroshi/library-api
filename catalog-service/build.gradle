@@ -53,7 +53,7 @@ ext {
     mapstructVersion = "1.6.3"
     lombokMapstructBindingVersion = "0.2.0"
     springdocVersion = "3.0.2"
-   	awsS3Version = "2.42.11"
+   	awsS3Version = "2.42.23"
    	aopVersion = "4.0.0-M2"
    	resilience4jVersion = "2.3.0"
     testcontainersVersion = "2.0.3"
