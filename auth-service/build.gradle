@@ -43,7 +43,7 @@ ext {
 	mapstructVersion = "1.6.3"
     lombokMapstructBindingVersion = "0.2.0"
     springdocVersion = "3.0.2"
-   	testcontainersVersion = "2.0.3"
+   	testcontainersVersion = "2.0.4"
    	jjwtVersion = "0.13.0"
    	shedlockVersion = "7.7.0"
    	
