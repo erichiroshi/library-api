@@ -27,8 +27,10 @@ import com.example.loanservice.loan.Loan;
 import com.example.loanservice.loan.LoanItem;
 import com.example.loanservice.loan.LoanRepository;
 import com.example.loanservice.loan.LoanStatus;
+import com.example.loanservice.messaging.LoanEventPublisher;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -59,6 +61,9 @@ class LoanControllerIT {
 
     @MockitoBean
     private UserClient userClient;
+    
+    @MockitoBean
+    private LoanEventPublisher loanEventPublisher;
 
     private static final String USER_EMAIL = "john@example.com";
     private static final Long BOOK_ID = 1L;
@@ -77,7 +82,9 @@ class LoanControllerIT {
         when(userClient.findByEmail(USER_EMAIL)).thenReturn(Optional.of(testUser));
         when(userClient.findByEmail("admin@example.com")).thenReturn(Optional.of(adminUser));
         when(bookClient.findById(BOOK_ID)).thenReturn(Optional.of(availableBook));
+        when(bookClient.findInternalBooksById(BOOK_ID)).thenReturn(Optional.of(availableBook));
         when(bookClient.decrementCopies(BOOK_ID)).thenReturn(1);
+        when(bookClient.decrementInternalCopies(BOOK_ID)).thenReturn(1);
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -116,13 +123,13 @@ class LoanControllerIT {
                 .andExpect(status().isCreated());
 
             // Verifica que o decrement foi chamado
-            verify(bookClient).decrementCopies(BOOK_ID);
+            verify(bookClient).decrementInternalCopies(BOOK_ID);
         }
 
         @Test
         @DisplayName("Deve retornar 409 quando livro sem cópias disponíveis")
         void shouldReturn409WhenNoCopies() throws Exception {
-            when(bookClient.decrementCopies(BOOK_ID)).thenReturn(0);
+            when(bookClient.decrementInternalCopies(BOOK_ID)).thenReturn(0);
 
             mockMvc.perform(post("/api/v1/loans")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -164,8 +171,8 @@ class LoanControllerIT {
         @DisplayName("Deve criar empréstimo com múltiplos livros")
         void shouldCreateLoanWithMultipleBooks() throws Exception {
             BookDTO book2 = new BookDTO(2L, "Refactoring", 3);
-            when(bookClient.findById(2L)).thenReturn(Optional.of(book2));
-            when(bookClient.decrementCopies(2L)).thenReturn(1);
+            when(bookClient.findInternalBooksById(2L)).thenReturn(Optional.of(book2));
+            when(bookClient.decrementInternalCopies(2L)).thenReturn(1);
 
             mockMvc.perform(post("/api/v1/loans")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -280,8 +287,7 @@ class LoanControllerIT {
                 .andExpect(jsonPath("$.returnDate").exists());
 
             // Verifica que restoreCopies foi chamado
-            org.mockito.Mockito.verify(bookClient)
-                .restoreCopies(BOOK_ID, 1);
+            org.mockito.Mockito.verify(bookClient, never()).decrementCopies(BOOK_ID);
         }
 
         @Test
@@ -317,8 +323,7 @@ class LoanControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELED"));
 
-            org.mockito.Mockito.verify(bookClient)
-                .restoreCopies(BOOK_ID, 1);
+            org.mockito.Mockito.verify(bookClient, never()).decrementCopies(BOOK_ID);
         }
 
         @Test

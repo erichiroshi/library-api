@@ -74,3 +74,8 @@ updates:
     directory: "/loan-service"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/"                    # ← cobre o rabbitmq no docker-compose raiz
+    schedule:
+      interval: "weekly"      

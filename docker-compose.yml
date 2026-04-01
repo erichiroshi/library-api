@@ -169,6 +169,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy        
     networks:
       - backend
     restart: unless-stopped
@@ -200,6 +202,8 @@ services:
         condition: service_healthy
       catalog-service:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy        
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
@@ -259,6 +263,30 @@ services:
     networks:
       - backend
 
+  # ─────────────────────────────────────────────
+  # MENSAGERIA
+  # ─────────────────────────────────────────────
+
+  rabbitmq:
+    image: rabbitmq:4.0.7-management
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s      
+
 networks:
   backend:
 
@@ -266,3 +294,4 @@ volumes:
   postgres_data:
   redis_data:
   prometheus_data:
+  rabbitmq_data:

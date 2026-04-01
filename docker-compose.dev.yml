@@ -71,7 +71,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./monitoring/prometheus/prometheus-dev.yml:/etc/prometheus/prometheus-dev.yml
+      - ./monitoring/prometheus/prometheus-dev.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     restart: unless-stopped
     healthcheck:
@@ -111,6 +111,30 @@ services:
     networks:
       - backend
 
+  # ─────────────────────────────────────────────
+  # MENSAGERIA
+  # ─────────────────────────────────────────────
+
+  rabbitmq:
+    image: rabbitmq:4.0.7-management
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s         
+    networks:
+      - backend
+
 networks:
   backend:
 
@@ -119,3 +143,4 @@ volumes:
   redis_data:
   pgadmin_data:
   prometheus_data:
+  rabbitmq_data:

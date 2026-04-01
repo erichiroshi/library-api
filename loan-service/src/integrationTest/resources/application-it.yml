@@ -3,6 +3,11 @@ spring:
     config:
       enabled: false
 
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false
+
   datasource:
     url: jdbc:tc:postgresql:16:///testdb
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver

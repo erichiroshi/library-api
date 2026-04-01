@@ -1,6 +1,7 @@
 package com.example.loanservice.loan;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,6 +25,8 @@ import com.example.loanservice.loan.exception.LoanNotFoundException;
 import com.example.loanservice.loan.exception.LoanUnauthorizedException;
 import com.example.loanservice.loan.exception.UserNotFoundException;
 import com.example.loanservice.loan.mapper.LoanMapper;
+import com.example.loanservice.messaging.LoanEventPublisher;
+import com.example.loanservice.messaging.event.BookRestoreEvent;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,6 +40,7 @@ public class LoanService {
     private final BookClient bookClient;
 	private final UserClient userClient;
 	private final LoanMapper mapper;
+    private final LoanEventPublisher eventPublisher;
 
     // ─────────────────────────────────────────────
     // CRIAR EMPRÉSTIMO
@@ -55,7 +59,7 @@ public class LoanService {
 		    .distinct()
 		    .collect(Collectors.toMap(
 		        id -> id,
-		        id -> bookClient.findById(id).orElseThrow(() ->new BookNotFoundException(id))
+		        id -> bookClient.findInternalBooksById(id).orElseThrow(() ->new BookNotFoundException(id))
 		    ));
 
         log.info("Creating loan for user={} books={}", userDTO.email(), dto.booksId());
@@ -72,7 +76,7 @@ public class LoanService {
             BookDTO bookDTO = books.get(bookId);
 
             // Update atômico — evita race condition em empréstimos concorrentes
-            int updated = bookClient.decrementCopies(bookId);
+            int updated = bookClient.decrementInternalCopies(bookId);
             if (updated == 0) {
                 throw new BookNotAvailableException(bookId, bookDTO.title());
             }
@@ -124,11 +128,16 @@ public class LoanService {
 
 		loan.setReturnDate(LocalDate.now());
 		loan.setStatus(LoanStatus.RETURNED);
-
-		loan.getItems().forEach(item -> bookClient.restoreCopies(item.getId().getBookId(), item.getQuantity()));
+		
+        // Publica evento assíncrono — catalog-service restaura as cópias
+        Map<Long, Integer> bookQuantities = buildBookQuantities(loan);
+        
+        eventPublisher.publishBookRestore(
+                new BookRestoreEvent(loan.getId(), bookQuantities)
+        );
+//		loan.getItems().forEach(item -> bookClient.restoreCopies(item.getId().getBookId(), item.getQuantity()));
 
         log.info("Loan returned: loanId={} user={}", loanId, userDTO.email());
-
 		return mapper.toDTO(loan);
 	}
 	
@@ -150,7 +159,13 @@ public class LoanService {
 
         loan.setStatus(LoanStatus.CANCELED);
         
-		loan.getItems().forEach(item -> bookClient.restoreCopies(item.getId().getBookId(), item.getQuantity()));
+        // Publica evento assíncrono — catalog-service restaura as cópias
+        Map<Long, Integer> bookQuantities = buildBookQuantities(loan);
+        eventPublisher.publishBookRestore(
+                new BookRestoreEvent(loan.getId(), bookQuantities)
+        );        
+        
+//		loan.getItems().forEach(item -> bookClient.restoreCopies(item.getId().getBookId(), item.getQuantity()));
 
         log.info("Loan canceled: loanId={} user={}", loanId, userDTO.email());
 
@@ -254,4 +269,14 @@ public class LoanService {
             throw new LoanUnauthorizedException(loan.getId());
         }
     }
+
+	// ─────────────────────────────────────────────
+	// CANCELAR EMPRÉSTIMO
+	// ─────────────────────────────────────────────
+	
+	private Map<Long, Integer> buildBookQuantities(Loan loan) {
+		Map<Long, Integer> bookQuantities = new HashMap<>();
+		loan.getItems().forEach(item -> bookQuantities.put(item.getId().getBookId(), item.getQuantity()));
+		return bookQuantities;
+	}
 }

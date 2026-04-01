@@ -29,4 +29,16 @@ public class BookClientFallback implements BookClient {
     public void restoreCopies(Long id, int quantity) {
         log.error("catalog-service unavailable — restoreCopies fallback for bookId={} quantity={}", id, quantity);
     }
+
+	@Override
+	public Optional<BookDTO> findInternalBooksById(Long id) {
+        log.error("catalog-service unavailable — findInternalBooksById fallback for bookId={}", id);
+		return Optional.empty();
+	}
+
+	@Override
+	public int decrementInternalCopies(Long id) {
+        log.error("catalog-service unavailable — decrementInternalCopies fallback for bookId={}", id);
+		return 0;
+	}
 }

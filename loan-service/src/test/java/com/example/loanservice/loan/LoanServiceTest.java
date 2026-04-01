@@ -30,6 +30,7 @@ import com.example.loanservice.loan.exception.LoanAlreadyReturnedException;
 import com.example.loanservice.loan.exception.LoanNotFoundException;
 import com.example.loanservice.loan.exception.LoanUnauthorizedException;
 import com.example.loanservice.loan.mapper.LoanMapper;
+import com.example.loanservice.messaging.LoanEventPublisher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -47,6 +48,7 @@ class LoanServiceTest {
     @Mock UserClient userClient;
     @Mock LoanMapper mapper;
     @Mock ApplicationEventPublisher eventPublisher;
+    @Mock LoanEventPublisher loanEventPublisher; 
 
     @InjectMocks
     LoanService loanService;
@@ -87,8 +89,8 @@ class LoanServiceTest {
 
             when(userClient.findByEmail("john@example.com"))
                 .thenReturn(Optional.of(authenticatedUser));
-            when(bookClient.findById(1L)).thenReturn(Optional.of(availableBook));
-            when(bookClient.decrementCopies(1L)).thenReturn(1);
+            when(bookClient.findInternalBooksById(1L)).thenReturn(Optional.of(availableBook));
+            when(bookClient.decrementInternalCopies(1L)).thenReturn(1);
             when(loanRepository.save(any(Loan.class))).thenAnswer(i -> {
                 Loan loan = i.getArgument(0);
                 loan.setId(1L);
@@ -103,7 +105,7 @@ class LoanServiceTest {
 
             assertThat(result).isNotNull();
             assertThat(result.status()).isEqualTo(LoanStatus.WAITING_RETURN);
-            verify(bookClient).decrementCopies(1L);
+            verify(bookClient).decrementInternalCopies(1L);
             verify(loanRepository).save(any(Loan.class));
         }
 
@@ -114,8 +116,8 @@ class LoanServiceTest {
 
             when(userClient.findByEmail("john@example.com"))
                 .thenReturn(Optional.of(authenticatedUser));
-            when(bookClient.findById(1L)).thenReturn(Optional.of(availableBook));
-            when(bookClient.decrementCopies(1L)).thenReturn(0);
+            when(bookClient.findInternalBooksById(1L)).thenReturn(Optional.of(availableBook));
+            when(bookClient.decrementInternalCopies(1L)).thenReturn(0);
             
             setAuthentication(authenticatedUser);
 

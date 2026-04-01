@@ -56,6 +56,16 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+  rabbitmq:
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000ms    # 1s na primeira tentativa
+          max-attempts: 3             # máximo 3 tentativas
+          multiplier: 2.0             # backoff exponencial: 1s, 2s, 4s
+          max-interval: 10000ms       # máximo 10s entre tentativas
+        acknowledge-mode: auto        # ack automático após processamento
 aws:
   access-key-id: ${AWS_KEY}
   secret-access-key: ${AWS_SECRET}

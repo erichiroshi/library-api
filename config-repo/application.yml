@@ -1,4 +1,11 @@
 # Configurações compartilhadas por todos os microservices
+spring:
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+
 eureka:
   client:
     service-url:

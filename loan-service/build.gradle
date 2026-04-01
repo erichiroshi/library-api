@@ -95,6 +95,9 @@ dependencies {
     
     // OpenTelemetry exporter — envia traces para Zipkin (visualização local)
     implementation 'io.opentelemetry:opentelemetry-exporter-zipkin'
+    
+    // RabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'    
 	
     // Testes
 	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
