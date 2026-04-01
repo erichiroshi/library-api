@@ -254,20 +254,20 @@ Qualquer outro endpoint
 
 ### Etapa 10 — CI/CD atualizado
 
-- [ ] Atualizar `ci.yml` para rodar testes em todos os subprojetos
-- [ ] Atualizar `docker.yml` para buildar imagem de cada serviço
-- [ ] Atualizar `release.yml` para taggear todas as imagens
-- [ ] Commit: `ci: update workflows for microservices structure`
+- [x] Atualizar `ci.yml` para rodar testes em todos os subprojetos
+- [x] Atualizar `docker.yml` para buildar imagem de cada serviço
+- [x] Atualizar `release.yml` para taggear todas as imagens
+- [x] Commit: `ci: update workflows for microservices structure`
 
 ---
 
 ### Etapa 11 — Merge e Release
 
-- [ ] Abrir PR `microservices` → `main`
-- [ ] Validar CI completo
-- [ ] Merge na `main`
-- [ ] Tag `v2.0.0`
-- [ ] Commit: `chore(release): bump version to v2.0.0`
+- [x] Abrir PR `microservices` → `main`
+- [x] Validar CI completo
+- [x] Merge na `main`
+- [x] Tag `v2.0.0`
+- [x] Commit: `chore(release): bump version to v2.0.0`
 
 ---
 
