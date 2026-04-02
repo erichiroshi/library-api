@@ -1,7 +1,10 @@
 package com.example.authservice.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
  * Habilita agendamento de tarefas com @Scheduled.
@@ -17,13 +20,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @EnableScheduling
 public class SchedulingConfig {
-    // Configuração adicional de thread pool (opcional)
-    // @Bean
-    // public TaskScheduler taskScheduler() {
-    //     ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-    //     scheduler.setPoolSize(5);
-    //     scheduler.setThreadNamePrefix("scheduled-task-");
-    //     scheduler.initialize();
-    //     return scheduler;
-    // }
+//     Configuração adicional de thread pool (opcional)
+     @Bean
+     TaskScheduler taskScheduler() {
+         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+         scheduler.setPoolSize(5);
+         scheduler.setThreadNamePrefix("scheduled-task-");
+         scheduler.initialize();
+         return scheduler;
+     }
 }

@@ -4,37 +4,85 @@
   "panels": [
     {
       "type": "stat",
-      "title": "Total Books",
-      "datasource": "Prometheus",
-      "targets": [
-        { "expr": "library_books_total", "refId": "A" }
-      ],
-      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 }
-    },
-    {
-      "type": "timeseries",
-      "title": "Requests per Second",
+      "title": "Total Books Created - 24h",
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "rate(http_server_requests_seconds_count{uri!=\"/actuator/prometheus\"}[1m])",
-          "legendFormat": "RPS",
+          "expr": "sum(increase(library_books_total[24h]))",
+          "instant": true,
           "refId": "A"
         }
       ],
-      "gridPos": { "h": 8, "w": 12, "x": 6, "y": 0 }
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        }
+      },
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center" },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 }
     },
     {
-      "type": "timeseries",
-      "title": "Requests by Endpoint",
+      "type": "stat",
+      "title": "Error Rate (%)",
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "rate(http_server_requests_seconds_count{uri!=\"/actuator/prometheus\"}[1m])",
+          "expr": "(sum(rate(http_server_requests_seconds_count{status=~\"5..\"}[$__rate_interval])) / sum(rate(http_server_requests_seconds_count[$__rate_interval]))) * 100",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        }
+      },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center" },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests per Second (Success 2xx)",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum by (uri) (rate(http_server_requests_seconds_count{uri!~\"(?i)unknown|NOT_FOUND|/actuator/.*\", status=~\"2..\"}[$__rate_interval]))",
           "legendFormat": "{{uri}}",
           "refId": "A"
         }
       ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": { "drawStyle": "line", "fillOpacity": 10 }
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Average Response Time (ms) by URI",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum by (uri) (rate(http_server_requests_seconds_sum{uri!~\"(?i)unknown|NOT_FOUND|/actuator/.*\"}[$__rate_interval])) / sum by (uri) (rate(http_server_requests_seconds_count{uri!~\"(?i)unknown|NOT_FOUND|/actuator/.*\"}[$__rate_interval])) * 1000",
+          "legendFormat": "{{uri}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ms", "custom": { "fillOpacity": 10 } }
+      },
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 }
     },
     {
@@ -43,37 +91,46 @@
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "rate(http_server_requests_seconds_count{status=~\"5..\"}[1m])",
-          "legendFormat": "5xx",
+          "expr": "sum by (uri, status) (rate(http_server_requests_seconds_count{status=~\"5..\"}[$__rate_interval]))",
+          "legendFormat": "{{uri}} ({{status}})",
           "refId": "A"
         }
       ],
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 }
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "fixed", "fixedColor": "dark-red" },
+          "custom": { "fillOpacity": 30 }
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
     },
     {
-      "type": "timeseries",
-      "title": "Average Response Time (ms)",
+      "type": "piechart",
+      "title": "HTTP Status Distribution",
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "rate(http_server_requests_seconds_sum[1m]) / rate(http_server_requests_seconds_count[1m]) * 1000",
-          "legendFormat": "Avg Response",
+          "expr": "sum by (status) (rate(http_server_requests_seconds_count{uri!~\"(?i)unknown|NOT_FOUND|/actuator/.*\"}[$__rate_interval]))",
+          "legendFormat": "Status {{status}}",
           "refId": "A"
         }
       ],
+      "options": { "pieType": "donut", "legend": { "displayMode": "list", "placement": "right" } },
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 }
     },
     {
-      "type": "stat",
-      "title": "Error Rate (%)",
+      "type": "table",
+      "title": "Diagnóstico: Requisições Desconhecidas (Unknown/404)",
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "(rate(http_server_requests_seconds_count{status=~\"5..\"}[1m]) / rate(http_server_requests_seconds_count[1m])) * 100",
+          "expr": "sum by (uri, status) (rate(http_server_requests_seconds_count{uri=~\"(?i)unknown|NOT_FOUND\"}[$__rate_interval])) > 0",
+          "legendFormat": "{{uri}} [{{status}}]",
           "refId": "A"
         }
       ],
-      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 13 }
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 21 }
     }
   ],
   "refresh": "5s",
@@ -82,5 +139,5 @@
   "tags": ["library", "observability"],
   "time": { "from": "now-15m", "to": "now" },
   "title": "Library API - Production Dashboard",
-  "version": 1
+  "version": 2
 }
