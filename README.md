@@ -56,7 +56,7 @@ Monolito production-ready com bounded contexts bem definidos, preparado para ext
 
 ---
 
-## 🔬 Fase 3 — Microservices (em desenvolvimento)
+## 🏛 Fase 3 — Microservices (v2.0.0)
 
 Extração do monolito em microservices usando o padrão **Strangler Fig**.
 
@@ -81,19 +81,58 @@ Extração do monolito em microservices usando o padrão **Strangler Fig**.
 
 ---
 
+## 🔬 Fase 4 — Mensageria, Performance (em desenvolvimento)
+> Acompanhe o progresso no [Fase 4 - Roadmap](https://github.com/erichiroshi/library-api/tree/main/about/fase-4-etapa-00-roadmap.md)
+
+Visão geral
+
+```
+Fase 4
+├── Etapa 1 — RabbitMQ (mensageria)
+├── Etapa 2 — Testes de carga (k6)
+│   ├── Monolito sem otimização
+│   ├── Monolito com cache Redis
+│   ├── Microservices sem cache
+│   └── Microservices com cache
+└── Etapa 3 — Análise e documentação dos resultados
+```
+
+---
+
 ## 🚀 Quick Start
 
-Credenciais de teste:
-- **ADMIN:** `joao.silva@email.com` / `123456`
+O projeto possui dois modos de execução:
 
-### Microservices (parcial — em desenvolvimento)
+- **dev** → ambiente voltado para desenvolvimento e avaliação
+- **prod** → ambiente containerizado simulando produção
+  
+---
 
-Serviços disponíveis até o momento:
+### Clone o projeto
+
+```bash
+git clone https://github.com/erichiroshi/library-api.git
+cd library-api
+```
+
+Refresh Gradle project em cada serviço → Executar a aplicação
+
+```bash
+./gradlew clean build
+```
+
+### 🟢 Modo Desenvolvimento (recomendado para avaliação)
+
+Nesse modo a infraestrutura é executada via Docker e a aplicação pode ser iniciada via terminal ou IDE.
+
+### Microservices 
 
 Rodar via CLI - perfil dev
 
 ```bash
-# 1. Infraestrutra - Docker Compose (Postgres + Redis + PgAdmin + Grafana + Prometheus + Zipkin)
+# 1. Infraestrutra + Observabilidade + Mensageria
+# Docker Compose (Postgres + Redis + PgAdmin + Grafana + Prometheus + Zipkin + RabbitMQ)
+
 cd library-api
 docker compose -f docker-compose.dev.yml up -d
 
@@ -129,10 +168,15 @@ cd loan-service
 # Acesse: http://localhost:{port-spring}/actuator/health
 ```
 
-> Docker Compose completo disponível ao final da Fase 3.
+---
+
+## 🏭 Modo Produção (simulado)
+
+> Docker Compose completo disponível.
 
 ```bash
-docker compose up -d
+docker compose up -d 
+docker compose up  #ver os logs no terminal
 ```
 
 **Serviços disponíveis após o startup:**
@@ -142,6 +186,7 @@ docker compose up -d
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3000` (admin/admin)
 - Zipkin: `http://localhost:9411`
+- RabbitMQ: `http://localhost:15672` (guest/guest)
 
 **Credenciais de teste:**
 - ADMIN: `joao.silva@email.com` / `123456`
@@ -150,7 +195,16 @@ docker compose up -d
 ```
 postgres + redis → config-server → eureka-server → gateway
 → auth-service + catalog-service → loan-service
-→ prometheus + grafana + zipkin
+→ prometheus + grafana + zipkin + RabbitMQ
+```
+
+---
+
+## 🧯 Encerrar ambiente
+
+```bash
+docker compose down          # Para os containers
+docker compose down -v       # Para e remove volumes (apaga banco)
 ```
 
 ---
@@ -165,7 +219,7 @@ postgres + redis → config-server → eureka-server → gateway
 
 ### Microservices (v2.0.0)
 - **6** serviços extraídos do monolito
-- **10** containers orquestrados via Docker Compose
+- **10+** containers orquestrados via Docker Compose
 - **1** ponto de entrada (Gateway com JWT centralizado)
 - **3** schemas isolados por domínio (auth, catalog, lending)
 - **W3C Trace Context** propagado em todos os serviços

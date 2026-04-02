@@ -8,14 +8,14 @@ posicionamento profissional estratégico.
 ## Etapas
 
 ### Etapa 1 — RabbitMQ
-- [ ] Adicionar RabbitMQ ao docker-compose.yml
-- [ ] Implementar producer no loan-service (LoanReturnedEvent, LoanCanceledEvent)
-- [ ] Implementar consumer no catalog-service (restaurar cópias)
-- [ ] Configurar Dead Letter Queue (DLQ)
-- [ ] Configurar retry com backoff exponencial
-- [ ] Substituir chamada Feign síncrona por evento assíncrono na devolução
-- [ ] Testes unitários dos producers e consumers
-- [ ] Commit: `feat(rabbitmq): adicionar mensageria assíncrona entre loan e catalog service`
+- [x] Adicionar RabbitMQ ao docker-compose.yml
+- [x] Implementar producer no loan-service (LoanReturnedEvent, LoanCanceledEvent)
+- [x] Implementar consumer no catalog-service (restaurar cópias)
+- [x] Configurar Dead Letter Queue (DLQ)
+- [x] Configurar retry com backoff exponencial
+- [x] Substituir chamada Feign síncrona por evento assíncrono na devolução
+- [x] Testes unitários dos producers e consumers
+- [x] Commit: `feat(rabbitmq): adicionar mensageria assíncrona entre loan e catalog service`
 
 ### Etapa 2 — Testes de carga (k6)
 - [ ] Instalar k6

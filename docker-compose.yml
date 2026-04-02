@@ -277,8 +277,6 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-    networks:
-      - backend
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
@@ -286,6 +284,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s      
+    networks:
+      - backend
 
 networks:
   backend:
