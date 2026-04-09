@@ -31,3 +31,6 @@ logs/
 
 # Spring Boot
 HELP.md
+
+# Grafana /data
+/monitoring/grafana/data/

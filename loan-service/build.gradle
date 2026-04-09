@@ -120,6 +120,15 @@ dependencyManagement {
 	}
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += '--enable-preview'
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgs += '--enable-preview'
+    useJUnitPlatform()
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
